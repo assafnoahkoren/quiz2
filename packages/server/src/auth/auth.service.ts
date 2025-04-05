@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto, LoginDto } from './auth.controller';
 import * as bcrypt from 'bcrypt';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -10,6 +11,18 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
+
+  createJwtToken(user: User) {
+    return this.jwtService.sign({ 
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+	  govExamId: user.govExamId
+    });
+  }
 
   async register(registerDto: RegisterDto) {
     // Check if user exists
@@ -34,10 +47,7 @@ export class AuthService {
     });
 
     // Generate JWT token
-    const token = this.jwtService.sign({ 
-      sub: user.id,
-      email: user.email,
-    });
+    const token = this.createJwtToken(user);
 
     // Return user (without password) and token
     return {
@@ -67,10 +77,7 @@ export class AuthService {
     }
 
     // Generate JWT token
-    const token = this.jwtService.sign({ 
-      sub: user.id,
-      email: user.email,
-    });
+    const token = this.createJwtToken(user);
 
     // Return user (without password) and token
     return {
@@ -78,6 +85,30 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+      },
+      token,
+    };
+  }
+
+  async refresh(user: { sub: string; email: string }) {
+    // Get the user from the database
+    const dbUser = await this.prisma.user.findUnique({
+      where: { id: user.sub },
+    });
+
+    if (!dbUser) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Generate a new JWT token
+    const token = this.createJwtToken(dbUser);
+
+    // Return user (without password) and new token
+    return {
+      user: {
+        id: dbUser.id,
+        email: dbUser.email,
+        name: dbUser.name,
       },
       token,
     };

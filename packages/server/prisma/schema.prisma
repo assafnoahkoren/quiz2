@@ -31,6 +31,8 @@ model User {
   password          String
   govExamInstanceId String?
   GovExamInstance   GovExamInstance? @relation(fields: [govExamInstanceId], references: [id])
+  govExamId         String?
+  GovExam           GovExam?         @relation(fields: [govExamId], references: [id])
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   UserExams         UserExam[]
@@ -41,6 +43,8 @@ model Subscription {
   id        String   @id @default(uuid())
   userId    String
   User      User     @relation(fields: [userId], references: [id])
+  govExamId String
+  GovExam   GovExam  @relation(fields: [govExamId], references: [id])
   expiresAt DateTime
   price     Int
   currency  String
@@ -56,6 +60,8 @@ model GovExam {
   ExamInstances GovExamInstance[]
   UserExams     UserExam[]
   Subject       Subject[]
+  Subscriptions Subscription[]
+  Users          User[]
 }
 
 model GovExamInstance {
