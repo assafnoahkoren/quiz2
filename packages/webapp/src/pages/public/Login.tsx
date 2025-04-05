@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../components/auth/AuthContext';
-import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Box } from '@mantine/core';
+import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Box, Stack } from '@mantine/core';
 import { IconLogin, IconMail, IconLock } from '@tabler/icons-react';
 
 export const Login = () => {
@@ -24,47 +24,49 @@ export const Login = () => {
   };
 
   return (
-    <Container size="xs" py="xl">
-      <Box ta="right" mb="md">
-      </Box>
-      
-      <Title order={2} ta="center" mb="lg">התחברות</Title>
-      
-      <form onSubmit={handleSubmit}>
-        <TextInput
-          label="אימייל"
-          placeholder="your@email.com"
-          required
-          mb="md"
-          leftSection={<IconMail size={16} />}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+    <Container size="xs" px={{ base: 'md', sm: 'xs' }} py="xl">
+        <Title order={2} ta="center" mb="lg">התחברות</Title>
         
-        <PasswordInput
-          label="סיסמה"
-          placeholder="הסיסמה שלך"
-          required
-          mb="lg"
-          leftSection={<IconLock size={16} />}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleSubmit}>
+          <Stack gap="md">
+            <TextInput
+              label="אימייל"
+              placeholder="your@email.com"
+              required
+              radius="md"
+              leftSection={<IconMail size={16} />}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            
+            <PasswordInput
+              label="סיסמה"
+              placeholder="הסיסמה שלך"
+              required
+              radius="md"
+              leftSection={<IconLock size={16} />}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            
+            <Button
+              type="submit"
+              fullWidth
+              radius="xl"
+              size="md"
+              mt="md"
+              leftSection={<IconLogin size={16} />}
+            >
+              התחבר
+            </Button>
+          </Stack>
+        </form>
         
-        <Button
-          type="submit"
-          fullWidth
-          leftSection={<IconLogin size={16} />}
-        >
-          התחבר
-        </Button>
-      </form>
-      
-      <Group justify="center" mt="md">
-        <Text size="sm">
-          אין לך חשבון? <Link to="/register" style={{ color: 'var(--mantine-color-blue-filled)' }}>הרשם</Link>
-        </Text>
-      </Group>
+        <Group justify="center" mt="lg">
+          <Text size="sm">
+            אין לך חשבון? <Link to="/register" style={{ color: 'var(--mantine-color-blue-filled)' }}>הרשם</Link>
+          </Text>
+        </Group>
     </Container>
   );
 }; 
