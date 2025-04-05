@@ -55,12 +55,13 @@ model GovExam {
   updatedAt     DateTime          @updatedAt
   ExamInstances GovExamInstance[]
   UserExams     UserExam[]
+  Subject       Subject[]
 }
 
 model GovExamInstance {
   id                String   @id @default(uuid())
-  examId            String
-  Exam              GovExam  @relation(fields: [examId], references: [id])
+  govExamId         String
+  GovExam           GovExam  @relation(fields: [govExamId], references: [id])
   createdAt         DateTime @default(now())
   date              DateTime
   registrationOpen  DateTime
@@ -72,7 +73,8 @@ model GovExamInstance {
 model Subject {
   id               String     @id @default(uuid())
   name             String
-  examId           String
+  govExamId        String
+  GovExam          GovExam    @relation(fields: [govExamId], references: [id])
   parentSubjectId  String?
   ParentSubject    Subject?   @relation(fields: [parentSubjectId], references: [id], name: "parentSubject")
   createdAt        DateTime   @default(now())
