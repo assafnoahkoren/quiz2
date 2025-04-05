@@ -13,10 +13,11 @@ import { AuthController } from './auth.controller';
         signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
+      global: true,
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {} 
