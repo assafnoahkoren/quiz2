@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Box, Stack } from '@mantine/core';
+import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Stack } from '@mantine/core';
 import { IconUserPlus, IconMail, IconLock, IconUser } from '@tabler/icons-react';
+import { useRegisterMutation } from '../../api';
 
 export const Register = () => {
   const [name, setName] = useState('');
@@ -9,8 +10,9 @@ export const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const registerMutation = useRegisterMutation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate passwords match
@@ -19,11 +21,19 @@ export const Register = () => {
       return;
     }
     
-    // Simulate registration - in a real app, you would call your API here
-    console.log('Registration attempt with:', { name, email, password });
-    
-    // Redirect to login after successful registration
-    navigate('/login');
+    try {
+      await registerMutation.mutateAsync({
+        name,
+        email,
+        password
+      });
+      
+      // Redirect to login after successful registration
+      navigate('/login');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      // Handle error (you could add proper error state and display it)
+    }
   };
 
   return (
@@ -40,6 +50,7 @@ export const Register = () => {
               leftSection={<IconUser size={16} />}
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={registerMutation.isPending}
             />
             
             <TextInput
@@ -51,6 +62,7 @@ export const Register = () => {
               leftSection={<IconMail size={16} />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={registerMutation.isPending}
             />
             
             <PasswordInput
@@ -61,6 +73,7 @@ export const Register = () => {
               leftSection={<IconLock size={16} />}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={registerMutation.isPending}
             />
             
             <PasswordInput
@@ -72,6 +85,7 @@ export const Register = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               error={confirmPassword !== '' && password !== confirmPassword ? "הסיסמאות אינן תואמות" : null}
+              disabled={registerMutation.isPending}
             />
             
             <Button
@@ -81,6 +95,7 @@ export const Register = () => {
               size="md"
               mt="md"
               leftSection={<IconUserPlus size={16} />}
+              loading={registerMutation.isPending}
             >
               הרשם
             </Button>
