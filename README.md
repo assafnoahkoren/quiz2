@@ -4,8 +4,15 @@ This is a TypeScript monorepo containing a React web app and a NestJS server.
 
 ## Structure
 
-- `packages/webapp`: React with Vite mobile web application
+- `packages/webapp`: React with Vite mobile web application using UnoCSS
 - `packages/server`: NestJS API server
+
+## Features
+
+- **UnoCSS**: Instant on-demand Atomic CSS engine for the webapp
+- **NestJS Backend**: Robust API server
+- **Monorepo Structure**: Shared workspace for easier development
+- **TypeScript**: End-to-end type safety
 
 ## Getting Started
 
@@ -38,8 +45,7 @@ yarn webapp dev
 
 ```bash
 # Build both projects
-yarn server build
-yarn webapp build
+yarn build
 ```
 
 ## Ports

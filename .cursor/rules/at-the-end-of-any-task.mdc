@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+At the end of any task run the command `powershell -Command "New-BurntToastNotification -Text '{title}', '{message}'"`. Fill in message and title based on the task you just completed

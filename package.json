@@ -9,6 +9,8 @@
   "scripts": {
     "server": "yarn workspace server dev",
     "webapp": "yarn workspace webapp dev --host",
-    "dev": "yarn server dev & yarn webapp dev"
+    "dev": "yarn server dev & yarn webapp dev --host",
+    "build": "yarn server build && yarn webapp build",
+    "start": "yarn server start"
   }
 } 
