@@ -1,43 +1,51 @@
 import { useAuth } from '../../components/auth/AuthContext';
+import { IconDemo } from '../../components/IconDemo';
+import { Button, Card, Container, Group, Text, Title } from '@mantine/core';
+import { IconLogout } from '@tabler/icons-react';
 
 export const Home = () => {
   const { logout } = useAuth();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="w-full max-w-4xl p-8 border rounded shadow-md">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Welcome to Quiz2</h1>
-          <button 
+    <Container size="lg" py="xl">
+      <Card shadow="sm" padding="lg" radius="md" withBorder mb="lg">
+        <Group justify="space-between" mb="md">
+          <Title order={3}>Welcome to Quiz2</Title>
+          <Button 
             onClick={logout}
-            className="px-4 py-2 bg-red-500 text-white rounded transition-fast hover:bg-red-600"
+            color="red"
+            leftSection={<IconLogout size={18} />}
           >
             Logout
-          </button>
-        </div>
+          </Button>
+        </Group>
         
-        <div className="bg-gray-100 p-6 rounded mb-6">
-          <h2 className="text-xl font-bold mb-4">Dashboard Overview</h2>
-          <p className="mb-4">This is a protected page that only authenticated users can access.</p>
-          <p>You are currently signed in with JWT authentication.</p>
-        </div>
+        <Text size="sm" mb="lg">
+          This is a protected page that only authenticated users can access.
+          You are currently signed in with JWT authentication.
+        </Text>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="border p-4 rounded shadow-sm">
-            <h3 className="text-lg font-bold mb-2">Recent Activity</h3>
-            <p className="text-gray-600">No recent activity to display.</p>
-          </div>
+        <Card withBorder mb="md">
+          <Title order={4} mb="md">Tabler Icons Demo</Title>
+          <IconDemo size={32} color="blue" />
+        </Card>
+        
+        <Group grow>
+          <Card withBorder p="md">
+            <Title order={5} mb="sm">Recent Activity</Title>
+            <Text size="sm" c="dimmed">No recent activity to display.</Text>
+          </Card>
           
-          <div className="border p-4 rounded shadow-sm">
-            <h3 className="text-lg font-bold mb-2">Quick Actions</h3>
-            <div className="flex flex-wrap gap-2">
-              <button className="px-3 py-1 bg-blue-500 text-white rounded text-sm">Action 1</button>
-              <button className="px-3 py-1 bg-green-500 text-white rounded text-sm">Action 2</button>
-              <button className="px-3 py-1 bg-purple-500 text-white rounded text-sm">Action 3</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Card withBorder p="md">
+            <Title order={5} mb="sm">Quick Actions</Title>
+            <Group>
+              <Button variant="light" color="blue" size="xs">Action 1</Button>
+              <Button variant="light" color="green" size="xs">Action 2</Button>
+              <Button variant="light" color="violet" size="xs">Action 3</Button>
+            </Group>
+          </Card>
+        </Group>
+      </Card>
+    </Container>
   );
 }; 

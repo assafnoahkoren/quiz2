@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../components/auth/AuthContext';
+import { Button, Card, Container, PasswordInput, TextInput, Title, Text, Group } from '@mantine/core';
+import { IconLogin, IconMail, IconLock } from '@tabler/icons-react';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -22,47 +24,46 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="w-full max-w-md p-8 border rounded shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <Container size="xs" py="xl">
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Title order={2} ta="center" mb="lg">Login</Title>
         
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block mb-2 text-sm" htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className="w-full p-2 border rounded"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <TextInput
+            label="Email"
+            placeholder="your@email.com"
+            required
+            mb="md"
+            leftSection={<IconMail size={16} />}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           
-          <div className="mb-6">
-            <label className="block mb-2 text-sm" htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="w-full p-2 border rounded"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordInput
+            label="Password"
+            placeholder="Your password"
+            required
+            mb="lg"
+            leftSection={<IconLock size={16} />}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           
-          <button
+          <Button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white rounded transition-fast hover:bg-blue-600"
+            fullWidth
+            leftSection={<IconLogin size={16} />}
           >
             Log In
-          </button>
+          </Button>
         </form>
         
-        <div className="mt-4 text-center text-sm">
-          <p>Don't have an account? <Link to="/register" className="text-blue-500 hover:underline">Register</Link></p>
-        </div>
-      </div>
-    </div>
+        <Group justify="center" mt="md">
+          <Text size="sm">
+            Don't have an account? <Link to="/register" style={{ color: 'var(--mantine-color-blue-filled)' }}>Register</Link>
+          </Text>
+        </Group>
+      </Card>
+    </Container>
   );
 }; 

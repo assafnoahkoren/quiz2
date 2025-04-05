@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Button, Card, Container, PasswordInput, TextInput, Title, Text, Group } from '@mantine/core';
+import { IconUserPlus, IconMail, IconLock, IconUser } from '@tabler/icons-react';
 
 export const Register = () => {
   const [name, setName] = useState('');
@@ -25,71 +27,68 @@ export const Register = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="w-full max-w-md p-8 border rounded shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
+    <Container size="xs" py="xl">
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Title order={2} ta="center" mb="lg">Register</Title>
         
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block mb-2 text-sm" htmlFor="name">Full Name</label>
-            <input
-              id="name"
-              type="text"
-              className="w-full p-2 border rounded"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+          <TextInput
+            label="Full Name"
+            placeholder="John Doe"
+            required
+            mb="md"
+            leftSection={<IconUser size={16} />}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
           
-          <div className="mb-4">
-            <label className="block mb-2 text-sm" htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className="w-full p-2 border rounded"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <TextInput
+            label="Email"
+            placeholder="your@email.com"
+            type="email"
+            required
+            mb="md"
+            leftSection={<IconMail size={16} />}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           
-          <div className="mb-4">
-            <label className="block mb-2 text-sm" htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="w-full p-2 border rounded"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordInput
+            label="Password"
+            placeholder="Create a password"
+            required
+            mb="md"
+            leftSection={<IconLock size={16} />}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           
-          <div className="mb-6">
-            <label className="block mb-2 text-sm" htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              className="w-full p-2 border rounded"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordInput
+            label="Confirm Password"
+            placeholder="Repeat your password"
+            required
+            mb="lg"
+            leftSection={<IconLock size={16} />}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={confirmPassword !== '' && password !== confirmPassword ? "Passwords don't match" : null}
+          />
           
-          <button
+          <Button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white rounded transition-fast hover:bg-blue-600"
+            fullWidth
+            leftSection={<IconUserPlus size={16} />}
           >
             Register
-          </button>
+          </Button>
         </form>
         
-        <div className="mt-4 text-center text-sm">
-          <p>Already have an account? <Link to="/login" className="text-blue-500 hover:underline">Login</Link></p>
-        </div>
-      </div>
-    </div>
+        <Group justify="center" mt="md">
+          <Text size="sm">
+            Already have an account? <Link to="/login" style={{ color: 'var(--mantine-color-blue-filled)' }}>Login</Link>
+          </Text>
+        </Group>
+      </Card>
+    </Container>
   );
 }; 

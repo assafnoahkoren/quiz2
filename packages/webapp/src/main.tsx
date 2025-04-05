@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
+
+// Import styles in the correct order
+import '@mantine/core/styles.css';
 import '@unocss/reset/tailwind.css';
 import 'uno.css';
 
