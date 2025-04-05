@@ -18,6 +18,9 @@
     "db:push": "prisma db push",
     "seed": "ts-node prisma/seed.ts"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^4.0.2",
@@ -26,6 +29,8 @@
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^6.5.0",
     "bcrypt": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "puppeteer": "^24.6.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
