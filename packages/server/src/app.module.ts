@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { SubjectsModule } from './subjects/subjects.module';
+import { GovExamModule } from './gov-exam/gov-exam.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { SubjectsModule } from './subjects/subjects.module';
     PrismaModule,
     AuthModule,
     SubjectsModule,
+    GovExamModule,
   ],
   controllers: [AppController],
   providers: [AppService],
