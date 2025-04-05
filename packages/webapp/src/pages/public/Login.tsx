@@ -9,13 +9,27 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [inputsDirty, setInputsDirty] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
   const loginMutation = useLoginMutation();
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    setInputsDirty(true);
+    setErrorMessage(null);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    setInputsDirty(true);
+    setErrorMessage(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setInputsDirty(false);
 
     try {
       const result = await loginMutation.mutateAsync({ email, password });
@@ -44,9 +58,9 @@ export const Login = () => {
             radius="md"
             leftSection={<IconMail size={16} />}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
             disabled={loginMutation.isPending}
-            error={loginMutation.isError}
+            error={!inputsDirty && loginMutation.isError}
           />
 
           <PasswordInput
@@ -56,12 +70,12 @@ export const Login = () => {
             radius="md"
             leftSection={<IconLock size={16} />}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             disabled={loginMutation.isPending}
-            error={loginMutation.isError}
+            error={!inputsDirty && loginMutation.isError}
           />
 
-          {errorMessage && (
+          {errorMessage && !inputsDirty && (
             <Alert
               icon={<IconAlertCircle size={16} />}
               title="ההתחברות נכשלה"
