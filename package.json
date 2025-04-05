@@ -11,6 +11,9 @@
     "webapp": "yarn workspace webapp dev --host",
     "dev": "yarn server dev & yarn webapp dev --host",
     "build": "yarn server build && yarn webapp build",
-    "start": "yarn server start"
+    "start": "yarn server start",
+    "up": "cd packages/server && docker-compose up -d",
+    "down": "cd packages/server && docker-compose down",
+    "env": "node scripts/link-env.js"
   }
 } 
