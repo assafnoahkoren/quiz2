@@ -8,7 +8,7 @@ export class SubjectsService {
 
   // Create a new subject
   async create(createSubjectDto: CreateSubjectDto) {
-    // Check if the examId exists
+    // Check if the exam exists using govExamId
     const examExists = await this.prisma.govExam.findUnique({
       where: { id: createSubjectDto.govExamId },
     });
@@ -94,9 +94,9 @@ export class SubjectsService {
       throw new NotFoundException(`Exam with ID ${examId} not found`);
     }
 
-    // Get all subjects for this exam
+    // Get all subjects for this exam - using govExamId field
     const subjects = await this.prisma.subject.findMany({
-      where: { govExamId: examId },
+      where: { govExamId: examId }, // Must use govExamId, not examId
       include: {
         _count: {
           select: { Questions: true },
@@ -112,7 +112,7 @@ export class SubjectsService {
       },
       where: {
         Subject: {
-          govExamId: examId,
+          govExamId: examId, // Must use govExamId, not examId
         },
       },
     });
