@@ -12,7 +12,11 @@
     "test": "jest --config ./jest-e2e.json",
     "test:watch": "jest --watch --config ./jest-e2e.json",
     "test:cov": "jest --coverage --config ./jest-e2e.json",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --config ./jest-e2e.json"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --config ./jest-e2e.json",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db push && ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

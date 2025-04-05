@@ -1,7 +1,7 @@
 // DTO for creating a subject
 export class CreateSubjectDto {
   name: string;
-  examId: string;
+  govExamId: string;
   parentSubjectId?: string;
 }
 
