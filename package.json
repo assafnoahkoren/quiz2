@@ -1,0 +1,14 @@
+{
+  "name": "quiz2",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/server",
+    "packages/webapp"
+  ],
+  "scripts": {
+    "server": "yarn workspace server dev",
+    "webapp": "yarn workspace webapp dev --host",
+    "dev": "yarn server dev & yarn webapp dev"
+  }
+} 
