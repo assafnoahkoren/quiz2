@@ -8,16 +8,133 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
+  id                String           @id @default(uuid())
+  email             String           @unique
+  name              String?
+  password          String
+  govExamInstanceId String?
+  GovExamInstance   GovExamInstance? @relation(fields: [govExamInstanceId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  UserExams         UserExam[]
+  Subscriptions     Subscription[]
+}
+
+model Subscription {
   id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  price     Int
+  currency  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GovExam {
+  id            String            @id @default(uuid())
+  name          String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  ExamInstances GovExamInstance[]
+  UserExams     UserExam[]
+}
+
+model GovExamInstance {
+  id                String   @id @default(uuid())
+  examId            String
+  Exam              GovExam  @relation(fields: [examId], references: [id])
+  createdAt         DateTime @default(now())
+  date              DateTime
+  registrationOpen  DateTime
+  registrationClose DateTime
+  updatedAt         DateTime @updatedAt
+  Users             User[]
+}
+
+model Subject {
+  id               String     @id @default(uuid())
+  name             String
+  examId           String
+  parentSubjectId  String?
+  ParentSubject    Subject?   @relation(fields: [parentSubjectId], references: [id], name: "parentSubject")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  childrenSubjects Subject[]  @relation("parentSubject")
+  Questions        Question[]
+}
+
+enum QuestionType {
+  FREE_TEXT
+  MCQ
+  TRUE_FALSE
+  MATCHING
+  COMPLETION
+}
+
+enum QuestionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Question {
+  id                String             @id @default(uuid())
+  subjectId         String
+  Subject           Subject            @relation(fields: [subjectId], references: [id])
+  question          String
+  imageUrl          String?
+  explanation       String?
+  status            QuestionStatus     @default(DRAFT)
+  type              QuestionType
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  Options           Options[]
+  UserExamQuestions UserExamQuestion[]
+}
+
+model Options {
+  id         String   @id @default(uuid())
+  questionId String
+  Question   Question @relation(fields: [questionId], references: [id])
+  answer     String
+  isCorrect  Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model UserExam {
+  id                String             @id @default(uuid())
+  userId            String
+  User              User               @relation(fields: [userId], references: [id])
+  govExamId         String
+  GovExam           GovExam            @relation(fields: [govExamId], references: [id])
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  UserExamQuestions UserExamQuestion[]
+}
+
+model UserExamQuestion {
+  id         String   @id @default(uuid())
+  userExamId String
+  UserExam   UserExam @relation(fields: [userExamId], references: [id])
+  questionId String
+  Question   Question @relation(fields: [questionId], references: [id])
+  answer     String?
+  isCorrect  Boolean?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

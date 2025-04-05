@@ -1,6 +1,6 @@
 import { useAuth } from '../../components/auth/AuthContext';
 import { IconDemo } from '../../components/IconDemo';
-import { Button, Container, Group, Text, Title, Divider, Stack, Box } from '@mantine/core';
+import { Button, Container, Group, Text, Title, Box } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
 
 export const Home = () => {
