@@ -10,38 +10,40 @@ export const Home = () => {
     <Container size="lg" py="xl">
       <Card shadow="sm" padding="lg" radius="md" withBorder mb="lg">
         <Group justify="space-between" mb="md">
-          <Title order={3}>Welcome to Quiz2</Title>
-          <Button 
-            onClick={logout}
-            color="red"
-            leftSection={<IconLogout size={18} />}
-          >
-            Logout
-          </Button>
+          <Title order={3}>ברוכים הבאים ל-Quiz2</Title>
+          <Group>
+            <Button 
+              onClick={logout}
+              color="red"
+              leftSection={<IconLogout size={18} />}
+            >
+              התנתק
+            </Button>
+          </Group>
         </Group>
         
         <Text size="sm" mb="lg">
-          This is a protected page that only authenticated users can access.
-          You are currently signed in with JWT authentication.
+          זהו דף מוגן שרק משתמשים מאומתים יכולים לגשת אליו.
+          אתה כרגע מחובר עם אימות JWT.
         </Text>
         
         <Card withBorder mb="md">
-          <Title order={4} mb="md">Tabler Icons Demo</Title>
+          <Title order={4} mb="md">הדגמת אייקונים של Tabler</Title>
           <IconDemo size={32} color="blue" />
         </Card>
         
         <Group grow>
           <Card withBorder p="md">
-            <Title order={5} mb="sm">Recent Activity</Title>
-            <Text size="sm" c="dimmed">No recent activity to display.</Text>
+            <Title order={5} mb="sm">פעילות אחרונה</Title>
+            <Text size="sm" c="dimmed">אין פעילות אחרונה להצגה.</Text>
           </Card>
           
           <Card withBorder p="md">
-            <Title order={5} mb="sm">Quick Actions</Title>
+            <Title order={5} mb="sm">פעולות מהירות</Title>
             <Group>
-              <Button variant="light" color="blue" size="xs">Action 1</Button>
-              <Button variant="light" color="green" size="xs">Action 2</Button>
-              <Button variant="light" color="violet" size="xs">Action 3</Button>
+              <Button variant="light" color="blue" size="xs">פעולה 1</Button>
+              <Button variant="light" color="green" size="xs">פעולה 2</Button>
+              <Button variant="light" color="violet" size="xs">פעולה 3</Button>
             </Group>
           </Card>
         </Group>

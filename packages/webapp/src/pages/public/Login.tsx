@@ -24,13 +24,13 @@ export const Login = () => {
   };
 
   return (
-    <Container size="xs" py="xl">
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Title order={2} ta="center" mb="lg">Login</Title>
+    <Container size="xs" py="xl" >
+      <Card shadow="sm" padding="lg" radius="md" withBorder >
+        <Title order={2} ta="center" mb="lg">התחברות</Title>
         
         <form onSubmit={handleSubmit}>
           <TextInput
-            label="Email"
+            label="אימייל"
             placeholder="your@email.com"
             required
             mb="md"
@@ -40,8 +40,8 @@ export const Login = () => {
           />
           
           <PasswordInput
-            label="Password"
-            placeholder="Your password"
+            label="סיסמה"
+            placeholder="הסיסמה שלך"
             required
             mb="lg"
             leftSection={<IconLock size={16} />}
@@ -53,14 +53,15 @@ export const Login = () => {
             type="submit"
             fullWidth
             leftSection={<IconLogin size={16} />}
+            className={classes.rtlButton}
           >
-            Log In
+            התחבר
           </Button>
         </form>
         
         <Group justify="center" mt="md">
           <Text size="sm">
-            Don't have an account? <Link to="/register" style={{ color: 'var(--mantine-color-blue-filled)' }}>Register</Link>
+            אין לך חשבון? <Link to="/register" style={{ color: 'var(--mantine-color-blue-filled)' }}>הרשם</Link>
           </Text>
         </Group>
       </Card>

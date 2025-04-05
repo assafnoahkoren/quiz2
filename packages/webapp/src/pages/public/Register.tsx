@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Card, Container, PasswordInput, TextInput, Title, Text, Group } from '@mantine/core';
 import { IconUserPlus, IconMail, IconLock, IconUser } from '@tabler/icons-react';
+import { DirectionToggle } from '../../components/DirectionToggle';
 
 export const Register = () => {
   const [name, setName] = useState('');
@@ -15,7 +16,7 @@ export const Register = () => {
     
     // Validate passwords match
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      alert('הסיסמאות אינן תואמות');
       return;
     }
     
@@ -27,14 +28,17 @@ export const Register = () => {
   };
 
   return (
-    <Container size="xs" py="xl">
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Title order={2} ta="center" mb="lg">Register</Title>
+    <Container size="xs" py="xl" >
+      <Group justify="right" mb="md">
+        <DirectionToggle />
+      </Group>
+      <Card shadow="sm" padding="lg" radius="md" withBorder >
+        <Title order={2} ta="center" mb="lg">הרשמה</Title>
         
         <form onSubmit={handleSubmit}>
           <TextInput
-            label="Full Name"
-            placeholder="John Doe"
+            label="שם מלא"
+            placeholder="ישראל ישראלי"
             required
             mb="md"
             leftSection={<IconUser size={16} />}
@@ -43,7 +47,7 @@ export const Register = () => {
           />
           
           <TextInput
-            label="Email"
+            label="אימייל"
             placeholder="your@email.com"
             type="email"
             required
@@ -54,8 +58,8 @@ export const Register = () => {
           />
           
           <PasswordInput
-            label="Password"
-            placeholder="Create a password"
+            label="סיסמה"
+            placeholder="צור סיסמה"
             required
             mb="md"
             leftSection={<IconLock size={16} />}
@@ -64,28 +68,29 @@ export const Register = () => {
           />
           
           <PasswordInput
-            label="Confirm Password"
-            placeholder="Repeat your password"
+            label="אימות סיסמה"
+            placeholder="חזור על הסיסמה"
             required
             mb="lg"
             leftSection={<IconLock size={16} />}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            error={confirmPassword !== '' && password !== confirmPassword ? "Passwords don't match" : null}
+            error={confirmPassword !== '' && password !== confirmPassword ? "הסיסמאות אינן תואמות" : null}
           />
           
           <Button
             type="submit"
             fullWidth
             leftSection={<IconUserPlus size={16} />}
+            className={classes.rtlButton}
           >
-            Register
+            הרשם
           </Button>
         </form>
         
         <Group justify="center" mt="md">
           <Text size="sm">
-            Already have an account? <Link to="/login" style={{ color: 'var(--mantine-color-blue-filled)' }}>Login</Link>
+            כבר יש לך חשבון? <Link to="/login" style={{ color: 'var(--mantine-color-blue-filled)' }}>התחבר</Link>
           </Text>
         </Group>
       </Card>
