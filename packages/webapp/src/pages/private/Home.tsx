@@ -1,10 +1,16 @@
+import { useEffect } from 'react';
 import { useAuth } from '../../components/auth/AuthContext';
 import { IconDemo } from '../../components/IconDemo';
 import { Button, Container, Group, Text, Title, Box } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
+import { useRefreshTokenMutation } from '../../api/auth';
 
 export const Home = () => {
   const { logout } = useAuth();
+  const refreshToken = useRefreshTokenMutation();
+  useEffect(() => {
+    refreshToken.mutate();
+  }, []);
 
   return (
     <Container size="lg" py="xl" px={{ base: 'md', sm: 'lg' }}>
