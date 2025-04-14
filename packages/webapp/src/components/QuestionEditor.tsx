@@ -1,4 +1,4 @@
-import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid, FileButton, Image } from '@mantine/core';
+import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid, FileButton, Image, LoadingOverlay } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useQuestion, useCreateQuestion, useUpdateQuestion, fetchQuestionById } from '../api/questions';
@@ -30,7 +30,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
   const isEditMode = !!questionId;
 
   // Fetch question data if in edit mode
-  const { data: questionData } = useQuery({
+  const { data: questionData, isLoading } = useQuery({
     queryKey: ['question', questionId],
     queryFn: () => fetchQuestionById(questionId!),
     enabled: isEditMode,
@@ -157,90 +157,93 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Stack gap="md">
-        <TextInput
-          label="שאלה"
-          placeholder="הזן את השאלה"
-          required
-          {...form.getInputProps('question')}
-        />
+      <div style={{ position: 'relative' }}>
+        <LoadingOverlay visible={isLoading}/>
+        <Stack gap="md">
+          <TextInput
+            label="שאלה"
+            placeholder="הזן את השאלה"
+            required
+            {...form.getInputProps('question')}
+          />
 
-        <Select
-          label="סוג השאלה"
-          placeholder="בחר סוג שאלה"
-          required
-          data={[
-            { value: QuestionType.MCQ, label: 'רב ברירה' },
-            { value: QuestionType.FREE_TEXT, label: 'תשובה חופשית' },
-            { value: QuestionType.TRUE_FALSE, label: 'נכון/לא נכון' },
-            { value: QuestionType.MATCHING, label: 'התאמה' },
-            { value: QuestionType.COMPLETION, label: 'השלמה' }
-          ]}
-          {...form.getInputProps('type')}
-        />
+          <Select
+            label="סוג השאלה"
+            placeholder="בחר סוג שאלה"
+            required
+            data={[
+              { value: QuestionType.MCQ, label: 'רב ברירה' },
+              { value: QuestionType.FREE_TEXT, label: 'תשובה חופשית' },
+              { value: QuestionType.TRUE_FALSE, label: 'נכון/לא נכון' },
+              { value: QuestionType.MATCHING, label: 'התאמה' },
+              { value: QuestionType.COMPLETION, label: 'השלמה' }
+            ]}
+            {...form.getInputProps('type')}
+          />
 
-        <Select
-          label="סטטוס"
-          placeholder="בחר סטטוס"
-          required
-          data={[
-            { value: QuestionStatus.DRAFT, label: 'טיוטה' },
-            { value: QuestionStatus.PUBLISHED, label: 'פורסם' },
-            { value: QuestionStatus.ARCHIVED, label: 'בארכיון' }
-          ]}
-          {...form.getInputProps('status')}
-        />
+          <Select
+            label="סטטוס"
+            placeholder="בחר סטטוס"
+            required
+            data={[
+              { value: QuestionStatus.DRAFT, label: 'טיוטה' },
+              { value: QuestionStatus.PUBLISHED, label: 'פורסם' },
+              { value: QuestionStatus.ARCHIVED, label: 'בארכיון' }
+            ]}
+            {...form.getInputProps('status')}
+          />
 
-        <Textarea
-          label="הסבר"
-          placeholder="הזן הסבר (אופציונלי)"
-          minRows={3}
-          {...form.getInputProps('explanation')}
-        />
+          <Textarea
+            label="הסבר"
+            placeholder="הזן הסבר (אופציונלי)"
+            minRows={3}
+            {...form.getInputProps('explanation')}
+          />
 
-        <Group>
-          <FileButton
-            onChange={handleImageUpload}
-            accept="image/png,image/jpeg,image/jpg"
-          >
-            {(props) => <Button {...props}>העלה תמונה</Button>}
-          </FileButton>
-          {form.values.imageFile && (
-            <Text size="sm">נבחרה תמונה: {form.values.imageFile.name}</Text>
+          <Group>
+            <FileButton
+              onChange={handleImageUpload}
+              accept="image/png,image/jpeg,image/jpg"
+            >
+              {(props) => <Button {...props}>העלה תמונה</Button>}
+            </FileButton>
+            {form.values.imageFile && (
+              <Text size="sm">נבחרה תמונה: {form.values.imageFile.name}</Text>
+            )}
+          </Group>
+
+          {form.values.imageUrl && (
+            <div style={{ width: '200px', height: '200px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img
+                src={form.values.imageUrl}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                alt="תצוגה מקדימה"
+              />
+            </div>
           )}
-        </Group>
 
-        {form.values.imageUrl && (
-          <div style={{ width: '200px', height: '200px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img
-              src={form.values.imageUrl}
-              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-              alt="תצוגה מקדימה"
-            />
-          </div>
-        )}
+          <Text size="sm" fw={500}>תשובות</Text>
+          {form.values.options.map((_, index) => (
+            <SimpleGrid key={index} cols={2}>
+              <TextInput
+                placeholder={`תשובה ${index + 1}`}
+                required
+                {...form.getInputProps(`options.${index}.answer`)}
+              />
+              <Switch
+                label="נכון"
+                {...form.getInputProps(`options.${index}.isCorrect`, { type: 'checkbox' })}
+              />
+            </SimpleGrid>
+          ))}
 
-        <Text size="sm" fw={500}>תשובות</Text>
-        {form.values.options.map((_, index) => (
-          <SimpleGrid key={index} cols={2}>
-            <TextInput
-              placeholder={`תשובה ${index + 1}`}
-              required
-              {...form.getInputProps(`options.${index}.answer`)}
-            />
-            <Switch
-              label="נכון"
-              {...form.getInputProps(`options.${index}.isCorrect`, { type: 'checkbox' })}
-            />
-          </SimpleGrid>
-        ))}
-
-        <Group justify="flex-end" mt="md">
-          <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
-            {isEditMode ? 'עדכן שאלה' : 'צור שאלה'}
-          </Button>
-        </Group>
-      </Stack>
+          <Group justify="flex-end" mt="md">
+            <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
+              {isEditMode ? 'עדכן שאלה' : 'צור שאלה'}
+            </Button>
+          </Group>
+        </Stack>
+      </div>
     </form>
   );
 } 

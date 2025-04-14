@@ -131,9 +131,13 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
               </Group>
               <Text>{question.question}</Text>
             </Accordion.Control>
-            {openItems.includes(question.id) && (
+            {openItems.includes(question.id) ? (
               <Accordion.Panel>
                 <QuestionEditor questionId={question.id} subjectId={subjectId} />
+              </Accordion.Panel>
+            ) : (
+              <Accordion.Panel>
+                <div className='h-[700px]'></div>
               </Accordion.Panel>
             )}
           </Accordion.Item>
