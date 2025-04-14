@@ -68,7 +68,7 @@ export const SubjectTree = ({ govExamId, onSubjectSelect }: SubjectTreeProps) =>
               padding: '4px 8px',
               borderRadius: '4px',
               backgroundColor: hasChildren ? 'var(--mantine-color-gray-0)' : 'transparent',
-			  paddingInlineStart: `${level * 16}px`,
+			  paddingInlineStart: `${level * 8}px`,
               '&:hover': {
                 backgroundColor: hasChildren ? 'var(--mantine-color-gray-1)' : 'var(--mantine-color-gray-0)',
               }
