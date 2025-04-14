@@ -85,7 +85,7 @@ export const SubjectTree = ({ govExamId, onSubjectSelect }: SubjectTreeProps) =>
 						}}
 					/>
 					) : (
-					<IconBook2 size={16} style={{ opacity: 0.6 }} />
+					<IconBook2 size={16} style={{ opacity: 0.3 }} />
 					)}
 				</span>
 				{typedNode.label}
