@@ -15,5 +15,9 @@
     "up": "cd packages/server && docker-compose up -d",
     "down": "cd packages/server && docker-compose down",
     "env": "node scripts/link-env.js"
+  },
+  "dependencies": {
+    "@types/pg": "^8.11.12",
+    "pg": "^8.14.1"
   }
-} 
+}
