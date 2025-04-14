@@ -47,37 +47,62 @@ export interface GovExamResponse {
   subjects: SubjectTreeItem[];
 }
 
+export enum QuestionType {
+  FREE_TEXT = 'FREE_TEXT',
+  MCQ = 'MCQ',
+  TRUE_FALSE = 'TRUE_FALSE',
+  MATCHING = 'MATCHING',
+  COMPLETION = 'COMPLETION'
+}
+
+export enum QuestionStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVED = 'ARCHIVED'
+}
+
 export interface Question {
   id: string;
-  text: string;
+  question: string;
   subjectId: string;
+  imageUrl: string | null;
+  explanation: string | null;
+  type: QuestionType;
+  status: QuestionStatus;
+  createdAt: string;
+  updatedAt: string;
   options: {
     id: string;
-    text: string;
+    answer: string;
     isCorrect: boolean;
   }[];
-  explanation?: string;
 }
 
 export interface CreateQuestionDto {
-  text: string;
+  question: string;
   subjectId: string;
+  imageUrl?: string;
+  explanation?: string;
+  type: QuestionType;
+  status?: QuestionStatus;
   options: {
-    text: string;
+    answer: string;
     isCorrect: boolean;
   }[];
-  explanation?: string;
 }
 
 export interface UpdateQuestionDto {
-  text?: string;
+  question?: string;
   subjectId?: string;
+  imageUrl?: string;
+  explanation?: string;
+  type?: QuestionType;
+  status?: QuestionStatus;
   options?: {
     id?: string;
-    text: string;
+    answer: string;
     isCorrect: boolean;
   }[];
-  explanation?: string;
 }
 
 export interface CreateSubjectDto {

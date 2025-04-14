@@ -1,18 +1,19 @@
-import { Container, Title, Group, Loader, Alert, Button, Grid } from '@mantine/core';
+import { Container, Title, Group, Loader, Alert, Button, Grid, Breadcrumbs, Anchor } from '@mantine/core';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSubjectsByExamId } from '../../api';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { SubjectTree } from '../../components/SubjectTree';
 import { SubjectEditor } from '../../components/SubjectEditor';
+import { useState } from 'react';
 
 export const GovExam = () => {
   const { govExamId } = useParams<{ govExamId: string }>();
   const navigate = useNavigate();
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const { data: examSubjects, isLoading, error } = useSubjectsByExamId(govExamId || '');
 
   const handleSubjectSelect = (subjectId: string) => {
-    // Handle subject selection here
-    console.log('Selected subject:', subjectId);
+    setSelectedSubjectId(subjectId);
   };
 
   if (isLoading) {
@@ -40,23 +41,26 @@ export const GovExam = () => {
   return (
     <Container size="xl">
       <Group mb="xl">
-        <Button
-          variant="subtle"
-          leftSection={<IconArrowLeft size={20} />}
-          onClick={() => navigate('/')}
-        >
-          Back to Exams
-        </Button>
+        <Breadcrumbs>
+          <Anchor onClick={() => navigate('/')}>Exams</Anchor>
+          <Anchor>{examSubjects.examName}</Anchor>
+        </Breadcrumbs>
       </Group>
       
-      <Title order={1} mb="xl">{examSubjects.examName}</Title>
+      <Title order={3} mb="xl">{examSubjects.examName}</Title>
       
       <Grid>
         <Grid.Col span={3} p="0">
           <SubjectTree govExamId={govExamId} onSubjectSelect={handleSubjectSelect} />
         </Grid.Col>
         <Grid.Col span={9} p="0">
-          <SubjectEditor />
+          {selectedSubjectId ? (
+            <SubjectEditor subjectId={selectedSubjectId} />
+          ) : (
+            <Alert color="blue" title="Select a Subject">
+              Please select a subject from the tree to view and edit its questions.
+            </Alert>
+          )}
         </Grid.Col>
       </Grid>
     </Container>
