@@ -73,7 +73,7 @@ export const SubjectTree = ({ govExamId, onSubjectSelect }: SubjectTreeProps) =>
 				paddingInlineStart: `${level * 8}px`,
 			}}
           >
-            <Text className='relative w-full'>
+            <Text className={`relative w-full ${hasChildren ? 'font-500' : ''}`}>
 				<span className="relative top-1 end-1">
 					{hasChildren ? (
 					<IconChevronDown
