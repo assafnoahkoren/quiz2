@@ -64,24 +64,23 @@ export const SubjectTree = ({ govExamId, onSubjectSelect }: SubjectTreeProps) =>
               onSubjectSelect(typedNode.value);
               elementProps.onClick?.(e);
             }}
-            style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              backgroundColor: hasChildren ? 'var(--mantine-color-gray-0)' : 'transparent',
-			  paddingInlineStart: `${level * 8}px`,
-              '&:hover': {
-                backgroundColor: hasChildren ? 'var(--mantine-color-gray-1)' : 'var(--mantine-color-gray-0)',
-              }
-            }}
+            className={`
+              p-1 px- pe-4 relative
+              
+              ${hasChildren ? 'bg-gray-1 hover:bg-gray-2' : 'hover:bg-gray-1'}
+            `}
+			style={{
+				paddingInlineStart: `${level * 8}px`,
+			}}
           >
             <Text className='relative w-full'>
-				<span className="relative top-1 end-0.5">
+				<span className="relative top-1 end-1">
 					{hasChildren ? (
 					<IconChevronDown
 						size={16}
 						style={{
-						transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-						transition: 'transform 200ms ease',
+							transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+							transition: 'transform 200ms ease',
 						}}
 					/>
 					) : (
@@ -89,8 +88,8 @@ export const SubjectTree = ({ govExamId, onSubjectSelect }: SubjectTreeProps) =>
 					)}
 				</span>
 				{typedNode.label}
-				{typedNode.questionCount > 0 && <Text className='absolute top-1 end-0 w-[20px] text-center' size="xs" c="dimmed">{typedNode.questionCount}</Text>}
 			</Text>
+			{typedNode.questionCount > 0 && <Text className='absolute top-2 end-0 w-[20px] text-center' size="xs" c="dimmed">{typedNode.questionCount}</Text>}
             
           </Group>
         );
