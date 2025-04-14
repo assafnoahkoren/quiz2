@@ -1,8 +1,9 @@
-import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge, Accordion } from '@mantine/core';
+import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge, Accordion, Button } from '@mantine/core';
 import { useQuestionsBySubjectId } from '../api';
 import { useState } from 'react';
 import { QuestionStatus } from '../api/types';
 import { QuestionEditor } from './QuestionEditor';
+import { IconPlus } from '@tabler/icons-react';
 
 interface SubjectEditorProps {
   subjectId: string;
@@ -16,6 +17,7 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
   const [statusFilter, setStatusFilter] = useState<QuestionStatus | null>(null);
   const [orderBy, setOrderBy] = useState<OrderBy | null>(null);
   const [openItems, setOpenItems] = useState<string[]>([]);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   const filterByText = (question: { question: string }) => {
     return question.question.toLowerCase().includes(searchText.toLowerCase());
@@ -32,6 +34,16 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
     const aValue = field === 'createdAt' ? new Date(a.createdAt) : new Date(a.updatedAt);
     const bValue = field === 'createdAt' ? new Date(b.createdAt) : new Date(b.updatedAt);
     return direction === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
+  };
+
+  const handleCreateClick = () => {
+    setIsCreatingNew(true);
+    setOpenItems(['new-question']);
+  };
+
+  const handleNewQuestionSuccess = () => {
+    setIsCreatingNew(false);
+    setOpenItems([]);
   };
 
   if (isLoading) {
@@ -63,6 +75,13 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
           value={searchText}
           onChange={(e) => setSearchText(e.currentTarget.value)}
         />
+        <Button
+          variant="light"
+          leftSection={<IconPlus size={16} />}
+          onClick={handleCreateClick}
+        >
+          צור שאלה
+        </Button>
         <Select
           placeholder="סטטוס"
           value={statusFilter}
@@ -87,6 +106,20 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
         />
       </Group>
       <Accordion value={openItems} onChange={setOpenItems} multiple>
+        {isCreatingNew && (
+          <Accordion.Item key="new-question" value="new-question">
+            <Accordion.Control>
+              <Group>
+                <Badge variant='light' color="yellow">טיוטה</Badge>
+                <Text size="xs" c="dimmed">שאלה חדשה</Text>
+              </Group>
+              <Text>צור שאלה חדשה</Text>
+            </Accordion.Control>
+            <Accordion.Panel>
+              <QuestionEditor subjectId={subjectId} onSuccess={handleNewQuestionSuccess} />
+            </Accordion.Panel>
+          </Accordion.Item>
+        )}
         {filteredQuestions?.map((question) => (
           <Accordion.Item key={question.id} value={question.id}>
             <Accordion.Control>

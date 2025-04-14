@@ -1,4 +1,4 @@
-import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid } from '@mantine/core';
+import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid, FileButton, Image } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useQuestion, useCreateQuestion, useUpdateQuestion, fetchQuestionById } from '../api/questions';
@@ -17,6 +17,7 @@ interface FormValues {
   type: QuestionType;
   status: QuestionStatus;
   explanation: string;
+  imageFile: File | null;
   imageUrl: string;
   options: Array<{
     answer: string;
@@ -44,6 +45,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
       type: QuestionType.MCQ,
       status: QuestionStatus.DRAFT,
       explanation: '',
+      imageFile: null,
       imageUrl: '',
       options: [
         { answer: '', isCorrect: false },
@@ -70,6 +72,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
         status: questionData.status,
         explanation: questionData.explanation || '',
         imageUrl: questionData.imageUrl || '',
+        imageFile: null,
         options: questionData.options.map((opt: { answer: string; isCorrect: boolean }) => ({
           answer: opt.answer,
           isCorrect: opt.isCorrect,
@@ -78,11 +81,53 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
     }
   }, [questionData]);
 
+  const handleImageUpload = (file: File | null) => {
+    if (file) {
+      // Check file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        notifications.show({
+          title: 'שגיאה',
+          message: 'גודל הקובץ חורג מהמגבלה (2MB)',
+          color: 'red',
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        
+        // Create an image element to check dimensions
+        const img = new window.Image();
+        img.onload = () => {
+          // Check image dimensions (800x800 limit)
+          if (img.width > 800 || img.height > 800) {
+            notifications.show({
+              title: 'שגיאה',
+              message: 'מימדי התמונה חורגים מהמגבלה (800x800 פיקסלים)',
+              color: 'red',
+            });
+            return;
+          }
+          // Set both the file and the URL
+          form.setValues({
+            ...form.values,
+            imageFile: file,
+            imageUrl: base64String
+          });
+        };
+        img.src = base64String;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      form.setFieldValue('imageFile', null);
+      form.setFieldValue('imageUrl', '');
+    }
+  };
+
   const handleSubmit = async (values: FormValues) => {
     try {
-      const data = {
-        ...values,
-      };
+      const { imageFile, ...data } = values;
 
       if (isEditMode) {
         await updateMutation.mutateAsync({ id: questionId!, ...data });
@@ -124,10 +169,13 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
           label="סוג השאלה"
           placeholder="בחר סוג שאלה"
           required
-          data={Object.values(QuestionType).map(type => ({
-            value: type,
-            label: type.replace('_', ' '),
-          }))}
+          data={[
+            { value: QuestionType.MCQ, label: 'רב ברירה' },
+            { value: QuestionType.FREE_TEXT, label: 'תשובה חופשית' },
+            { value: QuestionType.TRUE_FALSE, label: 'נכון/לא נכון' },
+            { value: QuestionType.MATCHING, label: 'התאמה' },
+            { value: QuestionType.COMPLETION, label: 'השלמה' }
+          ]}
           {...form.getInputProps('type')}
         />
 
@@ -135,17 +183,12 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
           label="סטטוס"
           placeholder="בחר סטטוס"
           required
-          data={Object.values(QuestionStatus).map(status => ({
-            value: status,
-            label: status,
-          }))}
+          data={[
+            { value: QuestionStatus.DRAFT, label: 'טיוטה' },
+            { value: QuestionStatus.PUBLISHED, label: 'פורסם' },
+            { value: QuestionStatus.ARCHIVED, label: 'בארכיון' }
+          ]}
           {...form.getInputProps('status')}
-        />
-
-        <TextInput
-          label="קישור לתמונה"
-          placeholder="הזן קישור לתמונה (אופציונלי)"
-          {...form.getInputProps('imageUrl')}
         />
 
         <Textarea
@@ -154,6 +197,28 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
           minRows={3}
           {...form.getInputProps('explanation')}
         />
+
+        <Group>
+          <FileButton
+            onChange={handleImageUpload}
+            accept="image/png,image/jpeg,image/jpg"
+          >
+            {(props) => <Button {...props}>העלה תמונה</Button>}
+          </FileButton>
+          {form.values.imageFile && (
+            <Text size="sm">נבחרה תמונה: {form.values.imageFile.name}</Text>
+          )}
+        </Group>
+
+        {form.values.imageUrl && (
+          <div style={{ width: '200px', height: '200px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src={form.values.imageUrl}
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              alt="תצוגה מקדימה"
+            />
+          </div>
+        )}
 
         <Text size="sm" fw={500}>תשובות</Text>
         {form.values.options.map((_, index) => (
