@@ -48,8 +48,8 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
         </Container>
       </AppShell.Header>
 
-      <AppShell.Main>
-        <Container size="xl" py="md">
+      <AppShell.Main px="0">
+        <Container size="xl" p="0">
           {children || <Outlet />}
         </Container>
       </AppShell.Main>

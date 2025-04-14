@@ -1,8 +1,9 @@
-import { Container, Title, Group, Loader, Alert, Button } from '@mantine/core';
+import { Container, Title, Group, Loader, Alert, Button, Grid } from '@mantine/core';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSubjectsByExamId } from '../../api';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { SubjectTree } from '../../components/SubjectTree';
+import { SubjectEditor } from '../../components/SubjectEditor';
 
 export const GovExam = () => {
   const { govExamId } = useParams<{ govExamId: string }>();
@@ -50,7 +51,14 @@ export const GovExam = () => {
       
       <Title order={1} mb="xl">{examSubjects.examName}</Title>
       
-      <SubjectTree govExamId={govExamId} onSubjectSelect={handleSubjectSelect} />
+      <Grid>
+        <Grid.Col span={3} p="0">
+          <SubjectTree govExamId={govExamId} onSubjectSelect={handleSubjectSelect} />
+        </Grid.Col>
+        <Grid.Col span={9} p="0">
+          <SubjectEditor />
+        </Grid.Col>
+      </Grid>
     </Container>
   );
 }; 

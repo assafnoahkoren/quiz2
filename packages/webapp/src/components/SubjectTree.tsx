@@ -66,27 +66,32 @@ export const SubjectTree = ({ govExamId, onSubjectSelect }: SubjectTreeProps) =>
             }}
             style={{
               padding: '4px 8px',
-              paddingInlineStart: `${(level * 16) + 8}px`,
               borderRadius: '4px',
               backgroundColor: hasChildren ? 'var(--mantine-color-gray-0)' : 'transparent',
+			  paddingInlineStart: `${level * 16}px`,
               '&:hover': {
                 backgroundColor: hasChildren ? 'var(--mantine-color-gray-1)' : 'var(--mantine-color-gray-0)',
               }
             }}
           >
-            {hasChildren ? (
-              <IconChevronDown
-                size={16}
-                style={{
-                  transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 200ms ease',
-                }}
-              />
-            ) : (
-              <IconBook2 size={16} style={{ opacity: 0.6 }} />
-            )}
-            <Text>{typedNode.label}</Text>
-            <Text size="sm" c="dimmed">{typedNode.questionCount}</Text>
+            <Text className='relative w-full'>
+				<span className="relative top-1 end-0.5">
+					{hasChildren ? (
+					<IconChevronDown
+						size={16}
+						style={{
+						transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+						transition: 'transform 200ms ease',
+						}}
+					/>
+					) : (
+					<IconBook2 size={16} style={{ opacity: 0.6 }} />
+					)}
+				</span>
+				{typedNode.label}
+				{typedNode.questionCount > 0 && <Text className='absolute top-1 end-0 w-[20px] text-center' size="xs" c="dimmed">{typedNode.questionCount}</Text>}
+			</Text>
+            
           </Group>
         );
       }}
