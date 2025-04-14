@@ -1,11 +1,11 @@
 import { RouterProvider, createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
-import { PrivateRoute } from '../components/auth/PrivateRoute';
-import { Layout } from '../components/Layout';
-import { Login } from '../pages/public/Login';
-import { Register } from '../pages/public/Register';
-import { Home } from '../pages/private/Home';
+import { PrivateRoute } from '../../components/auth/PrivateRoute';
+import { Layout } from '../../components/Layout';
+import { Home } from '../../pages/private/Home';
+import { Login } from '../../pages/public/Login';
+import { Register } from '../../pages/public/Register';
 
-const routes: RouteObject[] = [
+const mobileRoutes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
@@ -38,8 +38,10 @@ const routes: RouteObject[] = [
   },
 ];
 
-const router = createBrowserRouter(routes);
+const mobileRouter = createBrowserRouter(mobileRoutes);
 
-export const AppRouter = () => {
-  return <RouterProvider router={router} />;
-}; 
+const MobileRouter = () => {
+  return <RouterProvider router={mobileRouter} />;
+};
+
+export default MobileRouter; 

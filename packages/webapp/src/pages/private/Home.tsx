@@ -41,7 +41,7 @@ export const Home = () => {
         </Box>
       </Box>
       
-      <Group grow align="flex-start" style={{ flexDirection: 'column', '@media (min-width: 576px)': { flexDirection: 'row' } }}>
+      <Group grow align="flex-start" style={{ flexDirection: 'column'}}>
         <Box style={{ flex: 1 }}>
           <Title order={5} mb="sm">פעילות אחרונה</Title>
           <Text size="sm" c="dimmed">אין פעילות אחרונה להצגה.</Text>
