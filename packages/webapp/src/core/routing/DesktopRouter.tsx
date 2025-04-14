@@ -2,6 +2,7 @@ import { RouterProvider, createBrowserRouter, Navigate, RouteObject } from 'reac
 import { PrivateRoute } from '../../components/auth/PrivateRoute';
 import { DesktopLayout } from '../../pages/desktop/Layout';
 import { Home } from '../../pages/desktop/Home';
+import { GovExam } from '../../pages/desktop/GovExam';
 import { Login } from '../../pages/public/Login';
 import { Register } from '../../pages/public/Register';
 
@@ -26,6 +27,10 @@ const desktopRoutes: RouteObject[] = [
           {
             path: '/',
             element: <Home />,
+          },
+          {
+            path: 'gov-exam/:govExamId',
+            element: <GovExam />,
           },
         ],
       },

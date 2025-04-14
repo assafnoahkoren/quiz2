@@ -1,7 +1,30 @@
-import { Container, Title, Text, SimpleGrid, Card, Group, Button } from '@mantine/core';
+import { Container, Title, Text, SimpleGrid, Card, Group, Button, Loader, Alert } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
+import { useGovExams } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 export const Home = () => {
+  const { data: govExams, isLoading, error } = useGovExams();
+  const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <Container size="xl" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <Loader size="xl" />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container size="xl">
+        <Alert color="red" title="Error">
+          Failed to load government exams. Please try again later.
+        </Alert>
+      </Container>
+    );
+  }
+
   return (
     <Container size="xl">
       <Group justify="space-between" mb="xl">
@@ -20,24 +43,24 @@ export const Home = () => {
       </Group>
 
       <SimpleGrid cols={3} spacing="lg">
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Title order={3}>Sample Quiz 1</Title>
-          <Text size="sm" c="dimmed" mt="xs">
-            10 questions • 15 minutes
-          </Text>
-        </Card>
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Title order={3}>Sample Quiz 2</Title>
-          <Text size="sm" c="dimmed" mt="xs">
-            8 questions • 10 minutes
-          </Text>
-        </Card>
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Title order={3}>Sample Quiz 3</Title>
-          <Text size="sm" c="dimmed" mt="xs">
-            12 questions • 20 minutes
-          </Text>
-        </Card>
+        {govExams?.map((exam) => (
+          <Card 
+            key={exam.id} 
+            shadow="sm" 
+            padding="lg" 
+            radius="md" 
+            withBorder
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate(`/gov-exam/${exam.id}`)}
+          >
+            <Title order={3}>{exam.name}</Title>
+            {exam.description && (
+              <Text size="sm" c="dimmed" mt="xs">
+                {exam.description}
+              </Text>
+            )}
+          </Card>
+        ))}
       </SimpleGrid>
     </Container>
   );

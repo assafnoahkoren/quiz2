@@ -38,6 +38,7 @@ export interface Subject {
 
 export interface SubjectTreeItem extends Subject {
   children: SubjectTreeItem[];
+  questionCount: number;
 }
 
 export interface Question {
