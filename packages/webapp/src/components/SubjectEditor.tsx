@@ -15,6 +15,7 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<QuestionStatus | null>(null);
   const [orderBy, setOrderBy] = useState<OrderBy | null>(null);
+  const [openItems, setOpenItems] = useState<string[]>([]);
 
   const filterByText = (question: { question: string }) => {
     return question.question.toLowerCase().includes(searchText.toLowerCase());
@@ -85,7 +86,7 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
           ]}
         />
       </Group>
-      <Accordion>
+      <Accordion value={openItems} onChange={setOpenItems} multiple>
         {filteredQuestions?.map((question) => (
           <Accordion.Item key={question.id} value={question.id}>
             <Accordion.Control>
@@ -97,9 +98,11 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
               </Group>
               <Text>{question.question}</Text>
             </Accordion.Control>
-            <Accordion.Panel>
-              <QuestionEditor questionId={question.id} />
-            </Accordion.Panel>
+            {openItems.includes(question.id) && (
+              <Accordion.Panel>
+                <QuestionEditor questionId={question.id} subjectId={subjectId} />
+              </Accordion.Panel>
+            )}
           </Accordion.Item>
         ))}
       </Accordion>
