@@ -1,12 +1,37 @@
-import { Card, Text, Loader, Alert, Stack, Group, TextInput } from '@mantine/core';
+import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge } from '@mantine/core';
 import { useQuestionsBySubjectId } from '../api';
+import { useState } from 'react';
+import { QuestionStatus } from '../api/types';
 
 interface SubjectEditorProps {
   subjectId: string;
 }
 
+type OrderBy = 'updatedAt-desc' | 'updatedAt-asc' | 'createdAt-desc' | 'createdAt-asc';
+
 export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
   const { data: questions, isLoading, error } = useQuestionsBySubjectId(subjectId);
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState<QuestionStatus | null>(null);
+  const [orderBy, setOrderBy] = useState<OrderBy | null>(null);
+
+  const filterByText = (question: { question: string }) => {
+    return question.question.toLowerCase().includes(searchText.toLowerCase());
+  };
+
+  const filterByStatus = (question: { status: QuestionStatus }) => {
+    if (!statusFilter) return true;
+    return question.status === statusFilter;
+  };
+
+  const sortQuestions = (a: { createdAt: string; updatedAt: string }, b: { createdAt: string; updatedAt: string }) => {
+    if (!orderBy) return 0;
+
+    const [field, direction] = orderBy.split('-');
+    const aValue = field === 'createdAt' ? new Date(a.createdAt) : new Date(a.updatedAt);
+    const bValue = field === 'createdAt' ? new Date(b.createdAt) : new Date(b.updatedAt);
+    return direction === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
+  };
 
   if (isLoading) {
     return (
@@ -26,18 +51,53 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
     );
   }
 
+  const filteredQuestions = questions?.filter(filterByText).filter(filterByStatus).sort(sortQuestions);
+
   return (
     <Stack p="md" py="0">
       <Group>
-        <TextInput w="100%" placeholder="חיפוש שאלות" />
+        <TextInput 
+          flex={1}
+          placeholder="חיפוש שאלות" 
+          value={searchText}
+          onChange={(e) => setSearchText(e.currentTarget.value)}
+        />
+        <Select
+          placeholder="סטטוס"
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value as QuestionStatus)}
+          data={[
+            { value: QuestionStatus.DRAFT, label: 'טיוטה' },
+            { value: QuestionStatus.PUBLISHED, label: 'פורסם' },
+            { value: QuestionStatus.ARCHIVED, label: 'בארכיון' },
+          ]}
+          clearable
+        />
+        <Select
+          placeholder="מיין לפי"
+          value={orderBy}
+          onChange={(value) => setOrderBy(value as OrderBy)}
+          data={[
+            { value: 'updatedAt-desc', label: 'עריכה אחרונה (חדש לישן)' },
+            { value: 'updatedAt-asc', label: 'עריכה אחרונה (ישן לחדש)' },
+            { value: 'createdAt-desc', label: 'יצירה (חדש לישן)' },
+            { value: 'createdAt-asc', label: 'יצירה (ישן לחדש)' },
+          ]}
+        />
       </Group>
-      <Stack>
-        {questions?.map((question) => (
-          <Card key={question.id} shadow="xs" padding="md" radius="md" withBorder>
+      <Stack className='questions-list'>
+        {filteredQuestions?.map((question) => (
+          <Stack key={question.id} className='gap-1 p-3 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer'>
+            <Group>
+              <Badge variant='light' color={question.status === QuestionStatus.PUBLISHED ? 'green' : question.status === QuestionStatus.DRAFT ? 'yellow' : 'gray'}>
+                {question.status === QuestionStatus.PUBLISHED ? 'פורסם' : question.status === QuestionStatus.DRAFT ? 'טיוטה' : 'בארכיון'}
+              </Badge>
+              <Text size="xs" c="dimmed">נערך לאחרונה: {new Date(question.updatedAt).toLocaleDateString()}</Text>
+            </Group>
             <Text>{question.question}</Text>
-          </Card>
+          </Stack>
         ))}
-        {questions?.length === 0 && (
+        {filteredQuestions?.length === 0 && (
           <Text c="dimmed">No questions found for this subject.</Text>
         )}
       </Stack>
