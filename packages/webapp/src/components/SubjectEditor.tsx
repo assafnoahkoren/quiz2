@@ -1,7 +1,8 @@
-import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge } from '@mantine/core';
+import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge, Accordion } from '@mantine/core';
 import { useQuestionsBySubjectId } from '../api';
 import { useState } from 'react';
 import { QuestionStatus } from '../api/types';
+import { QuestionEditor } from './QuestionEditor';
 
 interface SubjectEditorProps {
   subjectId: string;
@@ -26,7 +27,6 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
 
   const sortQuestions = (a: { createdAt: string; updatedAt: string }, b: { createdAt: string; updatedAt: string }) => {
     if (!orderBy) return 0;
-
     const [field, direction] = orderBy.split('-');
     const aValue = field === 'createdAt' ? new Date(a.createdAt) : new Date(a.updatedAt);
     const bValue = field === 'createdAt' ? new Date(b.createdAt) : new Date(b.updatedAt);
@@ -85,22 +85,27 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
           ]}
         />
       </Group>
-      <Stack className='questions-list'>
+      <Accordion>
         {filteredQuestions?.map((question) => (
-          <Stack key={question.id} className='gap-1 p-3 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer'>
-            <Group>
-              <Badge variant='light' color={question.status === QuestionStatus.PUBLISHED ? 'green' : question.status === QuestionStatus.DRAFT ? 'yellow' : 'gray'}>
-                {question.status === QuestionStatus.PUBLISHED ? 'פורסם' : question.status === QuestionStatus.DRAFT ? 'טיוטה' : 'בארכיון'}
-              </Badge>
-              <Text size="xs" c="dimmed">נערך לאחרונה: {new Date(question.updatedAt).toLocaleDateString()}</Text>
-            </Group>
-            <Text>{question.question}</Text>
-          </Stack>
+          <Accordion.Item key={question.id} value={question.id}>
+            <Accordion.Control>
+              <Group>
+                <Badge variant='light' color={question.status === QuestionStatus.PUBLISHED ? 'green' : question.status === QuestionStatus.DRAFT ? 'yellow' : 'gray'}>
+                  {question.status === QuestionStatus.PUBLISHED ? 'פורסם' : question.status === QuestionStatus.DRAFT ? 'טיוטה' : 'בארכיון'}
+                </Badge>
+                <Text size="xs" c="dimmed">נערך לאחרונה: {new Date(question.updatedAt).toLocaleDateString()}</Text>
+              </Group>
+              <Text>{question.question}</Text>
+            </Accordion.Control>
+            <Accordion.Panel>
+              <QuestionEditor questionId={question.id} />
+            </Accordion.Panel>
+          </Accordion.Item>
         ))}
-        {filteredQuestions?.length === 0 && (
-          <Text c="dimmed">No questions found for this subject.</Text>
-        )}
-      </Stack>
+      </Accordion>
+      {filteredQuestions?.length === 0 && (
+        <Text c="dimmed">No questions found for this subject.</Text>
+      )}
     </Stack>
   );
 }; 
