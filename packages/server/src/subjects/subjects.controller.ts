@@ -15,7 +15,11 @@ export class SubjectsController {
   }
 
   @Get('exam/:examId')
-  findByGovExamId(@Param('examId') examId: string): Promise<SubjectTreeItemDto[]> {
+  findByGovExamId(@Param('examId') examId: string): Promise<{
+    examId: string;
+    examName: string;
+    subjects: SubjectTreeItemDto[];
+  }> {
     return this.subjectsService.findByGovExamId(examId);
   }
 

@@ -7,7 +7,7 @@ import { SubjectTree } from '../../components/SubjectTree';
 export const GovExam = () => {
   const { govExamId } = useParams<{ govExamId: string }>();
   const navigate = useNavigate();
-  const { data: subjects, isLoading, error } = useSubjectsByExamId(govExamId || '');
+  const { data: examSubjects, isLoading, error } = useSubjectsByExamId(govExamId || '');
 
   const handleSubjectSelect = (subjectId: string) => {
     // Handle subject selection here
@@ -32,7 +32,7 @@ export const GovExam = () => {
     );
   }
 
-  if (!govExamId) {
+  if (!govExamId || !examSubjects) {
     return null;
   }
 
@@ -48,7 +48,7 @@ export const GovExam = () => {
         </Button>
       </Group>
       
-      <Title order={1} mb="xl">Subjects</Title>
+      <Title order={1} mb="xl">{examSubjects.examName}</Title>
       
       <SubjectTree govExamId={govExamId} onSubjectSelect={handleSubjectSelect} />
     </Container>

@@ -41,6 +41,12 @@ export interface SubjectTreeItem extends Subject {
   questionCount: number;
 }
 
+export interface GovExamResponse {
+  examId: string;
+  examName: string;
+  subjects: SubjectTreeItem[];
+}
+
 export interface Question {
   id: string;
   text: string;

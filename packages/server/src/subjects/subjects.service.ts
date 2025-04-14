@@ -84,13 +84,17 @@ export class SubjectsService {
   }
 
   // Find subjects by exam id and return as tree
-  async findByGovExamId(examId: string): Promise<SubjectTreeItemDto[]> {
+  async findByGovExamId(examId: string): Promise<{
+    examId: string;
+    examName: string;
+    subjects: SubjectTreeItemDto[];
+  }> {
     // Check if exam exists
-    const examExists = await this.prisma.govExam.findUnique({
+    const exam = await this.prisma.govExam.findUnique({
       where: { id: examId },
     });
 
-    if (!examExists) {
+    if (!exam) {
       throw new NotFoundException(`Exam with ID ${examId} not found`);
     }
 
@@ -124,7 +128,13 @@ export class SubjectsService {
     });
 
     // Build the tree structure
-    return this.buildSubjectTree(subjects, null, questionCountMap);
+    const subjectTree = this.buildSubjectTree(subjects, null, questionCountMap);
+
+    return {
+      examId: exam.id,
+      examName: exam.name,
+      subjects: subjectTree
+    };
   }
 
   // Helper method to build the subject tree

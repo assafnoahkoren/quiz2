@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
-import { CreateSubjectDto, Subject, SubjectTreeItem, UpdateSubjectDto } from './types';
+import { CreateSubjectDto, Subject, SubjectTreeItem, UpdateSubjectDto, GovExamResponse } from './types';
 import { govExamKeys } from './gov-exam';
 
 // Query keys
@@ -14,8 +14,8 @@ export const subjectKeys = {
 };
 
 // Fetch subjects by gov exam id
-export const fetchSubjectsByExamId = async (examId: string): Promise<SubjectTreeItem[]> => {
-  const response = await apiClient.get<SubjectTreeItem[]>(`/api/subjects/exam/${examId}`);
+export const fetchSubjectsByExamId = async (examId: string): Promise<GovExamResponse> => {
+  const response = await apiClient.get<GovExamResponse>(`/api/subjects/exam/${examId}`);
   return response.data;
 };
 
