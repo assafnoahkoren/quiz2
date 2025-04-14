@@ -1,14 +1,14 @@
 import { RouterProvider, createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 import { PrivateRoute } from '../../components/auth/PrivateRoute';
-import { Layout } from '../../components/Layout';
-import { Home } from '../../pages/private/Home';
+import { DesktopLayout } from '../../pages/desktop/Layout';
+import { Home } from '../../pages/desktop/Home';
 import { Login } from '../../pages/public/Login';
 import { Register } from '../../pages/public/Register';
 
 const desktopRoutes: RouteObject[] = [
   {
     path: '/',
-    element: <Layout />,
+    element: <DesktopLayout />,
     children: [
       // Public routes
       {
