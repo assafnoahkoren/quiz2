@@ -2,10 +2,38 @@ import { Container, Title, Text, SimpleGrid, Card, Group, Button, Loader, Alert 
 import { IconPlus } from '@tabler/icons-react';
 import { useGovExams } from '../../api';
 import { useNavigate } from 'react-router-dom';
-
+import { useRefreshTokenMutation } from '../../api/auth';
+import { useEffect } from 'react';
+import { useAuth } from '../../components/auth/AuthContext';
+import { AuthResponse } from '../../api/types';
 export const Home = () => {
   const { data: govExams, isLoading, error } = useGovExams();
   const navigate = useNavigate();
+  const refreshToken = useRefreshTokenMutation();
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        // Only make the request if we don't have data
+        let response: AuthResponse | null = null;
+        if (!refreshToken.data) {
+          response = await refreshToken.mutateAsync();
+        }
+        
+        // Check if user is admin using the data from refresh token
+        if (response?.user.role !== 'ADMIN') {
+          logout();
+          navigate('/login');
+        }
+      } catch (error) {
+        logout();
+        navigate('/login');
+      }
+    };
+
+    checkAdmin();
+  }, []);
 
   if (isLoading) {
     return (

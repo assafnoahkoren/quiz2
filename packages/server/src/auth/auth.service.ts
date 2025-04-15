@@ -55,6 +55,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
       token,
     };
@@ -85,6 +86,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
       token,
     };
@@ -109,6 +111,7 @@ export class AuthService {
         id: dbUser.id,
         email: dbUser.email,
         name: dbUser.name,
+        role: dbUser.role,
       },
       token,
     };
