@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { PrismaClient, QuestionType, QuestionStatus } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 // Types for old database tables
 interface OldSubject {
@@ -39,6 +40,9 @@ async function importSubjects(oldDb: Pool) {
   console.log('Importing subjects...');
   const subjects = await oldDb.query<OldSubject>('SELECT * FROM "Subject"');
   
+  // Create a map to store old ID to new UUID mappings
+  const subjectIdMap = new Map<string, string>();
+  
   // First, create a default GovExam for the imported subjects
   const defaultGovExam = await prisma.govExam.create({
     data: {
@@ -47,30 +51,42 @@ async function importSubjects(oldDb: Pool) {
   });
 
   for (const subject of subjects.rows) {
+    const newId = uuidv4();
+    subjectIdMap.set(subject.id, newId);
+    
     await prisma.subject.create({
       data: {
-        id: subject.id,
+        id: newId,
         name: subject.name,
         govExamId: defaultGovExam.id,
-        parentSubjectId: subject.parentId || null,
+        parentSubjectId: subject.parentId ? subjectIdMap.get(subject.parentId) || null : null,
         createdAt: subject.createdAt,
         updatedAt: subject.createdAt
       }
     });
   }
   console.log(`Imported ${subjects.rows.length} subjects`);
+  return subjectIdMap;
 }
 
-async function importQuestions(oldDb: Pool) {
+async function importQuestions(oldDb: Pool, subjectIdMap: Map<string, string>) {
   console.log('Importing questions...');
   const questions = await oldDb.query<OldQuestion>('SELECT * FROM "Question"');
   
   for (const question of questions.rows) {
+    const newId = uuidv4();
+    const newSubjectId = subjectIdMap.get(question.subjectId);
+    
+    if (!newSubjectId) {
+      console.warn(`Skipping question ${question.id} - subject ${question.subjectId} not found`);
+      continue;
+    }
+
     // Create the question
     const newQuestion = await prisma.question.create({
       data: {
-        id: question.id,
-        subjectId: question.subjectId,
+        id: newId,
+        subjectId: newSubjectId,
         question: question.text,
         explanation: question.explanation || null,
         status: QuestionStatus.PUBLISHED,
@@ -109,10 +125,10 @@ async function importData() {
 
   try {
     // Import subjects first since questions depend on them
-    await importSubjects(oldDb);
+    const subjectIdMap = await importSubjects(oldDb);
     
     // Then import questions
-    await importQuestions(oldDb);
+    await importQuestions(oldDb, subjectIdMap);
 
     console.log('Data import completed successfully');
   } catch (error) {
