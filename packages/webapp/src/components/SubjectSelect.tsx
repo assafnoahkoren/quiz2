@@ -18,7 +18,6 @@ interface SubjectSelectProps {
 interface SubjectItem extends ComboboxItem {
   level: number;
   questionCount: number;
-  displayLabel?: string;
 }
 
 export const SubjectSelect = ({
@@ -33,14 +32,6 @@ export const SubjectSelect = ({
 }: SubjectSelectProps) => {
   const { data: examSubjects, isLoading, error: fetchError } = useSubjectsByExamId(govExamId);
 
-  // Helper function to add tabs based on level
-  const addTabsToLabel = (label: string, level: number): string => {
-    if (level === 0) return label;
-    // Create indentation using non-breaking spaces
-    const indentation = '\u00A0\u00A0\u00A0\u00A0'.repeat(level);
-    return `${indentation}${label}`;
-  };
-
   // Process subjects into flat data for select with hierarchy info
   const processSubjects = (subjects: SubjectTreeItem[], level = 0): SubjectItem[] => {
     let result: SubjectItem[] = [];
@@ -49,7 +40,6 @@ export const SubjectSelect = ({
       result.push({
         value: subject.id,
         label: subject.name,
-        displayLabel: addTabsToLabel(subject.name, level),
         level,
         questionCount: subject.questionCount
       });
@@ -99,6 +89,11 @@ export const SubjectSelect = ({
       error={error}
       disabled={disabled}
       searchable
+      styles={{
+        dropdown: {
+          width: 300
+        }
+      }}
       renderOption={({ option }) => {
         const subjectOption = option as SubjectItem;
         const isSelected = option.value === value;
@@ -111,8 +106,8 @@ export const SubjectSelect = ({
             borderRadius: '4px',
             margin: '-4px -8px'
           }}>
-            <Text>
-              {subjectOption.displayLabel || option.label}
+            <Text style={{ marginInlineStart: `${subjectOption.level * 16}px` }}>
+              {option.label}
               {subjectOption.questionCount > 0 && (
               <Text ms={10} span size="xs" c="dimmed">{subjectOption.questionCount}</Text>
             )}
