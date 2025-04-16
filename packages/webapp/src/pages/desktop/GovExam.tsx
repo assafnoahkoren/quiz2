@@ -55,7 +55,7 @@ export const GovExam = () => {
         </Grid.Col>
         <Grid.Col span={9} p="0">
           {selectedSubjectId ? (
-            <SubjectEditor subjectId={selectedSubjectId} />
+            <SubjectEditor subjectId={selectedSubjectId} govExamId={govExamId} />
           ) : (
             <Alert color="blue" title="Select a Subject">
               Please select a subject from the tree to view and edit its questions.

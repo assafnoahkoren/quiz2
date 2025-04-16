@@ -7,11 +7,12 @@ import { IconPlus } from '@tabler/icons-react';
 
 interface SubjectEditorProps {
   subjectId: string;
+  govExamId: string;
 }
 
 type OrderBy = 'updatedAt-desc' | 'updatedAt-asc' | 'createdAt-desc' | 'createdAt-asc';
 
-export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
+export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
   const { data: questions, isLoading, error } = useQuestionsBySubjectId(subjectId);
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<QuestionStatus | null>(null);
@@ -116,7 +117,11 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
               <Text>צור שאלה חדשה</Text>
             </Accordion.Control>
             <Accordion.Panel>
-              <QuestionEditor subjectId={subjectId} onSuccess={handleNewQuestionSuccess} />
+              <QuestionEditor 
+                subjectId={subjectId} 
+                govExamId={govExamId} 
+                onSuccess={handleNewQuestionSuccess} 
+              />
             </Accordion.Panel>
           </Accordion.Item>
         )}
@@ -133,7 +138,11 @@ export const SubjectEditor = ({ subjectId }: SubjectEditorProps) => {
             </Accordion.Control>
             {openItems.includes(question.id) ? (
               <Accordion.Panel>
-                <QuestionEditor questionId={question.id} subjectId={subjectId} />
+                <QuestionEditor 
+                  questionId={question.id} 
+                  subjectId={subjectId} 
+                  govExamId={govExamId} 
+                />
               </Accordion.Panel>
             ) : (
               <Accordion.Panel>

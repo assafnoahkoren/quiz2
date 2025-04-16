@@ -1,15 +1,19 @@
-import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid, FileButton, Image, LoadingOverlay } from '@mantine/core';
+import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid, FileButton, Image, LoadingOverlay, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useQuestion, useCreateQuestion, useUpdateQuestion, fetchQuestionById } from '../api/questions';
 import { QuestionType, QuestionStatus, Question } from '../api/types';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { SubjectSelect } from './SubjectSelect';
+import { questionKeys } from '../api/questions';
+import { subjectKeys } from '../api/subjects';
 
 interface QuestionEditorProps {
   questionId?: string;
   onSuccess?: () => void;
   subjectId: string;
+  govExamId: string;
 }
 
 interface FormValues {
@@ -19,18 +23,20 @@ interface FormValues {
   explanation: string;
   imageFile: File | null;
   imageUrl: string;
+  subjectId: string;
   options: Array<{
     answer: string;
     isCorrect: boolean;
   }>;
 }
 
-export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEditorProps) {
+export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: QuestionEditorProps) {
   const queryClient = useQueryClient();
   const isEditMode = !!questionId;
+  const originalSubjectIdRef = useRef<string>(subjectId);
 
   // Fetch question data if in edit mode
-  const { data: questionData, isLoading } = useQuery({
+  const { data: questionData, isLoading, error: questionError } = useQuery({
     queryKey: ['question', questionId],
     queryFn: () => fetchQuestionById(questionId!),
     enabled: isEditMode,
@@ -47,6 +53,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
       explanation: '',
       imageFile: null,
       imageUrl: '',
+      subjectId: subjectId,
       options: [
         { answer: '', isCorrect: false },
         { answer: '', isCorrect: false },
@@ -57,6 +64,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
     validate: {
       question: (value: string) => (!value ? 'שאלה היא חובה' : null),
       type: (value: QuestionType) => (!value ? 'סוג השאלה הוא חובה' : null),
+      subjectId: (value: string) => (!value ? 'נושא הוא חובה' : null),
       options: {
         answer: (value: string) => (!value ? 'התשובה היא חובה' : null),
       },
@@ -64,8 +72,12 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
   });
 
   // Set form values when question data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (questionData) {
+      // Store the original subject ID for comparison later
+      originalSubjectIdRef.current = questionData.subjectId || subjectId;
+      
+      // Update form values with question data
       form.setValues({
         question: questionData.question,
         type: questionData.type,
@@ -73,13 +85,14 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
         explanation: questionData.explanation || '',
         imageUrl: questionData.imageUrl || '',
         imageFile: null,
+        subjectId: questionData.subjectId || subjectId,
         options: questionData.options.map((opt: { answer: string; isCorrect: boolean }) => ({
           answer: opt.answer,
           isCorrect: opt.isCorrect,
         })),
       });
     }
-  }, [questionData]);
+  }, [questionData, subjectId]); // Removed form from dependencies to avoid circular updates
 
   const handleImageUpload = (file: File | null) => {
     if (file) {
@@ -128,16 +141,71 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
   const handleSubmit = async (values: FormValues) => {
     try {
       const { imageFile, ...data } = values;
+      const hasSubjectChanged = isEditMode && originalSubjectIdRef.current !== values.subjectId;
 
       if (isEditMode) {
-        await updateMutation.mutateAsync({ id: questionId!, ...data });
+        // For edit mode, ensure we have questionId
+        if (!questionId) {
+          notifications.show({
+            title: 'שגיאה',
+            message: 'מזהה השאלה חסר',
+            color: 'red',
+          });
+          return;
+        }
+
+        await updateMutation.mutateAsync({ id: questionId, ...data });
+        
+        // If subject has changed, invalidate both old and new subject question lists
+        if (hasSubjectChanged) {
+          // Invalidate old subject's question list
+          queryClient.invalidateQueries({ 
+            queryKey: questionKeys.list({ subjectId: originalSubjectIdRef.current }) 
+          });
+          
+          // Invalidate new subject's question list
+          queryClient.invalidateQueries({ 
+            queryKey: questionKeys.list({ subjectId: values.subjectId }) 
+          });
+          
+          // Invalidate the subject list for the exam to update counts
+          queryClient.invalidateQueries({ 
+            queryKey: subjectKeys.list({ examId: govExamId }) 
+          });
+        } else {
+          // If subject didn't change, still invalidate this question and its subject
+          queryClient.invalidateQueries({ queryKey: questionKeys.detail(questionId) });
+          queryClient.invalidateQueries({ 
+            queryKey: questionKeys.list({ subjectId: values.subjectId }) 
+          });
+        }
+        
         notifications.show({
           title: 'הצלחה',
           message: 'השאלה עודכנה בהצלחה',
           color: 'green',
         });
       } else {
-        await createMutation.mutateAsync({ ...data, subjectId: subjectId });
+        // For create mode, ensure we have subjectId
+        if (!values.subjectId) {
+          notifications.show({
+            title: 'שגיאה',
+            message: 'יש לבחור נושא',
+            color: 'red',
+          });
+          return;
+        }
+
+        await createMutation.mutateAsync({ ...data });
+        
+        // Invalidate the subject list for the exam and the question list for the subject
+        queryClient.invalidateQueries({ 
+          queryKey: subjectKeys.list({ examId: govExamId }) 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: questionKeys.list({ subjectId: values.subjectId }) 
+        });
+        
         notifications.show({
           title: 'הצלחה',
           message: 'השאלה נוצרה בהצלחה',
@@ -147,6 +215,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
 
       onSuccess?.();
     } catch (error) {
+      console.error('Error saving question:', error);
       notifications.show({
         title: 'שגיאה',
         message: 'לא ניתן לשמור את השאלה',
@@ -154,6 +223,14 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
       });
     }
   };
+
+  if (questionError && isEditMode) {
+    return (
+      <Alert color="red" title="שגיאה">
+        לא ניתן לטעון את פרטי השאלה. אנא נסה שוב מאוחר יותר.
+      </Alert>
+    );
+  }
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -167,31 +244,42 @@ export function QuestionEditor({ questionId, onSuccess, subjectId }: QuestionEdi
             {...form.getInputProps('question')}
           />
 
-          <Select
-            label="סוג השאלה"
-            placeholder="בחר סוג שאלה"
-            required
-            data={[
-              { value: QuestionType.MCQ, label: 'רב ברירה' },
-              { value: QuestionType.FREE_TEXT, label: 'תשובה חופשית' },
-              { value: QuestionType.TRUE_FALSE, label: 'נכון/לא נכון' },
-              { value: QuestionType.MATCHING, label: 'התאמה' },
-              { value: QuestionType.COMPLETION, label: 'השלמה' }
-            ]}
-            {...form.getInputProps('type')}
-          />
+          <Group grow align="flex-start">
+            <SubjectSelect
+              govExamId={govExamId}
+              value={form.values.subjectId}
+              onChange={(value) => form.setFieldValue('subjectId', value || '')}
+              label="נושא"
+              required
+              error={form.errors.subjectId}
+            />
 
-          <Select
-            label="סטטוס"
-            placeholder="בחר סטטוס"
-            required
-            data={[
-              { value: QuestionStatus.DRAFT, label: 'טיוטה' },
-              { value: QuestionStatus.PUBLISHED, label: 'פורסם' },
-              { value: QuestionStatus.ARCHIVED, label: 'בארכיון' }
-            ]}
-            {...form.getInputProps('status')}
-          />
+            <Select
+              label="סוג השאלה"
+              placeholder="בחר סוג שאלה"
+              required
+              data={[
+                { value: QuestionType.MCQ, label: 'רב ברירה' },
+                { value: QuestionType.FREE_TEXT, label: 'תשובה חופשית' },
+                { value: QuestionType.TRUE_FALSE, label: 'נכון/לא נכון' },
+                { value: QuestionType.MATCHING, label: 'התאמה' },
+                { value: QuestionType.COMPLETION, label: 'השלמה' }
+              ]}
+              {...form.getInputProps('type')}
+            />
+
+            <Select
+              label="סטטוס"
+              placeholder="בחר סטטוס"
+              required
+              data={[
+                { value: QuestionStatus.DRAFT, label: 'טיוטה' },
+                { value: QuestionStatus.PUBLISHED, label: 'פורסם' },
+                { value: QuestionStatus.ARCHIVED, label: 'בארכיון' }
+              ]}
+              {...form.getInputProps('status')}
+            />
+          </Group>
 
           <Textarea
             label="הסבר"
