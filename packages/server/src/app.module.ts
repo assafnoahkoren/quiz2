@@ -7,6 +7,7 @@ import { SubjectsModule } from './subjects/subjects.module';
 import { GovExamModule } from './gov-exam/gov-exam.module';
 import { QuestionsModule } from './questions/questions.module';
 import { AppConfigModule } from './config/config.module';
+import { UserModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AppConfigModule } from './config/config.module';
     SubjectsModule,
     GovExamModule,
     QuestionsModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
