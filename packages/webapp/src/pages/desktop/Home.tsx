@@ -16,10 +16,7 @@ export const Home = () => {
     const checkAdmin = async () => {
       try {
         // Only make the request if we don't have data
-        let response: AuthResponse | null = null;
-        if (!refreshToken.data) {
-          response = await refreshToken.mutateAsync();
-        }
+        const response = await refreshToken.mutateAsync();
         
         // Check if user is admin using the data from refresh token
         if (response?.user.role !== 'ADMIN') {
@@ -57,9 +54,8 @@ export const Home = () => {
     <Container size="xl">
       <Group justify="space-between" mb="xl">
         <div>
-          <Title order={1}>Welcome to Quiz App</Title>
           <Text c="dimmed" size="lg">
-            Create and take quizzes to test your knowledge
+            צור ופתור מבחנים כדי לבדוק את הידע שלך
           </Text>
         </div>
 

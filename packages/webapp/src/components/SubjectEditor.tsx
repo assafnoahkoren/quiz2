@@ -170,7 +170,7 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
         ))}
       </Accordion>
       {filteredQuestions?.length === 0 && (
-        <Text c="dimmed">No questions found for this subject.</Text>
+        <Text c="dimmed">לא נמצאו שאלות בנושא זה.</Text>
       )}
     </Stack>
   );

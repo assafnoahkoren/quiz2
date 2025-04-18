@@ -93,9 +93,11 @@ export const GovExam = () => {
           {selectedSubjectId ? (
             <SubjectEditor subjectId={selectedSubjectId} govExamId={govExamId} />
           ) : (
-            <Alert color="blue" title="Select a Subject">
-              Please select a subject from the tree to view and edit its questions.
-            </Alert>
+            <Group  px="md" h="100%">
+              <Alert color="blue" title="בחר נושא" flex={1}>
+                אנא בחר נושא מהעץ כדי לצפות ולערוך את השאלות שלו.
+              </Alert>
+            </Group>
           )}
         </Grid.Col>
       </Grid>

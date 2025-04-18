@@ -21,6 +21,8 @@ export class AuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
 	    govExamId: user.govExamId
+    }, {
+      expiresIn: '90d',
     });
   }
 
