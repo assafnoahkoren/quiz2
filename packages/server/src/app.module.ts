@@ -8,6 +8,7 @@ import { GovExamModule } from './gov-exam/gov-exam.module';
 import { QuestionsModule } from './questions/questions.module';
 import { AppConfigModule } from './config/config.module';
 import { UserModule } from './users/users.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserModule } from './users/users.module';
     GovExamModule,
     QuestionsModule,
     UserModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -30,6 +30,9 @@ export class UserService {
         updatedAt: true,
         Subscriptions: true
       }, // Exclude password from response
+      orderBy: {
+        createdAt: 'asc'
+      }
     });
   }
 

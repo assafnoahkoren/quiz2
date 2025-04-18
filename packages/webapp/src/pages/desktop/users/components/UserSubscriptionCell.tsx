@@ -11,8 +11,8 @@ export const UserSubscriptionCell: React.FC<UserSubscriptionCellProps> = ({ subs
   if (!subscriptions || subscriptions.length === 0) {
     return (
       <Box style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Badge color="gray">No subscription</Badge>
-        <Text size="sm">(0)</Text>
+        <Badge color="gray">ללא</Badge>
+        <Text size="sm" c="dimmed">(סה"כ 0 מנויים)</Text>
       </Box>
     );
   }
