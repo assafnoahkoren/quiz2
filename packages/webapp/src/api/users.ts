@@ -66,11 +66,11 @@ export const useCreateUser = (options?: UseMutationOptions<User, Error, CreateUs
   const queryClient = useQueryClient();
   return useMutation<User, Error, CreateUserDto>({
     mutationFn: createUser,
+    ...options,
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
-    ...options,
   });
 };
 
@@ -78,13 +78,13 @@ export const useCreateUser = (options?: UseMutationOptions<User, Error, CreateUs
 export const useUpdateUser = (options?: UseMutationOptions<User, Error, { id: string } & UpdateUserDto>) => {
   const queryClient = useQueryClient();
   return useMutation<User, Error, { id: string } & UpdateUserDto>({
+    ...options,
     mutationFn: updateUser,
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
-    ...options,
   });
 };
 
