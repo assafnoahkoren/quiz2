@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.tsx';
 import { ClickToComponent } from "click-to-react-component";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 // Import styles in the correct order
 import '@mantine/core/styles.css';
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <App />
       <ClickToComponent editor="cursor"/>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </React.StrictMode>,
 ); 

@@ -88,7 +88,7 @@ export const UserForm: React.FC<UserFormProps> = ({ userId, onSuccess, onCancel 
   });
 
   return (
-    <Paper p="md" shadow="xs" radius="md" style={{ position: 'relative' }}>
+    <Paper p="md"  radius="md" style={{ position: 'relative' }}>
       <LoadingOverlay visible={isLoadingUser || isSubmitting} />
       
       <Title order={3} mb="md">{title}</Title>
