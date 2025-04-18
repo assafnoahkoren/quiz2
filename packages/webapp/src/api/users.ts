@@ -3,6 +3,7 @@ import { User, CreateUserDto, UpdateUserDto, DeleteUserResponse, EnrichedUser } 
 import apiClient from './client';
 
 const USERS_ENDPOINT = 'api/users'; // Path relative to base URL in apiClient
+const ME_ENDPOINT = 'api/me'; // Endpoint for current user
 
 // API client functions
 export const getUsers = async (): Promise<EnrichedUser[]> => {
@@ -13,6 +14,11 @@ export const getUsers = async (): Promise<EnrichedUser[]> => {
 export const getUserById = async (id: string): Promise<User> => {
   if (!id) throw new Error('User ID is required');
   const response = await apiClient.get<User>(`${USERS_ENDPOINT}/${id}`);
+  return response.data;
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  const response = await apiClient.get<User>(ME_ENDPOINT);
   return response.data;
 };
 
@@ -40,6 +46,7 @@ export const userKeys = {
   list: (filters: string) => [...userKeys.lists(), { filters }] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
+  me: () => [...userKeys.all, 'me'] as const,
 };
 
 // Hook to get all users
@@ -57,6 +64,15 @@ export const useGetUserById = (id: string, options?: Omit<UseQueryOptions<User, 
     queryKey: userKeys.detail(id),
     queryFn: () => getUserById(id),
     enabled: !!id,
+    ...options,
+  });
+};
+
+// Hook to get the current authenticated user
+export const useCurrentUser = (options?: Omit<UseQueryOptions<User, Error>, 'queryKey' | 'queryFn'>) => {
+  return useQuery<User, Error>({
+    queryKey: userKeys.me(),
+    queryFn: getCurrentUser,
     ...options,
   });
 };
@@ -83,6 +99,7 @@ export const useUpdateUser = (options?: UseMutationOptions<User, Error, { id: st
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.me() }); // Invalidate current user if updated
       options?.onSuccess?.(data, variables, context);
     },
   });
