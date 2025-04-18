@@ -16,7 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '../auth/auth.guard'; // Example path, adjust if needed
 import { AdminGuard } from '../auth/role.guard'; // Example path, adjust if needed
 
-@Controller('users')
+@Controller('api/users')
 @UseGuards(AuthGuard, AdminGuard) // Apply guards to all routes in this controller
 export class UserController {
   constructor(private readonly userService: UserService) {}

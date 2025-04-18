@@ -5,6 +5,7 @@ import { Home } from '../../pages/desktop/Home';
 import { GovExam } from '../../pages/desktop/GovExam';
 import { Login } from '../../pages/public/Login';
 import { Register } from '../../pages/public/Register';
+import UsersPage from '../../pages/desktop/users/UsersPage';
 
 const desktopRoutes: RouteObject[] = [
   // Public routes
@@ -32,6 +33,10 @@ const desktopRoutes: RouteObject[] = [
           {
             path: 'gov-exam/:govExamId',
             element: <GovExam />,
+          },
+          {
+            path: 'users',
+            element: <UsersPage />,
           },
           // Fallback for authenticated but unmatched routes within the layout
           {

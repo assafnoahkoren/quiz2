@@ -6,6 +6,8 @@ import { ClickToComponent } from "click-to-react-component";
 
 // Import styles in the correct order
 import '@mantine/core/styles.css';
+import 'mantine-datatable/styles.layer.css';
+
 import 'uno.css';
 
 // Create a client
