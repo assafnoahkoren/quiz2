@@ -1,14 +1,24 @@
 import { ReactNode } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { AppShell, Container, Group, Text, Button, Stack } from '@mantine/core';
-import { IconLogin, IconUserPlus } from '@tabler/icons-react';
+import { IconLogin, IconUserPlus, IconLogout } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../components/auth/AuthContext';
 
 interface DesktopLayoutProps {
   children?: ReactNode;
 }
 
 export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem('authToken');
+    navigate('/login');
+  };
+
   return (
     <AppShell
       header={{ height: 60 }}
@@ -24,24 +34,15 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
               fw={700}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
-              Quiz App
+              קוויז
             </Text>
             <Group>
               <Button
-                component={Link}
-                to="/login"
                 variant="subtle"
-                leftSection={<IconLogin size={20} />}
+                leftSection={<IconLogout size={20} />}
+                onClick={handleLogout}
               >
-                Login
-              </Button>
-              <Button
-                component={Link}
-                to="/register"
-                variant="subtle"
-                leftSection={<IconUserPlus size={20} />}
-              >
-                Register
+                Logout
               </Button>
             </Group>
           </Group>

@@ -3,7 +3,7 @@ import { useQuestionsBySubjectId } from '../api';
 import { useState } from 'react';
 import { QuestionStatus } from '../api/types';
 import { QuestionEditor } from './QuestionEditor';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconX } from '@tabler/icons-react';
 
 interface SubjectEditorProps {
   subjectId: string;
@@ -45,6 +45,11 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
   const handleNewQuestionSuccess = () => {
     setIsCreatingNew(false);
     setOpenItems([]);
+  };
+
+  const handleCancelCreate = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setIsCreatingNew(false);
   };
 
   if (isLoading) {
@@ -110,11 +115,23 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
         {isCreatingNew && (
           <Accordion.Item key="new-question" value="new-question">
             <Accordion.Control>
-              <Group>
-                <Badge variant='light' color="yellow">טיוטה</Badge>
-                <Text size="xs" c="dimmed">שאלה חדשה</Text>
+              <Group justify="space-between">
+                <Group>
+                  <Badge variant='light' color="yellow">טיוטה</Badge>
+                  <Text size="xs" c="dimmed">שאלה חדשה</Text>
+                </Group>
+                <Button
+                  size="compact-xs"
+                  me={16}
+                  variant="light"
+                  color="red"
+                  onClick={handleCancelCreate}
+                  leftSection={<IconX size={14} />}
+                >
+                  בטל
+                </Button>
               </Group>
-              <Text>צור שאלה חדשה</Text>
+              <Text mt={4}>צור שאלה חדשה</Text>
             </Accordion.Control>
             <Accordion.Panel>
               <QuestionEditor 

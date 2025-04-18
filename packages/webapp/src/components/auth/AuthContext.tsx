@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.setItem('authToken', token);
       setIsAuthenticated(true);
     } else {
-      localStorage.removeItem('authToken');
       setIsAuthenticated(false);
     }
   }, [token]);

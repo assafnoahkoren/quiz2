@@ -62,12 +62,7 @@ export const Home = () => {
             Create and take quizzes to test your knowledge
           </Text>
         </div>
-        <Button
-          leftSection={<IconPlus size={20} />}
-          size="lg"
-        >
-          Create New Quiz
-        </Button>
+
       </Group>
 
       <SimpleGrid cols={3} spacing="lg">
