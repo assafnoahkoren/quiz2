@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, TextInput, Select, Button, Group, LoadingOverlay, Paper, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useGetUserById, useCreateUser, useUpdateUser } from '../../../../api/users';
+import { useGetUserById, useCreateUser, useUpdateUser, useGetUsers } from '../../../../api/users';
 import { UserRole, CreateUserDto, UpdateUserDto, User } from '../../../../types/user';
 
 interface UserFormProps {
@@ -13,6 +13,9 @@ interface UserFormProps {
 export const UserForm: React.FC<UserFormProps> = ({ userId, onSuccess, onCancel }) => {
   const isEditMode = !!userId;
   const title = isEditMode ? 'עריכת משתמש' : 'הוספת משתמש חדש';
+
+  // Get users query to refresh after operations
+  const { refetch: refetchUsers } = useGetUsers();
 
   // Form setup
   const form = useForm({
@@ -52,6 +55,7 @@ export const UserForm: React.FC<UserFormProps> = ({ userId, onSuccess, onCancel 
   // Mutations for create and update
   const createUserMutation = useCreateUser({
     onSuccess: () => {
+      refetchUsers();
       if (onSuccess) onSuccess();
       form.reset();
     },
@@ -59,6 +63,7 @@ export const UserForm: React.FC<UserFormProps> = ({ userId, onSuccess, onCancel 
 
   const updateUserMutation = useUpdateUser({
     onSuccess: () => {
+      refetchUsers();
       if (onSuccess) onSuccess();
     },
   });
