@@ -64,9 +64,14 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    // Find the user
-    const user = await this.prisma.user.findUnique({
-      where: { email: loginDto.email },
+    // Find the user with case-insensitive email search
+    const user = await this.prisma.user.findFirst({
+      where: { 
+        email: { 
+          equals: loginDto.email,
+          mode: 'insensitive'
+        } 
+      },
     });
 
     // If user doesn't exist or password doesn't match
