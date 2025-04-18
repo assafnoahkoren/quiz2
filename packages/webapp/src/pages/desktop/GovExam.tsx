@@ -4,7 +4,33 @@ import { useSubjectsByExamId } from '../../api';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { SubjectTree } from '../../components/SubjectTree';
 import { SubjectEditor } from '../../components/SubjectEditor';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { SubjectTreeItem } from '../../api/types';
+
+// Helper function to find subject name by ID in the tree
+const findSubjectPathById = (subjects: SubjectTreeItem[] | undefined, targetId: string | null): string[] | null => {
+  if (!targetId || !subjects) return null;
+
+  for (const subject of subjects) {
+    // Check if the current subject is the target
+    if (subject.id === targetId) {
+      return [subject.name]; // Base case: found the target
+    }
+
+    // Recursively search in children
+    if (subject.children && subject.children.length > 0) {
+      const pathFromChild = findSubjectPathById(subject.children, targetId);
+      // If the target was found in a child's subtree
+      if (pathFromChild) {
+        // Prepend the current subject's name to the path
+        return [subject.name, ...pathFromChild];
+      }
+    }
+  }
+
+  // Target ID not found in this branch of the tree
+  return null;
+};
 
 export const GovExam = () => {
   const { govExamId } = useParams<{ govExamId: string }>();
@@ -15,6 +41,10 @@ export const GovExam = () => {
   const handleSubjectSelect = (subjectId: string) => {
     setSelectedSubjectId(subjectId);
   };
+
+  const selectedSubjectPath = useMemo(() => {
+    return findSubjectPathById(examSubjects?.subjects, selectedSubjectId);
+  }, [examSubjects?.subjects, selectedSubjectId]);
 
   if (isLoading) {
     return (
@@ -38,16 +68,22 @@ export const GovExam = () => {
     return null;
   }
 
+  // Keep breadcrumbs simple for now, only showing exam name
+  const breadcrumbItems = [
+    <Anchor key="exams" onClick={() => navigate('/')}>Exams</Anchor>,
+    <Anchor key="examName">{examSubjects.examName}</Anchor>,
+  ];
+
   return (
     <Container size="xl">
       <Group mb="xl">
-        <Breadcrumbs>
-          <Anchor onClick={() => navigate('/')}>Exams</Anchor>
-          <Anchor>{examSubjects.examName}</Anchor>
-        </Breadcrumbs>
+        <Breadcrumbs>{breadcrumbItems}</Breadcrumbs>
       </Group>
       
-      <Title order={3} mb="xl">{examSubjects.examName}</Title>
+      <Title order={3} mb="xl">
+        {examSubjects.examName}
+        {selectedSubjectPath ? ` / ${selectedSubjectPath.join(' / ')}` : ''}
+      </Title>
       
       <Grid>
         <Grid.Col span={3} p="0">
