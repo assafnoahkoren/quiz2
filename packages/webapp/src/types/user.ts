@@ -4,20 +4,32 @@
 // Adjust if your actual Subscription model differs
 export interface Subscription {
   id: string;
-  type: string; // e.g., 'FREE', 'PRO', 'ENTERPRISE'
-  startDate: string; // ISO Date string
-  endDate?: string; // ISO Date string
   userId: string;
-  // Add other relevant subscription fields
+  govExamId: string;
+  expiresAt: string;
+  price: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN'
 }
 
 export interface User {
   id: string;
   email: string;
   name?: string | null;
+  role: UserRole;
   createdAt: string; // ISO Date string
   updatedAt: string; // ISO Date string
-  Subscriptions?: Subscription[]; // Included in findOne response
+}
+
+// A user with subscription data included
+export interface EnrichedUser extends User {
+  Subscriptions: Subscription[];
 }
 
 // DTO for creating a user (matches backend CreateUserDto)
@@ -33,6 +45,7 @@ export interface UpdateUserDto {
   email?: string;
   password?: string;
   name?: string | null;
+  role?: UserRole;
 }
 
 // Type for the delete response

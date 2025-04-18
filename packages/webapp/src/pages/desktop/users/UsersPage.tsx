@@ -2,17 +2,25 @@ import React from 'react';
 import { Box, Loader, Text, Title } from '@mantine/core';
 import { DataTable } from 'mantine-datatable';
 import { useGetUsers } from '../../../api/users';
-
-interface UserWithRole {
-  id: string;
-  email: string;
-  name?: string | null;
-  role?: string;
-}
+import { UserIdCell, UserRoleCell, UserSubscriptionCell } from './components';
+import { UserActionsCell } from './components/UserActionsCell';
+import { EnrichedUser } from '../../../types/user';
 
 const UsersPage: React.FC = () => {
   // Use the query hook to fetch users
   const { data: users, isLoading, error } = useGetUsers();
+
+  // Handle edit user
+  const handleEditUser = (user: EnrichedUser) => {
+    console.log('Edit user:', user);
+    // Implement edit functionality here
+  };
+
+  // Handle delete user
+  const handleDeleteUser = (user: EnrichedUser) => {
+    console.log('Delete user:', user);
+    // Implement delete functionality here
+  };
 
   // Handle loading state
   if (isLoading) {
@@ -46,22 +54,39 @@ const UsersPage: React.FC = () => {
           {
             accessor: 'id',
             title: '#',
+            width: '130px',
             textAlign: 'right',
+            render: (record) => <UserIdCell id={record.id} />,
           },
-          { accessor: 'name', title: 'Name' },
-          { accessor: 'email', title: 'Email' },
+          { accessor: 'name', title: 'שם' },
+          { accessor: 'email', title: 'דוא״ל' },
           {
             accessor: 'role',
-            title: 'Role',
+            title: 'תפקיד',
             render: (record) => {
-              // Use type assertion to access role property
-              const user = record as UserWithRole;
-              const role = user.role || 'USER';
-              return (
-                <Box fw={700} c={role === 'ADMIN' ? 'blue' : 'gray'}>
-                  {role}
-                </Box>
-              );
+              return <UserRoleCell role={record.role} />;
+            },
+          },
+          {
+            accessor: 'subscription',
+            title: 'מנוי',
+            render: (record) => {
+              // Use type assertion to access Subscriptions property
+              const user = record as EnrichedUser;
+              return <UserSubscriptionCell subscriptions={user.Subscriptions} />;
+            },
+          },
+          {
+            accessor: 'actions',
+            title: 'פעולות',
+            textAlign: 'center',
+            width: '100px',
+            render: (record) => {
+              return <UserActionsCell 
+                user={record as EnrichedUser} 
+                onEdit={handleEditUser} 
+                onDelete={handleDeleteUser} 
+              />;
             },
           },
         ]}
@@ -70,7 +95,7 @@ const UsersPage: React.FC = () => {
         }}
         emptyState={
           <Text fw={500} ta="center" p="xl">
-            No users found
+            לא נמצאו משתמשים
           </Text>
         }
       />

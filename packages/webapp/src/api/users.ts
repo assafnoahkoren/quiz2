@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { User, CreateUserDto, UpdateUserDto, DeleteUserResponse } from '../types/user';
+import { User, CreateUserDto, UpdateUserDto, DeleteUserResponse, EnrichedUser } from '../types/user';
 import apiClient from './client';
 
 const USERS_ENDPOINT = 'api/users'; // Path relative to base URL in apiClient
 
 // API client functions
-export const getUsers = async (): Promise<User[]> => {
-  const response = await apiClient.get<User[]>(USERS_ENDPOINT);
+export const getUsers = async (): Promise<EnrichedUser[]> => {
+  const response = await apiClient.get<EnrichedUser[]>(USERS_ENDPOINT);
   return response.data;
 };
 
@@ -43,8 +43,8 @@ export const userKeys = {
 };
 
 // Hook to get all users
-export const useGetUsers = (options?: Omit<UseQueryOptions<User[], Error>, 'queryKey' | 'queryFn'>) => {
-  return useQuery<User[], Error>({
+export const useGetUsers = (options?: Omit<UseQueryOptions<EnrichedUser[], Error>, 'queryKey' | 'queryFn'>) => {
+  return useQuery<EnrichedUser[], Error>({
     queryKey: userKeys.lists(),
     queryFn: getUsers,
     ...options,

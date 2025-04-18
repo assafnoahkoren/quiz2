@@ -15,13 +15,21 @@ export class UserService {
         ...createUserDto,
         password: hashedPassword,
       },
-      select: { id: true, email: true, name: true, createdAt: true, updatedAt: true }, // Exclude password from response
+      select: { id: true, email: true, name: true, role: true, createdAt: true, updatedAt: true }, // Include role in response
     });
   }
 
   findAll() {
     return this.prisma.user.findMany({
-      select: { id: true, email: true, name: true, createdAt: true, updatedAt: true }, // Exclude password from response
+      select: {
+        id: true, 
+        email: true, 
+        name: true, 
+        role: true, // Include role in response
+        createdAt: true, 
+        updatedAt: true,
+        Subscriptions: true
+      }, // Exclude password from response
     });
   }
 
@@ -29,7 +37,7 @@ export class UserService {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: { 
-        Subscriptions: true // Corrected relation name to plural
+        Subscriptions: true
       }
     });
     if (!user) {
@@ -48,7 +56,7 @@ export class UserService {
       return await this.prisma.user.update({
         where: { id },
         data,
-        select: { id: true, email: true, name: true, createdAt: true, updatedAt: true }, // Exclude password from response
+        select: { id: true, email: true, name: true, role: true, createdAt: true, updatedAt: true }, // Include role in response
       });
     } catch (error) {
       // Handle potential Prisma errors, e.g., record not found
