@@ -285,6 +285,8 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
             label="הסבר"
             placeholder="הזן הסבר (אופציונלי)"
             minRows={3}
+            autosize
+            maxRows={15}
             {...form.getInputProps('explanation')}
           />
 
