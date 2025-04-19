@@ -22,6 +22,12 @@ export class QuestionsController {
     return this.questionsService.generateQuestion(data.text, data.subjectId);
   }
 
+  @Post(':id/solve')
+  @UseGuards(AuthGuard, AdminGuard)
+  solveQuestion(@Param('id') id: string): Promise<{ correctOption: any, explanation: string }> {
+    return this.questionsService.solveQuestion(id);
+  }
+
   @Get('subject/:subjectId')
   findBySubjectId(@Param('subjectId') subjectId: string): Promise<QuestionResponseDto[]> {
     return this.questionsService.findBySubjectId(subjectId);

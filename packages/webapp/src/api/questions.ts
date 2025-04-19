@@ -48,6 +48,12 @@ export const generateQuestion = async (data: { text: string; subjectId: string }
   return response.data;
 };
 
+// Solve a question using AI
+export const solveQuestion = async (id: string): Promise<{ correctOption: any, explanation: string }> => {
+  const response = await apiClient.post<{ correctOption: any, explanation: string }>(`/api/questions/${id}/solve`);
+  return response.data;
+};
+
 // React Query hooks
 export const useQuestionsBySubjectId = (subjectId: string) => {
   return useQuery({
@@ -57,10 +63,12 @@ export const useQuestionsBySubjectId = (subjectId: string) => {
   });
 };
 
-export const useQuestion = (id: string) => {
+export const useQuestion = (id?: string) => {
+  console.log(questionKeys.detail(id!));
+  
   return useQuery({
-    queryKey: questionKeys.detail(id),
-    queryFn: () => fetchQuestionById(id),
+    queryKey: questionKeys.detail(id!),
+    queryFn: () => fetchQuestionById(id!),
     enabled: !!id,
   });
 };
@@ -118,5 +126,11 @@ export const useGenerateQuestion = () => {
         queryKey: questionKeys.list({ subjectId: data.subjectId }) 
       });
     },
+  });
+};
+
+export const useSolveQuestion = () => {
+  return useMutation({
+    mutationFn: solveQuestion
   });
 }; 

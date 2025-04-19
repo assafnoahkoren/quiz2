@@ -77,6 +77,9 @@ export class QuestionsService {
       include: {
         Options: true,
       },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
 
     return questions.map(q => this.mapToResponseDto(q));
@@ -269,6 +272,78 @@ export class QuestionsService {
         throw new BadRequestException('Error creating AI-generated question');
       }
       throw new BadRequestException(`Error generating question: ${error.message}`);
+    }
+  }
+
+  async solveQuestion(questionId: string): Promise<{ correctOption: any, explanation: string }> {
+    const anthropic = new Anthropic({
+      apiKey: this.appConfigService.ANTHROPIC_API_KEY,
+    });
+
+    try {
+      // Fetch the question with its options
+      const question = await this.prisma.question.findUnique({
+        where: { id: questionId },
+        include: {
+          Options: true,
+        },
+      });
+
+      if (!question) {
+        throw new NotFoundException(`Question with ID ${questionId} not found`);
+      }
+
+      // Format the question and options for the AI
+      const optionsFormatted = question.Options.map((opt, idx) => 
+        `${String.fromCharCode(65 + idx)}. ${opt.answer}`
+      ).join('\n');
+
+      const response = await anthropic.messages.create({
+        model: "claude-3-7-sonnet-20250219",
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: `
+          Please solve this multiple-choice question:
+
+          Question: ${question.question}
+          
+          Options:
+          ${optionsFormatted}
+          
+          Instructions:
+          1. Determine the correct answer option
+          2. Provide a detailed explanation of why this answer is correct. The explanation should be in Hebrew (keep technical terms in English if needed). Add line breaks to the explanation for better readability.
+          3. Return results in this JSON format (do not include any other text because it will break the JSON parsing):
+          {
+            "correctOption": {
+              "id": "option_id",
+              "letter": "A/B/C/D",
+              "text": "The correct answer text"
+            },
+            "explanation": "Detailed explanation of why this answer is correct"
+          }
+        ` }],
+        temperature: 0.2,
+      });
+
+      // Parse the JSON response
+      const parsedResponse = JSON.parse(response.content[0]['text']);
+      
+      // Find the option ID based on the letter or text
+      const correctOption = question.Options.find((opt, idx) => {
+        const optionLetter = String.fromCharCode(65 + idx);
+        return parsedResponse.correctOption.letter === optionLetter || 
+               parsedResponse.correctOption.text === opt.answer;
+      });
+
+      return {
+        correctOption: correctOption || parsedResponse.correctOption,
+        explanation: parsedResponse.explanation
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Error solving question');
+      }
+      throw new BadRequestException(`Error solving question: ${error.message}`);
     }
   }
 
