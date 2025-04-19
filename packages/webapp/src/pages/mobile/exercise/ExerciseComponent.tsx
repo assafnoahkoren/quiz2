@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { useLocation } from 'react-router-dom';
-import exerciseStore from './exerciseStore';
+import exerciseStoreInstance, { ExerciseContext } from './exerciseStore';
 import { GovExam } from '../../../api/types';
 
 // Remove props interface as data comes from route state
@@ -29,16 +29,20 @@ const ExerciseComponent: React.FC = () => {
   }
 
   return (
-    <div>
-      {/* Exercise component content will go here */}
-      {klinautExam ? (
-        <p>Found Exam: {klinautExam.name} (ID: {klinautExam.id})</p>
-      ) : (
-        <p>Klinaut exam not found in the provided list.</p>
-      )}
-      <hr />
-      <p>Total Exams Received: {govExams.length}</p>
-    </div>
+    // Wrap the content with the Context Provider
+    <ExerciseContext.Provider value={exerciseStoreInstance}>
+      <div>
+        {/* Exercise component content will go here */}
+        {klinautExam ? (
+          <p>Found Exam: {klinautExam.name} (ID: {klinautExam.id})</p>
+        ) : (
+          <p>Klinaut exam not found in the provided list.</p>
+        )}
+        <hr />
+        <p>Total Exams Received: {govExams.length}</p>
+        {/* Child components can now use useExerciseStore() */}
+      </div>
+    </ExerciseContext.Provider>
   );
 };
 

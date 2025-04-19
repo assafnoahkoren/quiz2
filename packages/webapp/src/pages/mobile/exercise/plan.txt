@@ -1,6 +1,6 @@
 [x] Fetch gov-exams in Home.tsx and pass data via route state on navigation to /exercise route, which renders ExerciseComponent. ExerciseComponent reads data from route state. 
-[ ] Create context and two hooks (create context, use context) in exerciseStore.ts 
-[ ] In ExerciseComponent.tsx, create the context for the store and wrap the component content with its provider. 
+[x] Create context and two hooks (create context, use context) in exerciseStore.ts 
+[x] In ExerciseComponent.tsx, create the context for the store and wrap the component content with its provider. 
 [ ] Create SubjectPicker component:
     [ ] Create basic SubjectPicker component file and structure.
     [ ] Accept examId and onChange props.
