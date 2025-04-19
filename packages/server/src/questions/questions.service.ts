@@ -202,8 +202,8 @@ export class QuestionsService {
       }
 
       const response = await anthropic.messages.create({
-        model: "claude-3-sonnet-20240229",
-        max_tokens: 4000,
+        model: "claude-3-7-sonnet-20250219",
+        max_tokens: 6000,
         messages: [{ role: 'user', content: `
           I have a question with answer options. Please analyze it, identify the correct answer,
           and return a structured JSON response.
