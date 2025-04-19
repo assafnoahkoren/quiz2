@@ -39,7 +39,8 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
               <Text
                 size="lg"
                 fw={700}
-                style={{ textDecoration: 'none', color: 'inherit' }}
+                style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                onClick={() => navigate('/')}
               >
                 קוויז
               </Text>

@@ -6,6 +6,10 @@ import { Login } from '../../pages/public/Login';
 import { Register } from '../../pages/public/Register';
 import { MobileLayout } from '../../pages/mobile/MobileLayout';
 
+// These components would need to be created
+const Exercise = () => <div>Exercise Page</div>;
+const Exam = () => <div>Exam Page</div>;
+
 const mobileRoutes: RouteObject[] = [
   // Public routes with Layout
   {
@@ -33,6 +37,14 @@ const mobileRoutes: RouteObject[] = [
           {
             index: true,
             element: <Home />,
+          },
+          {
+            path: 'exercise',
+            element: <Exercise />,
+          },
+          {
+            path: 'exam',
+            element: <Exam />,
           },
         ],
       },
