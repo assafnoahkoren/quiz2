@@ -63,9 +63,7 @@ export const useQuestionsBySubjectId = (subjectId: string) => {
   });
 };
 
-export const useQuestion = (id?: string) => {
-  console.log(questionKeys.detail(id!));
-  
+export const useQuestion = (id?: string) => { 
   return useQuery({
     queryKey: questionKeys.detail(id!),
     queryFn: () => fetchQuestionById(id!),

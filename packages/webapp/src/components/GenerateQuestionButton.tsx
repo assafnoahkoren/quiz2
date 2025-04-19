@@ -31,9 +31,7 @@ export function GenerateQuestionButton({ subjectId, onGenerated }: GenerateQuest
         text: questionText,
         subjectId
       });
-      
-      console.log('Generated question:', result);
-      
+            
       if (onGenerated) {
         onGenerated(result);
       }
