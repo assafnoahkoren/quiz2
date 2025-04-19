@@ -10,6 +10,11 @@ interface MobileLayoutProps {
   children?: ReactNode;
 }
 
+const HEADER_HEIGHT = 50;
+export const getFullViewHeight = () => {
+  return `calc(100dvh - ${HEADER_HEIGHT}px)`;
+}
+
 export const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -24,8 +29,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
 
   return (
     <AppShell
-      header={{ height: 50 }}
-      padding="xs"
+      header={{ height: HEADER_HEIGHT }}
     >
       <AppShell.Header>
         <Container h="100%" px="xs">
@@ -98,9 +102,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       </Drawer>
 
       <AppShell.Main>
-        <Container size="100%" px="xs">
-          {children || <Outlet />}
-        </Container>
+        {children || <Outlet />}
       </AppShell.Main>
     </AppShell>
   );
