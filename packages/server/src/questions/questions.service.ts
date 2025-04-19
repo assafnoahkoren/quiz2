@@ -312,7 +312,8 @@ export class QuestionsService {
           Instructions:
           1. Determine the correct answer option
           2. Provide a detailed explanation of why this answer is correct. The explanation should be in Hebrew (keep technical terms in English if needed). Add line breaks to the explanation for better readability.
-          3. Return results in this JSON format (do not include any other text because it will break the JSON parsing):
+          3. When explaining the correct answer, make sure to mention the correct option by its full text and do not use the letter.
+          4. Return results in this JSON format (do not include any other text because it will break the JSON parsing):
           {
             "correctOption": {
               "id": "option_id",
