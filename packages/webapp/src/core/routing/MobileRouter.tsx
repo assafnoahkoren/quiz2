@@ -5,9 +5,10 @@ import { Home } from '../../pages/mobile/Home';
 import { Login } from '../../pages/public/Login';
 import { Register } from '../../pages/public/Register';
 import { MobileLayout } from '../../pages/mobile/MobileLayout';
+import ExerciseComponent from '../../pages/mobile/exercise/ExerciseComponent';
 
 // These components would need to be created
-const Exercise = () => <div>Exercise Page</div>;
+// const Exercise = () => <div>Exercise Page</div>;
 const Exam = () => <div>Exam Page</div>;
 
 const mobileRoutes: RouteObject[] = [
@@ -40,7 +41,7 @@ const mobileRoutes: RouteObject[] = [
           },
           {
             path: 'exercise',
-            element: <Exercise />,
+            element: <ExerciseComponent />,
           },
           {
             path: 'exam',

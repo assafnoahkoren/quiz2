@@ -1,19 +1,32 @@
-import { Stack, Button, Text, Box, Title, Modal } from '@mantine/core';
+import { Stack, Button, Text, Box, Title, Modal, Loader, Alert } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { getFullViewHeight } from './MobileLayout';
-import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools } from '@tabler/icons-react';
+import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle } from '@tabler/icons-react';
 import { useState } from 'react';
+import { useGovExams } from '../../api/gov-exam';
 
 export const Home = () => {
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const { data: govExams, isLoading, error } = useGovExams();
+
+  const handleNavigateToExercise = () => {
+    if (govExams) {
+      navigate('/exercise', { state: { govExams } });
+    } else {
+      console.error('Gov exams data not available for navigation');
+      navigate('/exercise'); 
+    }
+  };
 
   return (
     <Stack style={{ height: getFullViewHeight() }} py="xl" align="center" px="md">
       <Button 
         size="lg" 
         fullWidth 
-        onClick={() => navigate('/exercise')}
+        onClick={handleNavigateToExercise}
+        disabled={isLoading || !!error || !govExams}
         style={{ 
           maxWidth: 300, 
           fontSize: '1.2rem',
@@ -74,6 +87,13 @@ export const Home = () => {
           <IconNotes size={24} />
         </Box>
       </Button>
+
+      {isLoading && <Loader mt="xl" />}
+      {error && (
+        <Alert icon={<IconAlertCircle size="1rem" />} title="Error!" color="red" mt="xl">
+          Failed to load data needed for exercises: {error.message}
+        </Alert>
+      )}
 
       <Modal
         opened={modalOpen}
