@@ -1,0 +1,12 @@
+[ ] Fetch all the gov-exams using the hook in the home page and pass it as a prop to the ExerciseComponent. 
+[ ] Create context and two hooks (create context, use context) in exerciseStore.ts 
+[ ] In ExerciseComponent.tsx, create the context for the store and wrap the component content with its provider. 
+[ ] Create SubjectPicker component:
+    [ ] Create basic SubjectPicker component file and structure.
+    [ ] Accept examId and onChange props.
+    [ ] Use useSubjectsByExamId hook to fetch data.
+    [ ] Handle loading/error states for data fetching.
+    [ ] Render fetched subjects using Mantine Tree component.
+    [ ] Implement checkbox state management for the tree nodes.
+    [ ] Implement parent-checks-children checkbox logic.
+    [ ] Implement onChange callback to emit selected subject IDs. 
