@@ -1,9 +1,10 @@
 import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge, Accordion, Button } from '@mantine/core';
 import { useQuestionsBySubjectId } from '../api';
 import { useState } from 'react';
-import { QuestionStatus } from '../api/types';
+import { QuestionStatus, Question } from '../api/types';
 import { QuestionEditor } from './QuestionEditor';
 import { IconPlus, IconX } from '@tabler/icons-react';
+import { GenerateQuestionButton } from './GenerateQuestionButton';
 
 interface SubjectEditorProps {
   subjectId: string;
@@ -52,6 +53,10 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
     setIsCreatingNew(false);
   };
 
+  const handleQuestionGenerated = (question: Question) => {
+    setOpenItems(prev => [...prev, question.id]);
+  };
+
   if (isLoading) {
     return (
       <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -88,6 +93,10 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
         >
           צור שאלה
         </Button>
+        <GenerateQuestionButton 
+          subjectId={subjectId} 
+          onGenerated={handleQuestionGenerated} 
+        />
         <Select
           placeholder="סטטוס"
           value={statusFilter}
@@ -98,6 +107,7 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
             { value: QuestionStatus.ARCHIVED, label: 'בארכיון' },
           ]}
           clearable
+          w={120}
         />
         <Select
           placeholder="מיין לפי"
@@ -109,6 +119,7 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
             { value: 'createdAt-desc', label: 'יצירה (חדש לישן)' },
             { value: 'createdAt-asc', label: 'יצירה (ישן לחדש)' },
           ]}
+          w={120}
         />
       </Group>
       <Accordion value={openItems} onChange={setOpenItems} multiple>

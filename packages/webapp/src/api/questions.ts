@@ -42,6 +42,12 @@ export const deleteQuestion = async (id: string): Promise<void> => {
   await apiClient.delete(`/api/questions/${id}`);
 };
 
+// Generate a question using AI
+export const generateQuestion = async (data: { text: string; subjectId: string }): Promise<Question> => {
+  const response = await apiClient.post<Question>('/api/questions/generate', data);
+  return response.data;
+};
+
 // React Query hooks
 export const useQuestionsBySubjectId = (subjectId: string) => {
   return useQuery({
@@ -97,6 +103,20 @@ export const useDeleteQuestion = () => {
       // We need the subjectId to properly invalidate, so pass it in the context
       // For now, invalidate all question lists
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+    },
+  });
+};
+
+export const useGenerateQuestion = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: generateQuestion,
+    onSuccess: (data) => {
+      // Invalidate questions list for the subject
+      queryClient.invalidateQueries({ 
+        queryKey: questionKeys.list({ subjectId: data.subjectId }) 
+      });
     },
   });
 }; 

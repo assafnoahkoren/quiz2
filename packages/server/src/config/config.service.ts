@@ -42,4 +42,8 @@ export class AppConfigService extends ConfigService {
   get VITE_API_URL(): string {
     return this.getOrThrow('VITE_API_URL');
   }
+
+  get ANTHROPIC_API_KEY(): string {
+    return this.getOrThrow('ANTHROPIC_API_KEY');
+  }
 } 

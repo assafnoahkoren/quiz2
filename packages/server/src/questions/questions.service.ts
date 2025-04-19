@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateQuestionDto, UpdateQuestionDto, QuestionResponseDto } from './dto/question.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, QuestionStatus, QuestionType } from '@prisma/client';
+import { AppConfigService } from 'src/config/config.service';
+import { Anthropic } from '@anthropic-ai/sdk';
 
 @Injectable()
 export class QuestionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private appConfigService: AppConfigService) {}
 
   // Create a new question
   async create(createQuestionDto: CreateQuestionDto): Promise<QuestionResponseDto> {
@@ -181,6 +183,92 @@ export class QuestionsService {
         throw new BadRequestException('Error deleting question');
       }
       throw error;
+    }
+  }
+
+  async generateQuestion(text: string, subjectId: string): Promise<QuestionResponseDto> {
+    const anthropic = new Anthropic({
+      apiKey: this.appConfigService.ANTHROPIC_API_KEY,
+    });
+
+    try {
+      // Check if subject exists
+      const subjectExists = await this.prisma.subject.findUnique({
+        where: { id: subjectId },
+      });
+
+      if (!subjectExists) {
+        throw new NotFoundException(`Subject with ID ${subjectId} not found`);
+      }
+
+      const response = await anthropic.messages.create({
+        model: "claude-3-sonnet-20240229",
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: `
+          I have a question with answer options. Please analyze it, identify the correct answer,
+          and return a structured JSON response.
+
+          The question text is: ${text}
+
+          Instructions:
+          1. Determine the most accurate answer among the options
+          2. Translate the question and all answers to Hebrew (keep technical terms in English if needed)
+          3. Provide a brief explanation in Hebrew for why the selected answer is correct
+          4. Return results in this JSON format (do not include any other text because it will break the JSON parsing):
+          {
+            "question": "Hebrew translated question text",
+            "options": [
+              {
+                "answer": "Hebrew translated answer option 1",
+                "isCorrect": boolean
+              },
+              {
+                "answer": "Hebrew translated answer option 2",
+                "isCorrect": boolean
+              },
+              ...
+            ],
+            "explanation": "Hebrew explanation of the correct answer"
+          }
+
+          Please ensure only ONE option has isCorrect set to true.
+
+          ` }],
+        temperature: 0.2,
+      });
+
+      // Parse the JSON response
+      const parsedResponse = JSON.parse(response.content[0]['text']);
+
+      // Create question in database
+      const newQuestion = await this.prisma.question.create({
+        data: {
+          subjectId,
+          question: parsedResponse.question,
+          explanation: parsedResponse.explanation,
+          type: QuestionType.MCQ,
+          status: QuestionStatus.DRAFT,
+        },
+      });
+
+      // Create options for the question
+      if (parsedResponse.options && parsedResponse.options.length > 0) {
+        await this.prisma.options.createMany({
+          data: parsedResponse.options.map(option => ({
+            questionId: newQuestion.id,
+            answer: option.answer,
+            isCorrect: option.isCorrect,
+          })),
+        });
+      }
+
+      // Return the newly created question with options
+      return this.findOne(newQuestion.id);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Error creating AI-generated question');
+      }
+      throw new BadRequestException(`Error generating question: ${error.message}`);
     }
   }
 
