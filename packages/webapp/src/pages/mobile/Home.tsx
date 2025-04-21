@@ -8,16 +8,12 @@ import { useGovExams } from '../../api/gov-exam';
 export const Home = () => {
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
+  
 
-  const { data: govExams, isLoading, error } = useGovExams();
+  const { isLoading, error } = useGovExams();
 
   const handleNavigateToExercise = () => {
-    if (govExams) {
-      navigate('/exercise', { state: { govExams } });
-    } else {
-      console.error('Gov exams data not available for navigation');
-      navigate('/exercise'); 
-    }
+    navigate('/exercise');
   };
 
   return (
@@ -26,7 +22,6 @@ export const Home = () => {
         size="lg" 
         fullWidth 
         onClick={handleNavigateToExercise}
-        disabled={isLoading || !!error || !govExams}
         style={{ 
           maxWidth: 300, 
           fontSize: '1.2rem',

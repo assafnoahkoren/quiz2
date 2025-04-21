@@ -1,8 +1,8 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { useLocation } from 'react-router-dom';
+import { Loader, Alert } from '@mantine/core';
 import exerciseStoreInstance, { ExerciseContext } from './exerciseStore';
-import { GovExam } from '../../../api/types';
+import { useGovExams } from '../../../api/gov-exam';
 
 // Remove props interface as data comes from route state
 // interface ExerciseComponentProps {
@@ -11,21 +11,30 @@ import { GovExam } from '../../../api/types';
 
 // Remove prop definition and destructuring from React.FC
 const ExerciseComponent: React.FC = () => {
-  // Get location state
-  const location = useLocation();
-  // Type assertion might be needed depending on how state is passed
-  const govExams = (location.state as { govExams: GovExam[] })?.govExams;
+  // Fetch govExams using the React Query hook
+  const { data: govExams, isLoading, error } = useGovExams();
 
   // Find the specific exam
   const klinautExam = govExams?.find(exam => exam.name.includes('קלינאות'));
 
-  console.log('Received govExams from route state:', govExams);
-  console.log('Found Klinaut exam:', klinautExam);
+  // Handle Loading state
+  if (isLoading) {
+    return <div><Loader /> Loading exams...</div>; // Or a more sophisticated loading UI
+  }
 
-  // Handle case where state might not be passed (e.g., direct navigation)
+  // Handle Error state
+  if (error) {
+    return (
+      <Alert color="red" title="Error">
+        Failed to load government exams: {error instanceof Error ? error.message : 'Unknown error'}
+      </Alert>
+    );
+  }
+
+  // Handle case where data fetch succeeds but is empty or klinaut exam not found
   if (!govExams) {
     // Redirect back, show error, or fetch data here?
-    return <div>Error: Government exams data not provided. Please navigate from the Home page.</div>;
+    return <div>Error: Government exams data not available.</div>;
   }
 
   return (

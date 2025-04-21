@@ -5,6 +5,7 @@ import { IconLogout, IconHome, IconMenu2, IconUser, IconX } from '@tabler/icons-
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../components/auth/AuthContext';
 import { useCurrentUser } from '../../api/users';
+import { useGovExams } from '../../api/gov-exam';
 
 interface MobileLayoutProps {
   children?: ReactNode;
@@ -20,6 +21,8 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
   const navigate = useNavigate();
   const [opened, { toggle, close }] = useDisclosure();
   const { data: currentUser } = useCurrentUser();
+  
+  useGovExams(); // prefetch data - not needed for this page
 
   const handleLogout = () => {
     logout();
