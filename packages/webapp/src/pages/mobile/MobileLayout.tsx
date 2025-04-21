@@ -76,7 +76,10 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
             variant="subtle"
             fullWidth
             leftSection={<IconHome size={18} />}
-            onClick={() => navigate('/')}
+            onClick={() => {
+              close();
+              navigate('/');
+            }}
             justify="start"
           >
             דף הבית
