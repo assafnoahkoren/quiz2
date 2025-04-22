@@ -1,21 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
 import { CreateQuestionDto, UpdateQuestionDto, QuestionResponseDto } from './dto/question.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
 
 @Controller('api/questions')
+@UseGuards(AuthGuard)
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
   @Post()
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   create(@Body() createQuestionDto: CreateQuestionDto): Promise<QuestionResponseDto> {
     return this.questionsService.create(createQuestionDto);
   }
 
   @Post('generate')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   generateQuestion(
     @Body() data: { text: string; subjectId: string }
   ): Promise<QuestionResponseDto> {
@@ -23,7 +24,7 @@ export class QuestionsController {
   }
 
   @Post(':id/solve')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   solveQuestion(@Param('id') id: string): Promise<{ correctOption: any, explanation: string }> {
     return this.questionsService.solveQuestion(id);
   }
@@ -31,9 +32,10 @@ export class QuestionsController {
   @Post(':id/answer')
   answerExercise(
     @Param('id') questionId: string,
-    @Body() data: { chosenOption: string, isCorrect: boolean }
+    @Body() data: { chosenOption: string, isCorrect: boolean },
+    @Req() req
   ): Promise<any> {
-    return this.questionsService.answerExercise(questionId, data.chosenOption, data.isCorrect);
+    return this.questionsService.answerExercise(questionId, data.chosenOption, data.isCorrect, req.user.id);
   }
 
   @Post('random')

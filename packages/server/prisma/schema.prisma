@@ -24,19 +24,20 @@ enum UserRole {
 }
 
 model User {
-  id                String           @id @default(uuid())
-  role              UserRole         @default(USER)
-  email             String           @unique
+  id                String             @id @default(uuid())
+  role              UserRole           @default(USER)
+  email             String             @unique
   name              String?
   password          String
   govExamInstanceId String?
-  GovExamInstance   GovExamInstance? @relation(fields: [govExamInstanceId], references: [id])
+  GovExamInstance   GovExamInstance?   @relation(fields: [govExamInstanceId], references: [id])
   govExamId         String?
-  GovExam           GovExam?         @relation(fields: [govExamId], references: [id])
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  GovExam           GovExam?           @relation(fields: [govExamId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   UserExams         UserExam[]
   Subscriptions     Subscription[]
+  UserExamQuestion  UserExamQuestion[]
 }
 
 model Subscription {
@@ -61,7 +62,7 @@ model GovExam {
   UserExams     UserExam[]
   Subject       Subject[]
   Subscriptions Subscription[]
-  Users          User[]
+  Users         User[]
 }
 
 model GovExamInstance {
@@ -142,13 +143,15 @@ model UserExam {
 }
 
 model UserExamQuestion {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
+  userId     String
+  User       User      @relation(fields: [userId], references: [id])
   userExamId String?
   UserExam   UserExam? @relation(fields: [userExamId], references: [id])
   questionId String
-  Question   Question @relation(fields: [questionId], references: [id])
+  Question   Question  @relation(fields: [questionId], references: [id])
   answer     String?
   isCorrect  Boolean?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }

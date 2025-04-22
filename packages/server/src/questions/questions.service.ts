@@ -416,7 +416,7 @@ export class QuestionsService {
   }
 
   // Create a UserExamQuestion for a standalone exercise (not part of an exam)
-  async answerExercise(questionId: string, chosenOption: string, isCorrect: boolean): Promise<any> {
+  async answerExercise(questionId: string, chosenOption: string, isCorrect: boolean, userId: string): Promise<any> {
     // Check if question exists
     const questionExists = await this.prisma.question.findUnique({
       where: { id: questionId },
@@ -427,13 +427,13 @@ export class QuestionsService {
     }
 
     try {
-      // Create the UserExamQuestion with null userExamId
+      // Create the UserExamQuestion with userId
       const userExamQuestion = await this.prisma.userExamQuestion.create({
         data: {
           questionId,
           answer: chosenOption,
           isCorrect,
-          userExamId: null
+          userId
         },
       });
 

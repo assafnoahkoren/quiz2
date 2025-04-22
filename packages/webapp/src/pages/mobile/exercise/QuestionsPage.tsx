@@ -168,7 +168,7 @@ const QuestionsPage: React.FC = () => {
       // Save answer to server
       answerExerciseMutation.mutate({
         questionId: currentQuestion.id,
-        chosenOption: selectedOption,
+        chosenOption: JSON.stringify(selectedOptionObj),
         isCorrect
       });
     }
