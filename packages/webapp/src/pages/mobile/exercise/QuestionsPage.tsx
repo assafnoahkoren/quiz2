@@ -12,6 +12,16 @@ interface AnswerState {
   answered: boolean;
 }
 
+// Helper function to shuffle an array
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 const QuestionsPage: React.FC = () => {
   const exerciseStore = useExerciseStore();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -61,6 +71,12 @@ const QuestionsPage: React.FC = () => {
       if (subjectIds.length === 0) return null;
       
       const question = await randomQuestionMutation.mutateAsync(subjectIds);
+      
+      // Shuffle the options when we get the question
+      if (question) {
+        question.options = shuffleArray(question.options);
+      }
+      
       return question;
     } catch (err) {
       console.error('Error fetching question:', err);
@@ -234,6 +250,7 @@ const QuestionsPage: React.FC = () => {
             </Button>
           </Group>
           
+          {/* Question and explanation section */}
           <Box>
             <Paper p="md">
               <Text size="lg" fw={700} mb="md">
