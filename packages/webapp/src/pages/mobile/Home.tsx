@@ -1,18 +1,26 @@
 import { Stack, Button, Text, Box, Title, Modal, Loader, Alert } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { getFullViewHeight } from './MobileLayout';
-import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle } from '@tabler/icons-react';
+import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle, IconListCheck, IconArchive, IconClock, IconStopwatch } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useGovExams } from '../../api/gov-exam';
+import exerciseStoreInstance from './exercise/exerciseStore';
 
 export const Home = () => {
   const navigate = useNavigate();
+  const exerciseStore = exerciseStoreInstance;
   const [modalOpen, setModalOpen] = useState(false);
   
 
   const { isLoading, error } = useGovExams();
 
   const handleNavigateToExercise = () => {
+    exerciseStore.deselectAll();
+    navigate('/exercise');
+  };
+
+  const handleNavigateToAllQuestions = () => {
+    exerciseStore.prepareSelectAllOnLoad();
     navigate('/exercise');
   };
 
@@ -53,6 +61,38 @@ export const Home = () => {
       <Button 
         size="lg" 
         fullWidth 
+        onClick={handleNavigateToAllQuestions}
+        style={{ 
+          maxWidth: 300, 
+          fontSize: '1.2rem',
+          borderRadius: '10px',
+          background: 'linear-gradient(45deg, #FFA500, #FF6347)',
+          height: '70px',
+          marginTop: '20px',
+          position: 'relative',
+        }}
+      >
+        <Stack gap={0}>
+          <Title order={4}>
+            תרגול שאלות
+          </Title>
+          <Text className='opacity-75'>
+            שאלות אקראיות מכל הנושאים
+          </Text>
+        </Stack>
+        <Box style={{ 
+          position: 'absolute', 
+          right: '16px', 
+          top: '50%', 
+          transform: 'translateY(-50%)' 
+        }}>
+          <IconArchive size={24} />
+        </Box>
+      </Button>
+
+      <Button 
+        size="lg" 
+        fullWidth 
         onClick={() => setModalOpen(true)}
         style={{ 
           maxWidth: 300, 
@@ -70,7 +110,7 @@ export const Home = () => {
             מבחן מלא
           </Title>
           <Text className='opacity-75'>
-            100 שאלות, בכל הנושאים
+            100 שאלות, על זמן
           </Text>
         </Stack>
         <Box style={{ 
@@ -79,7 +119,7 @@ export const Home = () => {
           top: '50%', 
           transform: 'translateY(-50%)' 
         }}>
-          <IconNotes size={24} />
+          <IconStopwatch size={24} />
         </Box>
       </Button>
 

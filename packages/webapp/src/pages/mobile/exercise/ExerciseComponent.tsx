@@ -1,29 +1,23 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Loader, Alert } from '@mantine/core';
 import exerciseStoreInstance, { ExerciseContext } from './exerciseStore';
 import { useGovExams } from '../../../api/gov-exam';
 import { SubjectsPicker } from './SubjectsPicker';
+import QuestionsPage from './QuestionsPage';
 
-// Remove prop definition and destructuring from React.FC
 const ExerciseComponent: React.FC = () => {
   // ===== HOOKS ===== 
-  // Hooks must be called unconditionally at the top
   const { data: govExams, isLoading: examsLoading, error: examsError } = useGovExams();
-  const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
   
-  // Find the specific exam (do this *after* hooks)
+  // Find the specific exam
   const klinautExam = govExams?.find(exam => exam.name.includes('קלינאות'));
   
-  const handleSubjectSelectionChange = useCallback((ids: string[]) => {
-    setSelectedSubjectIds(ids);
-    console.log('Selected Subject IDs:', ids); // Log for debugging
-  }, []);
   // ===== END HOOKS ===== 
 
   // Handle Loading state
   if (examsLoading) {
-    return <div><Loader /> Loading...</div>; // Or a more sophisticated loading UI
+    return <div><Loader /> Loading...</div>;
   }
 
   // Handle Error state
@@ -35,25 +29,30 @@ const ExerciseComponent: React.FC = () => {
     );
   }
 
-  // Handle case where data fetch succeeds but is empty
-  // Note: Finding klinautExam happens *after* this check if govExams exists but is empty
-  if (!govExams) {
-    // Redirect back, show error, or fetch data here?
-    return <div>Error: Government exams data not available.</div>;
+  // Handle case where the specific exam isn't found or data is missing
+  if (!klinautExam) {
+    return (
+        <Alert color="orange" title="Exam Not Found">
+            Could not find the 'קלינאות' exam data.
+        </Alert>
+    );
+  }
+  
+  // Determine component to render based on phase
+  let content = null;
+  if (exerciseStoreInstance.currentPhase === "pickingSubjects") {
+    content = <SubjectsPicker govExamId={klinautExam.id} />;
+  } else if (exerciseStoreInstance.currentPhase === "exercising") {
+    content = <QuestionsPage />;
+  } else if (exerciseStoreInstance.currentPhase === "done") {
+    // TODO: Add a component for the results/done phase
+    content = <div>Exercise Done! Results coming soon...</div>;
   }
 
   return (
     // Wrap the content with the Context Provider
     <ExerciseContext.Provider value={exerciseStoreInstance}>
-		{klinautExam && (
-			<SubjectsPicker 
-			govExamId={klinautExam.id} 
-			onChange={handleSubjectSelectionChange} 
-			/>
-		)}
-
-		
-
+        {content} 
     </ExerciseContext.Provider>
   );
 };

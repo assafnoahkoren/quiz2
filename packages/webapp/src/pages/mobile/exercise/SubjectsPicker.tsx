@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Checkbox, Loader, Alert, Stack, Box, Group, Text, Title, Button } from '@mantine/core';
+import { observer } from 'mobx-react-lite';
 import { useSubjectsByExamId } from '../../../api';
 import { SubjectTreeItem } from '../../../api/types';
 import { IconChevronLeft, IconChevronRight, IconPlayerPlay, IconPlayerPlayFilled } from '@tabler/icons-react';
+import exerciseStoreInstance from './exerciseStore';
 
 // Custom hook for animated counter
 const useCountAnimation = (value: number, duration: number = 500) => {
@@ -112,7 +114,6 @@ const subjectItemStyles = `
 
 interface SubjectsPickerProps {
   govExamId: string;
-  onChange: (selectedIds: string[]) => void;
 }
 
 // Helper function to get all descendant IDs (including self)
@@ -155,131 +156,88 @@ const buildSubjectMap = (subjects: SubjectTreeItem[], parentId: string | null = 
   return map;
 };
 
+// Helper function to get descendants (needed for indeterminate calculation)
+const getAllDescendantIdsFromNodeInfo = (
+  node: { subject: SubjectTreeItem, parentId: string | null, childrenIds: string[] }, 
+  map: Map<string, { subject: SubjectTreeItem, parentId: string | null, childrenIds: string[] }>
+): string[] => {
+    let ids: string[] = [];
+    if (node.childrenIds.length > 0) {
+        node.childrenIds.forEach(childId => {
+            const childNodeInfo = map.get(childId);
+            if (childNodeInfo) {
+                ids.push(childId);
+                ids = ids.concat(getAllDescendantIdsFromNodeInfo(childNodeInfo, map)); // Recursive call
+            }
+        });
+    }
+    return ids;
+};
 
-export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onChange }) => {
+export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExamId }) => {
   const { data: examData, isLoading, error } = useSubjectsByExamId(govExamId);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [subjectMap, setSubjectMap] = useState<Map<string, { subject: SubjectTreeItem, parentId: string | null, childrenIds: string[] }>>(new Map());
-  // Track expanded state of subjects
+  const exerciseStore = exerciseStoreInstance;
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  // Track total questions
   const [totalQuestions, setTotalQuestions] = useState(0);
   
-  // Animated values
-  const animatedSubjectsCount = useCountAnimation(selectedIds.size);
+  const animatedSubjectsCount = useCountAnimation(exerciseStore.selectedSubjectsCount);
   const animatedQuestionsCount = useCountAnimation(totalQuestions);
 
-  // Build the subject map when data loads
   useEffect(() => {
     if (examData?.subjects) {
-      setSubjectMap(buildSubjectMap(examData.subjects));
-      
-      // Initialize with empty set - all subjects closed by default
-      setExpandedIds(new Set());
+      exerciseStore.setSubjectData(examData.subjects);
+      if (exerciseStore.shouldSelectAllOnLoad) {
+        exerciseStore.selectAllSubjects();
+        exerciseStore.resetSelectAllOnLoad();
+      }
     }
-  }, [examData?.subjects]);
+  }, [examData?.subjects, exerciseStore]);
 
-  // Calculate total questions when selected subjects change
   useEffect(() => {
-    if (!examData?.subjects || selectedIds.size === 0) {
+    if (!exerciseStore.allSubjectsFlatMap || exerciseStore.selectedSubjectIds.size === 0) {
       setTotalQuestions(0);
       return;
     }
     
-    // Get a map of all subjects by ID
-    const subjectsMap = getAllSubjectIds(examData.subjects);
-    
-    // Calculate total questions
     let questionSum = 0;
-    selectedIds.forEach(id => {
-      const subject = subjectsMap.get(id);
+    exerciseStore.selectedSubjectIds.forEach(id => {
+      const subject = exerciseStore.allSubjectsFlatMap.get(id);
       if (subject && subject.questionCount) {
         questionSum += subject.questionCount;
       }
     });
     
     setTotalQuestions(questionSum);
-  }, [selectedIds, examData?.subjects]);
+  }, [exerciseStore.selectedSubjectIds, exerciseStore.allSubjectsFlatMap]);
 
-  // Remove automatic notification on selection change
-  // We'll only notify when the button is clicked
-
-  const handleCheckboxChange = useCallback((subjectId: string, checked: boolean) => {
-    const nodeInfo = subjectMap.get(subjectId);
-    if (!nodeInfo) return;
-
-    const { subject } = nodeInfo;
-    const descendantIds = getAllDescendantIds(subject);
-    
-    setSelectedIds(prevSelectedIds => {
-      const newSelectedIds = new Set(prevSelectedIds);
-
-      // Select/deselect descendants
-      descendantIds.forEach(id => {
-        if (checked) {
-          newSelectedIds.add(id);
-        } else {
-          newSelectedIds.delete(id);
-        }
-      });
-
-      // Update ancestors
-      let currentParentId = nodeInfo.parentId;
-      while (currentParentId) {
-        const parentInfo = subjectMap.get(currentParentId);
-        if (!parentInfo) break;
-
-        const allChildrenSelected = parentInfo.childrenIds.every(childId => newSelectedIds.has(childId));
-        
-        if (checked) {
-          // If checking a node, ensure parent is checked if all siblings are now checked
-          if (allChildrenSelected) {
-            newSelectedIds.add(currentParentId);
-          }
-        } else {
-          // If unchecking a node, always uncheck the parent
-           newSelectedIds.delete(currentParentId);
-        }
-        currentParentId = parentInfo.parentId; // Move up the tree
-      }
-      
-      return newSelectedIds;
-    });
-
-  }, [subjectMap]);
-  
-  // Handle start practice button click
   const handleStartPractice = useCallback(() => {
-    // Emit selected subjects to parent component
-    onChange(Array.from(selectedIds));
-  }, [onChange, selectedIds]);
+    console.log("Start practice with:", Array.from(exerciseStore.selectedSubjectIds));
+    exerciseStore.startExercising();
+  }, [exerciseStore]);
 
   const renderSubjectNode = (subject: SubjectTreeItem, level = 0) => {
-    const isChecked = selectedIds.has(subject.id);
+    const isChecked = exerciseStore.selectedSubjectIds.has(subject.id);
     let isIndeterminate = false;
+    const nodeInfo = exerciseStore.subjectMap.get(subject.id);
 
-    if (subject.children && subject.children.length > 0) {
-      const descendantIds = getAllDescendantIds(subject).slice(1); // Exclude self
-      const hasSelectedDescendant = descendantIds.some(id => selectedIds.has(id));
-      // Indeterminate if not fully checked but at least one descendant is checked
+    // Calculate indeterminate state based on store data
+    if (nodeInfo && nodeInfo.childrenIds.length > 0) {
+      // Now call the helper function which is defined outside this function
+      const descendantIds = getAllDescendantIdsFromNodeInfo(nodeInfo, exerciseStore.subjectMap);
+      const hasSelectedDescendant = descendantIds.some(id => exerciseStore.selectedSubjectIds.has(id));
       isIndeterminate = !isChecked && hasSelectedDescendant;
     }
 
-    const hasChildren = subject.children && subject.children.length > 0;
+    const hasChildren = nodeInfo && nodeInfo.childrenIds.length > 0;
     const isExpanded = expandedIds.has(subject.id);
     const canBeFolded = hasChildren && (level === 0 || level === 1);
     
-    // Calculate padding based on level
-    const basePadding = 16; // Base padding value
-    const levelPadding = level * 0; // Indentation for nesting
-    const leftPadding = levelPadding + basePadding + (level === 0 ? 2 : 0); // Extra padding for top level
+    const basePadding = 16;
+    const levelPadding = level * 0;
+    const leftPadding = levelPadding + basePadding + (level === 0 ? 2 : 0);
 
-    // Handle card click to toggle expansion (like chevron)
     const handleCardClick = (e: React.MouseEvent) => {
-      // Stop propagation to prevent triggering parent card clicks
       e.stopPropagation();
-      
-      // Don't trigger if clicking on the badge or checkbox
       const target = e.target as HTMLElement;
       if (
         target.tagName === 'INPUT' || 
@@ -290,47 +248,36 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
         return;
       }
       
-      // If there are no children, toggle the checkbox
       if (!hasChildren) {
-        handleCheckboxChange(subject.id, !isChecked);
+        exerciseStore.toggleSubjectSelection(subject.id);
         return;
       }
       
-      // If can be folded, toggle expansion
       if (canBeFolded) {
         handleFoldToggle(e);
       }
     };
 
-    // Handle checkbox change with stopPropagation
     const handleCheckboxChangeWithStopPropagation = (event: React.ChangeEvent<HTMLInputElement>) => {
-      // Stop propagation to prevent the card click handler from also firing
       event.stopPropagation();
-      handleCheckboxChange(subject.id, event.currentTarget.checked);
+      exerciseStore.toggleSubjectSelection(subject.id);
     };
 
-    // Handle badge click
     const handleBadgeClick = (e: React.MouseEvent) => {
       e.stopPropagation();
     };
 
-    // Handle text click to toggle expansion (like chevron)
     const handleTextClick = (e: React.MouseEvent) => {
       e.stopPropagation();
-      
-      // If there are no children, toggle the checkbox
       if (!hasChildren) {
-        handleCheckboxChange(subject.id, !isChecked);
+        exerciseStore.toggleSubjectSelection(subject.id);
         return;
       }
-      
-      // If can be folded, toggle expansion
       if (canBeFolded) {
         handleFoldToggle(e);
       }
     };
     
-    // Handle fold toggle
     const handleFoldToggle = (e: React.MouseEvent) => {
       e.stopPropagation();
       setExpandedIds(prev => {
@@ -381,7 +328,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {hasChildren && (
+            {hasChildren && nodeInfo && (
               <span 
                 className="subcategory-badge"
                 style={{ 
@@ -394,10 +341,10 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
                 }}
                 onClick={handleBadgeClick}
               >
-                {subject.children.length} תתי נושאים
+                {nodeInfo.childrenIds.length} תתי נושאים
               </span>
             )}
-            <div className="checkbox-container" onClick={(e) => e.stopPropagation()}>
+            <div className="checkbox-container" onClick={(e) => e.stopPropagation()}> 
               <Checkbox
                 checked={isChecked}
                 indeterminate={isIndeterminate}
@@ -411,7 +358,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
             className={`item-children-container ${isExpanded ? 'expanded' : ''}`}
             onClick={(e) => e.stopPropagation()}
           >
-            {subject.children.map(child => renderSubjectNode(child, level + 1))}
+            {subject.children && subject.children.map(child => renderSubjectNode(child, level + 1))}
           </div>
         )}
       </div>
@@ -434,6 +381,10 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
     return <div>No subjects found for this exam.</div>;
   }
 
+  if (exerciseStore.subjectMap.size === 0 && examData?.subjects?.length > 0) {
+     return <div><Loader size="sm" /> Initializing...</div>;
+  }
+
   return (
     <Stack px="md" gap={0}>
       <style>{subjectItemStyles}</style>
@@ -446,7 +397,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
             lineHeight: '3rem',
             color: '#228be6',
             transition: 'transform 0.3s ease',
-            transform: selectedIds.size > 0 ? 'scale(1.05)' : 'scale(1)'
+            transform: exerciseStore.selectedSubjectIds.size > 0 ? 'scale(1.05)' : 'scale(1)'
           }}>
             {animatedSubjectsCount}
           </Text>
@@ -469,9 +420,9 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
 
       <Button 
         onClick={handleStartPractice} 
-        disabled={selectedIds.size === 0}
+        disabled={exerciseStore.selectedSubjectIds.size === 0}
         size="lg"
-        color={selectedIds.size > 0 ? "blue" : "gray"}
+        color={exerciseStore.selectedSubjectIds.size > 0 ? "blue" : "gray"}
         style={{ transition: 'all 0.3s ease', width:'max-content', marginInline:'auto', marginBottom:'1.8rem' }}
         rightSection={<IconPlayerPlayFilled size={18} className='rotate-180'/>}
       >
@@ -482,4 +433,4 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
       {examData.subjects.map(subject => renderSubjectNode(subject))}
     </Stack>
   );
-}; 
+}); 
