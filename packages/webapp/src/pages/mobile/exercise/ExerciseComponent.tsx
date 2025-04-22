@@ -1,37 +1,42 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Loader, Alert } from '@mantine/core';
 import exerciseStoreInstance, { ExerciseContext } from './exerciseStore';
 import { useGovExams } from '../../../api/gov-exam';
-
-// Remove props interface as data comes from route state
-// interface ExerciseComponentProps {
-//   govExams: GovExam[];
-// }
+import { SubjectsPicker } from './SubjectsPicker';
 
 // Remove prop definition and destructuring from React.FC
 const ExerciseComponent: React.FC = () => {
-  // Fetch govExams using the React Query hook
-  const { data: govExams, isLoading, error } = useGovExams();
-
-  // Find the specific exam
+  // ===== HOOKS ===== 
+  // Hooks must be called unconditionally at the top
+  const { data: govExams, isLoading: examsLoading, error: examsError } = useGovExams();
+  const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
+  
+  // Find the specific exam (do this *after* hooks)
   const klinautExam = govExams?.find(exam => exam.name.includes('קלינאות'));
+  
+  const handleSubjectSelectionChange = useCallback((ids: string[]) => {
+    setSelectedSubjectIds(ids);
+    console.log('Selected Subject IDs:', ids); // Log for debugging
+  }, []);
+  // ===== END HOOKS ===== 
 
   // Handle Loading state
-  if (isLoading) {
-    return <div><Loader /> Loading exams...</div>; // Or a more sophisticated loading UI
+  if (examsLoading) {
+    return <div><Loader /> Loading...</div>; // Or a more sophisticated loading UI
   }
 
   // Handle Error state
-  if (error) {
+  if (examsError) {
     return (
       <Alert color="red" title="Error">
-        Failed to load government exams: {error instanceof Error ? error.message : 'Unknown error'}
+        Failed to load government exams: {examsError instanceof Error ? examsError.message : 'Unknown error'}
       </Alert>
     );
   }
 
-  // Handle case where data fetch succeeds but is empty or klinaut exam not found
+  // Handle case where data fetch succeeds but is empty
+  // Note: Finding klinautExam happens *after* this check if govExams exists but is empty
   if (!govExams) {
     // Redirect back, show error, or fetch data here?
     return <div>Error: Government exams data not available.</div>;
@@ -40,17 +45,15 @@ const ExerciseComponent: React.FC = () => {
   return (
     // Wrap the content with the Context Provider
     <ExerciseContext.Provider value={exerciseStoreInstance}>
-      <div>
-        {/* Exercise component content will go here */}
-        {klinautExam ? (
-          <p>Found Exam: {klinautExam.name} (ID: {klinautExam.id})</p>
-        ) : (
-          <p>Klinaut exam not found in the provided list.</p>
-        )}
-        <hr />
-        <p>Total Exams Received: {govExams.length}</p>
-        {/* Child components can now use useExerciseStore() */}
-      </div>
+		{klinautExam && (
+			<SubjectsPicker 
+			govExamId={klinautExam.id} 
+			onChange={handleSubjectSelectionChange} 
+			/>
+		)}
+
+		
+
     </ExerciseContext.Provider>
   );
 };
