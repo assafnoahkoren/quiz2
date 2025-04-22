@@ -72,7 +72,6 @@ const subjectItemStyles = `
 }
 .subject-item.level-0 {
   background-color: #f8f9fa;
-  padding: 14px 18px !important;
 }
 .subject-item.level-1 {
   background-color: #e7f5ff;
@@ -97,14 +96,15 @@ const subjectItemStyles = `
 }
 
 /* Animation for expanding/collapsing */
-.children-container {
+.item-children-container {
   overflow: hidden;
   transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
   max-height: 0;
   opacity: 0;
+  width: auto;
 }
 
-.children-container.expanded {
+.item-children-container.expanded {
   max-height: 1000px; /* A value large enough for most cases */
   opacity: 1;
 }
@@ -174,9 +174,8 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
     if (examData?.subjects) {
       setSubjectMap(buildSubjectMap(examData.subjects));
       
-      // Initialize expandedIds with all top-level subjects
-      const topLevelIds = examData.subjects.map(subject => subject.id);
-      setExpandedIds(new Set(topLevelIds));
+      // Initialize with empty set - all subjects closed by default
+      setExpandedIds(new Set());
     }
   }, [examData?.subjects]);
 
@@ -291,6 +290,12 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
         return;
       }
       
+      // If there are no children, toggle the checkbox
+      if (!hasChildren) {
+        handleCheckboxChange(subject.id, !isChecked);
+        return;
+      }
+      
       // If can be folded, toggle expansion
       if (canBeFolded) {
         handleFoldToggle(e);
@@ -312,6 +317,12 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
     // Handle text click to toggle expansion (like chevron)
     const handleTextClick = (e: React.MouseEvent) => {
       e.stopPropagation();
+      
+      // If there are no children, toggle the checkbox
+      if (!hasChildren) {
+        handleCheckboxChange(subject.id, !isChecked);
+        return;
+      }
       
       // If can be folded, toggle expansion
       if (canBeFolded) {
@@ -337,7 +348,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
       <div 
         key={subject.id} 
         style={{
-          padding: level === 0 ? '14px 18px' : '12px 16px',
+          padding: level === 0 ? '8px 18px' : '0px 16px',
           paddingLeft: `${leftPadding}px`,
           marginLeft: level > 0 ? '8px' : '0',
           marginRight: level > 0 ? '8px' : '0'
@@ -345,7 +356,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
         className={`subject-item ${hasChildren ? 'has-children' : ''} level-${level}`}
         onClick={handleCardClick}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingInlineEnd: '6px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {canBeFolded && (
               <div 
@@ -397,7 +408,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
         </div>
         {hasChildren && (
           <div 
-            className={`children-container ${isExpanded ? 'expanded' : ''}`}
+            className={`item-children-container ${isExpanded ? 'expanded' : ''}`}
             onClick={(e) => e.stopPropagation()}
           >
             {subject.children.map(child => renderSubjectNode(child, level + 1))}
@@ -424,7 +435,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
   }
 
   return (
-    <Stack px="md">
+    <Stack px="md" gap={0}>
       <style>{subjectItemStyles}</style>
 
       {/* Stats Cards */}
@@ -432,25 +443,27 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
         <Stack gap={0} style={{ textAlign: 'center' }}>
           <Text size="xl" fw={700} style={{ 
             fontSize: '2.5rem', 
+            lineHeight: '3rem',
             color: '#228be6',
             transition: 'transform 0.3s ease',
             transform: selectedIds.size > 0 ? 'scale(1.05)' : 'scale(1)'
           }}>
             {animatedSubjectsCount}
           </Text>
-          <Title order={6} mb="xs">נושאים שנבחרו</Title>
+          <Title order={6} fw={400} opacity={0.5} mb="xs">נושאים שנבחרו</Title>
         </Stack>
         
         <Stack gap={0} style={{ textAlign: 'center' }}>
           <Text size="xl" fw={700} style={{ 
             fontSize: '2.5rem', 
+            lineHeight: '3rem',
             color: '#228be6',
             transition: 'transform 0.3s ease',
             transform: totalQuestions > 0 ? 'scale(1.05)' : 'scale(1)'
           }}>
             {animatedQuestionsCount}
           </Text>
-          <Title order={6} mb="xs">סה״כ שאלות</Title>
+          <Title order={6} fw={400} opacity={0.5} mb="xs">סה״כ שאלות</Title>
         </Stack>
       </Group>
 
@@ -459,7 +472,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = ({ govExamId, onCha
         disabled={selectedIds.size === 0}
         size="lg"
         color={selectedIds.size > 0 ? "blue" : "gray"}
-        style={{ transition: 'all 0.3s ease', width:'max-content', marginInline:'auto' }}
+        style={{ transition: 'all 0.3s ease', width:'max-content', marginInline:'auto', marginBottom:'1.8rem' }}
         rightSection={<IconPlayerPlayFilled size={18} className='rotate-180'/>}
       >
         התחל תרגול
