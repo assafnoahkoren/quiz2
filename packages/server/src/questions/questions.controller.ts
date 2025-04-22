@@ -28,6 +28,11 @@ export class QuestionsController {
     return this.questionsService.solveQuestion(id);
   }
 
+  @Post('random')
+  getRandomQuestion(@Body() body: { subjectIds: string[] }): Promise<QuestionResponseDto> {
+    return this.questionsService.getRandomQuestion(body.subjectIds);
+  }
+
   @Get('subject/:subjectId')
   findBySubjectId(@Param('subjectId') subjectId: string): Promise<QuestionResponseDto[]> {
     return this.questionsService.findBySubjectId(subjectId);

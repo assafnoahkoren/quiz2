@@ -54,6 +54,12 @@ export const solveQuestion = async (id: string): Promise<{ correctOption: any, e
   return response.data;
 };
 
+// Get a random question from specified subjects
+export const getRandomQuestion = async (subjectIds: string[]): Promise<Question> => {
+  const response = await apiClient.post<Question>('/api/questions/random', { subjectIds });
+  return response.data;
+};
+
 // React Query hooks
 export const useQuestionsBySubjectId = (subjectId: string) => {
   return useQuery({
@@ -130,5 +136,11 @@ export const useGenerateQuestion = () => {
 export const useSolveQuestion = () => {
   return useMutation({
     mutationFn: solveQuestion
+  });
+};
+
+export const useRandomQuestion = () => {
+  return useMutation({
+    mutationFn: getRandomQuestion
   });
 }; 

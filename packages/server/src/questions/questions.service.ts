@@ -85,6 +85,53 @@ export class QuestionsService {
     return questions.map(q => this.mapToResponseDto(q));
   }
 
+  // Get a random question from an array of subject IDs
+  async getRandomQuestion(subjectIds: string[]): Promise<QuestionResponseDto> {
+    if (!subjectIds || subjectIds.length === 0) {
+      throw new BadRequestException('At least one subject ID must be provided');
+    }
+
+    try {
+      // Use Prisma's raw query to get a random question with ORDER BY RANDOM()
+      // Convert enum to string to avoid type comparison issues
+      const draftStatus = QuestionStatus.DRAFT.toString();
+      
+      const randomQuestionResult = await this.prisma.$queryRaw<{id: string}[]>`
+        SELECT q.* 
+        FROM "Question" q
+        WHERE q."subjectId" IN (${Prisma.join(subjectIds)})
+        AND q."status"::text != ${draftStatus}
+        ORDER BY RANDOM() 
+        LIMIT 1
+      `;
+
+      if (!randomQuestionResult || randomQuestionResult.length === 0) {
+        throw new NotFoundException('No questions found for the specified subjects');
+      }
+
+      // Get the question with its options
+      const questionId = randomQuestionResult[0].id;
+
+      const questionWithOptions = await this.prisma.question.findUnique({
+        where: { id: questionId },
+        include: {
+          Options: true,
+        },
+      });
+
+      if (!questionWithOptions) {
+        throw new NotFoundException(`Question with ID ${questionId} not found`);
+      }
+
+      return this.mapToResponseDto(questionWithOptions);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Error retrieving random question: ${error.message}`);
+    }
+  }
+
   // Find a single question by ID
   async findOne(id: string): Promise<QuestionResponseDto> {
     const question = await this.prisma.question.findUnique({

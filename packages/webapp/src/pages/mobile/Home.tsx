@@ -15,11 +15,13 @@ export const Home = () => {
   const { isLoading, error } = useGovExams();
 
   const handleNavigateToExercise = () => {
+    exerciseStore.currentPhase = 'pickingSubjects';
     exerciseStore.deselectAll();
     navigate('/exercise');
   };
 
   const handleNavigateToAllQuestions = () => {
+    exerciseStore.currentPhase = 'pickingSubjects';
     exerciseStore.prepareSelectAllOnLoad();
     navigate('/exercise');
   };
