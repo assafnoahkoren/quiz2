@@ -60,6 +60,15 @@ export const getRandomQuestion = async (subjectIds: string[]): Promise<Question>
   return response.data;
 };
 
+// Answer a standalone exercise
+export const answerExercise = async (
+  questionId: string, 
+  data: { chosenOption: string, isCorrect: boolean }
+): Promise<any> => {
+  const response = await apiClient.post(`/api/questions/${questionId}/answer`, data);
+  return response.data;
+};
+
 // React Query hooks
 export const useQuestionsBySubjectId = (subjectId: string) => {
   return useQuery({
@@ -142,5 +151,15 @@ export const useSolveQuestion = () => {
 export const useRandomQuestion = () => {
   return useMutation({
     mutationFn: getRandomQuestion
+  });
+};
+
+export const useAnswerExercise = () => {
+  return useMutation({
+    mutationFn: ({ questionId, chosenOption, isCorrect }: { 
+      questionId: string;
+      chosenOption: string;
+      isCorrect: boolean;
+    }) => answerExercise(questionId, { chosenOption, isCorrect })
   });
 }; 

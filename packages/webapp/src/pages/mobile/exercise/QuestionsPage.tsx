@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion } from '@mantine/core';
-import { useRandomQuestion } from '../../../api/questions';
+import { useRandomQuestion, useAnswerExercise } from '../../../api/questions';
 import { Question } from '../../../api/types';
 import { IconAlertCircle, IconArrowRight, IconArrowLeft } from '@tabler/icons-react';
 import { useExerciseStore } from './exerciseStore';
@@ -38,6 +38,7 @@ const QuestionsPage: React.FC = () => {
   const footerRef = useRef<HTMLDivElement>(null);
   
   const randomQuestionMutation = useRandomQuestion();
+  const answerExerciseMutation = useAnswerExercise();
 
   // Update footer spacer height whenever needed
   useEffect(() => {
@@ -150,13 +151,27 @@ const QuestionsPage: React.FC = () => {
   const handleSubmitAnswer = () => {
     setAnswered(true);
     
-    // Save the answer state
+    // Save the answer state locally
     const newMap = new Map(answerMap);
     newMap.set(currentQuestionIndex, {
       selectedOption,
       answered: true
     });
     setAnswerMap(newMap);
+
+    // Get the current question and check if answer is correct
+    const currentQuestion = questions[currentQuestionIndex];
+    if (currentQuestion && selectedOption) {
+      const selectedOptionObj = currentQuestion.options.find(opt => opt.id === selectedOption);
+      const isCorrect = selectedOptionObj?.isCorrect || false;
+      
+      // Save answer to server
+      answerExerciseMutation.mutate({
+        questionId: currentQuestion.id,
+        chosenOption: selectedOption,
+        isCorrect
+      });
+    }
   };
 
   const handleNextQuestion = async () => {

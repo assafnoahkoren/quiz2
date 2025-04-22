@@ -143,8 +143,8 @@ model UserExam {
 
 model UserExamQuestion {
   id         String   @id @default(uuid())
-  userExamId String
-  UserExam   UserExam @relation(fields: [userExamId], references: [id])
+  userExamId String?
+  UserExam   UserExam? @relation(fields: [userExamId], references: [id])
   questionId String
   Question   Question @relation(fields: [questionId], references: [id])
   answer     String?

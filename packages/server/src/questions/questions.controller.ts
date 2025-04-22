@@ -28,6 +28,14 @@ export class QuestionsController {
     return this.questionsService.solveQuestion(id);
   }
 
+  @Post(':id/answer')
+  answerExercise(
+    @Param('id') questionId: string,
+    @Body() data: { chosenOption: string, isCorrect: boolean }
+  ): Promise<any> {
+    return this.questionsService.answerExercise(questionId, data.chosenOption, data.isCorrect);
+  }
+
   @Post('random')
   getRandomQuestion(@Body() body: { subjectIds: string[] }): Promise<QuestionResponseDto> {
     return this.questionsService.getRandomQuestion(body.subjectIds);

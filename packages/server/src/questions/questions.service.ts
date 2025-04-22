@@ -414,4 +414,35 @@ export class QuestionsService {
       })),
     };
   }
+
+  // Create a UserExamQuestion for a standalone exercise (not part of an exam)
+  async answerExercise(questionId: string, chosenOption: string, isCorrect: boolean): Promise<any> {
+    // Check if question exists
+    const questionExists = await this.prisma.question.findUnique({
+      where: { id: questionId },
+    });
+
+    if (!questionExists) {
+      throw new NotFoundException(`Question with ID ${questionId} not found`);
+    }
+
+    try {
+      // Create the UserExamQuestion with null userExamId
+      const userExamQuestion = await this.prisma.userExamQuestion.create({
+        data: {
+          questionId,
+          answer: chosenOption,
+          isCorrect,
+          userExamId: null
+        },
+      });
+
+      return userExamQuestion;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Error recording question answer');
+      }
+      throw error;
+    }
+  }
 } 
