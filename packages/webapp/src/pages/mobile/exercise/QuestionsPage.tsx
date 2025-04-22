@@ -4,6 +4,7 @@ import { useRandomQuestion } from '../../../api/questions';
 import { Question } from '../../../api/types';
 import { IconAlertCircle, IconArrowRight, IconArrowLeft } from '@tabler/icons-react';
 import { useExerciseStore } from './exerciseStore';
+import { getFullViewHeight } from '../MobileLayout';
 
 // Define a type for our answers map
 interface AnswerState {
@@ -162,7 +163,7 @@ const QuestionsPage: React.FC = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <Box p="md">
+    <Box p="md" style={{height: getFullViewHeight()}}>
       {loading ? (
         <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
           <Loader size="xl" />
