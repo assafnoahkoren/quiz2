@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion } from '@mantine/core';
 import { useRandomQuestion } from '../../../api/questions';
 import { Question } from '../../../api/types';
@@ -22,8 +22,38 @@ const QuestionsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   // Map to store answers for each question
   const [answerMap, setAnswerMap] = useState<Map<number, AnswerState>>(new Map());
+  // State for footer spacer height
+  const [footerHeight, setFooterHeight] = useState(0);
+  // Reference to the footer element
+  const footerRef = useRef<HTMLDivElement>(null);
   
   const randomQuestionMutation = useRandomQuestion();
+
+  // Update footer spacer height whenever needed
+  useEffect(() => {
+    const updateFooterHeight = () => {
+      if (footerRef.current) {
+        const height = footerRef.current.offsetHeight;
+        setFooterHeight(height);
+      }
+    };
+
+    // Initial measurement
+    updateFooterHeight();
+
+    // Set up resize observer to detect size changes
+    const resizeObserver = new ResizeObserver(updateFooterHeight);
+    if (footerRef.current) {
+      resizeObserver.observe(footerRef.current);
+    }
+
+    // Cleanup
+    return () => {
+      if (footerRef.current) {
+        resizeObserver.unobserve(footerRef.current);
+      }
+    };
+  }, [currentQuestionIndex, answered]); // Re-measure when index or answer state changes
 
   const fetchRandomQuestion = async (): Promise<Question | null> => {
     try {
@@ -177,8 +207,8 @@ const QuestionsPage: React.FC = () => {
           {error}
         </Alert>
       ) : currentQuestion ? (
-        <Stack>
-          <Group justify="space-between" mb="md">
+        <Stack gap={0} style={{ height: '100%', position: 'relative' }}>
+          <Group justify="space-between">
             <Button 
               variant="subtle" 
               color="blue" 
@@ -204,111 +234,130 @@ const QuestionsPage: React.FC = () => {
             </Button>
           </Group>
           
-          <Paper p="md">
-            <Text size="md" fw={700} mb="md">
-              {currentQuestion.question}
-            </Text>
+          <Box>
+            <Paper p="md">
+              <Text size="lg" fw={700} mb="md">
+                {currentQuestion.question}
+              </Text>
 
-            {answered && currentQuestion.explanation && (
-              <Accordion 
-                mb="md" 
-                variant="filled"
-                styles={{
-                  item: {
-                    borderRadius: '8px',
-                    border: '1px solid #e9ecef',
-                    overflow: 'hidden',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                    marginTop: '12px',
-                    backgroundColor: '#f8f9fa'
-                  },
-                  control: {
-                    padding: '12px 16px',
-                    '&:hover': {
-                      backgroundColor: '#f1f3f5'
+              {answered && currentQuestion.explanation && (
+                <Accordion 
+                  mb="md" 
+                  variant="filled"
+                  styles={{
+                    item: {
+                      borderRadius: '8px',
+                      border: '1px solid #e9ecef',
+                      overflow: 'hidden',
+                      marginTop: '12px',
+                      backgroundColor: '#f8f9fa'
+                    },
+                    control: {
+                      padding: '12px 16px',
+                      '&:hover': {
+                        backgroundColor: '#f1f3f5'
+                      }
+                    },
+                    panel: {
+                      padding: '16px',
+                      backgroundColor: 'white',
+                      borderTop: '1px solid #e9ecef'
+                    },
+                    chevron: {
+                      color: '#4dabf7'
                     }
-                  },
-                  panel: {
-                    padding: '16px',
-                    backgroundColor: 'white',
-                    borderTop: '1px solid #e9ecef'
-                  },
-                  chevron: {
-                    color: '#4dabf7'
-                  }
-                }}
-              >
-                <Accordion.Item value="explanation">
-                  <Accordion.Control py={0}>הצג הסבר</Accordion.Control>
-                  <Accordion.Panel px={0}>
-                    <Text>{currentQuestion.explanation}</Text>
-                  </Accordion.Panel>
-                </Accordion.Item>
-              </Accordion>
-            )}
-          </Paper>
-          
-          <Paper p={0}>
-            <Radio.Group 
-              value={selectedOption || ''} 
-              onChange={(value) => handleOptionSelect(value)}
-            >
-              <Stack>
-                {currentQuestion.options.map((option) => (
-                  <Paper
-                    key={option.id}
-                    p="sm"
-                    withBorder
-                    style={{
-                      backgroundColor: answered ? (
-                        option.isCorrect ? '#e7f5ea' : 
-                        option.id === selectedOption ? '#ffebee' : 'white'
-                      ) : 'white',
-                      borderColor: answered ? (
-                        option.isCorrect ? '#4caf50' : 
-                        option.id === selectedOption ? '#f44336' : '#dee2e6'
-                      ) : '#dee2e6',
-                      marginBottom: '8px',
-                      cursor: answered ? 'default' : 'pointer'
-                    }}
-                    onClick={() => !answered && handleOptionSelect(option.id)}
-                  >
-                    <Radio 
-                      value={option.id} 
-                      label={option.answer}
-                      disabled={answered}
-                      readOnly
-                    />
-                  </Paper>
-                ))}
-              </Stack>
-            </Radio.Group>
-          </Paper>
-
-          <Group justify="space-between">
-            {!answered ? (
-              <Button 
-                onClick={handleSubmitAnswer} 
-                disabled={!selectedOption}
-                color="blue"
-                fullWidth
-              >
-                בדוק
-              </Button>
-            ) : (
-              <Group style={{ width: '100%' }}>
-                <Button 
-                  onClick={handleNextQuestion}
-                  color="green" 
-                  style={{ flex: 1 }}
-                  rightSection={<IconArrowLeft size="1.2rem" />}
-                  disabled={currentQuestionIndex === questions.length - 1 && questions.length === 1}
+                  }}
                 >
-                  לשאלה הבאה
+                  <Accordion.Item value="explanation">
+                    <Accordion.Control py={0}>הצג הסבר</Accordion.Control>
+                    <Accordion.Panel px={0}>
+                      <Text style={{ whiteSpace: 'pre-line' }}>{currentQuestion.explanation}</Text>
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+              )}
+            </Paper>
+            
+            {/* Spacer Box that matches the height of the footer */}
+            <Box style={{ height: footerHeight, marginTop: '1rem' }} />
+          </Box>
+          
+          {/* Fixed footer with options and buttons */}
+          <Box 
+            id="question-footer" 
+            ref={footerRef}
+            style={{ 
+              position: 'fixed', 
+              bottom: 0, 
+              left: 0, 
+              right: 0, 
+              padding: '16px',
+              background: 'white',
+              zIndex: 10,
+              boxShadow: '0 -2px 15px rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            <Paper p={0} mb="md">
+              <Radio.Group 
+                value={selectedOption || ''} 
+                onChange={(value) => handleOptionSelect(value)}
+              >
+                <Stack>
+                  {currentQuestion.options.map((option) => (
+                    <Paper
+                      key={option.id}
+                      p="sm"
+                      withBorder
+                      style={{
+                        backgroundColor: answered ? (
+                          option.isCorrect ? '#e7f5ea' : 
+                          option.id === selectedOption ? '#ffebee' : 'white'
+                        ) : 'white',
+                        borderColor: answered ? (
+                          option.isCorrect ? '#e7f5ea' : 
+                          option.id === selectedOption ? '#ffebee' : '#dee2e6'
+                        ) : '#dee2e6',
+                        marginBottom: '8px',
+                        cursor: answered ? 'default' : 'pointer'
+                      }}
+                      onClick={() => !answered && handleOptionSelect(option.id)}
+                    >
+                      <Radio 
+                        value={option.id} 
+                        label={option.answer}
+                        readOnly
+                      />
+                    </Paper>
+                  ))}
+                </Stack>
+              </Radio.Group>
+            </Paper>
+
+            <Group justify="space-between">
+              {!answered ? (
+                <Button 
+                  onClick={handleSubmitAnswer} 
+                  disabled={!selectedOption}
+                  color="blue"
+                  fullWidth
+                >
+                  בדוק
                 </Button>
-              </Group>
-            )}
-          </Group>
+              ) : (
+                <Group style={{ width: '100%' }}>
+                  <Button 
+                    onClick={handleNextQuestion}
+                    color="green" 
+                    style={{ flex: 1 }}
+                    rightSection={<IconArrowLeft size="1.2rem" />}
+                    disabled={currentQuestionIndex === questions.length - 1 && questions.length === 1}
+                  >
+                    לשאלה הבאה
+                  </Button>
+                </Group>
+              )}
+            </Group>
+          </Box>
         </Stack>
       ) : (
         <Alert 
