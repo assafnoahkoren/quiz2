@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon, Badge } from '@mantine/core';
 import { IconLogout, IconHome, IconMenu2, IconUser, IconX } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
@@ -21,6 +21,7 @@ export const getFullViewHeight = () => {
 export const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [opened, { toggle, close }] = useDisclosure();
   const { data: currentUser } = useCurrentUser();
   const { data: subscriptionStatus, isLoading: isLoadingStatus } = useMySubscriptionStatus();
@@ -120,7 +121,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
         {children || <Outlet />}
       </AppShell.Main>
 
-      <SubscriptionStatusHandler />
+      {location.pathname !== '/thank-you' && <SubscriptionStatusHandler />}
     </AppShell>
   );
 }; 
