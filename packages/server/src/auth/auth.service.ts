@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto, LoginDto } from './auth.controller';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
+import { UserPayload } from './types/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -99,8 +100,8 @@ export class AuthService {
     };
   }
 
-  async refresh(user: { sub: string; email: string }) {
-    // Get the user from the database
+  async refresh(user: { sub: string }) {
+    // Get the user from the database using user.sub (the ID)
     const dbUser = await this.prisma.user.findUnique({
       where: { id: user.sub },
     });
@@ -109,7 +110,7 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Generate a new JWT token
+    // Generate a new JWT token based on the full dbUser object
     const token = this.createJwtToken(dbUser);
 
     // Return user (without password) and new token

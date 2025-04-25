@@ -3,6 +3,7 @@ import { QuestionsService } from './questions.service';
 import { CreateQuestionDto, UpdateQuestionDto, QuestionResponseDto } from './dto/question.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
+import { AuthedRequest } from '../auth/types/authed-request.interface';
 
 @Controller('api/questions')
 @UseGuards(AuthGuard)
@@ -11,21 +12,28 @@ export class QuestionsController {
 
   @Post()
   @UseGuards(AdminGuard)
-  create(@Body() createQuestionDto: CreateQuestionDto): Promise<QuestionResponseDto> {
+  create(
+    @Body() createQuestionDto: CreateQuestionDto,
+    @Req() request: AuthedRequest
+  ): Promise<QuestionResponseDto> {
     return this.questionsService.create(createQuestionDto);
   }
 
   @Post('generate')
   @UseGuards(AdminGuard)
   generateQuestion(
-    @Body() data: { text: string; subjectId: string }
+    @Body() data: { text: string; subjectId: string },
+    @Req() request: AuthedRequest
   ): Promise<QuestionResponseDto> {
     return this.questionsService.generateQuestion(data.text, data.subjectId);
   }
 
   @Post(':id/solve')
   @UseGuards(AdminGuard)
-  solveQuestion(@Param('id') id: string): Promise<{ correctOption: any, explanation: string }> {
+  solveQuestion(
+    @Param('id') id: string,
+    @Req() request: AuthedRequest
+  ): Promise<{ correctOption: any, explanation: string }> {
     return this.questionsService.solveQuestion(id);
   }
 
@@ -33,38 +41,51 @@ export class QuestionsController {
   answerExercise(
     @Param('id') questionId: string,
     @Body() data: { chosenOption: string, isCorrect: boolean },
-    @Req() req
+    @Req() request: AuthedRequest
   ): Promise<any> {
-    return this.questionsService.answerExercise(questionId, data.chosenOption, data.isCorrect, req.user.id);
+    return this.questionsService.answerExercise(questionId, data.chosenOption, data.isCorrect, request.user.id);
   }
 
   @Post('random')
-  getRandomQuestion(@Body() body: { subjectIds: string[] }): Promise<QuestionResponseDto> {
+  getRandomQuestion(
+    @Body() body: { subjectIds: string[] },
+    @Req() request: AuthedRequest
+  ): Promise<QuestionResponseDto> {
     return this.questionsService.getRandomQuestion(body.subjectIds);
   }
 
   @Get('subject/:subjectId')
-  findBySubjectId(@Param('subjectId') subjectId: string): Promise<QuestionResponseDto[]> {
+  findBySubjectId(
+    @Param('subjectId') subjectId: string,
+    @Req() request: AuthedRequest
+  ): Promise<QuestionResponseDto[]> {
     return this.questionsService.findBySubjectId(subjectId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<QuestionResponseDto> {
+  findOne(
+    @Param('id') id: string,
+    @Req() request: AuthedRequest
+  ): Promise<QuestionResponseDto> {
     return this.questionsService.findOne(id);
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   update(
-    @Param('id') id: string, 
-    @Body() updateQuestionDto: UpdateQuestionDto
+    @Param('id') id: string,
+    @Body() updateQuestionDto: UpdateQuestionDto,
+    @Req() request: AuthedRequest
   ): Promise<QuestionResponseDto> {
     return this.questionsService.update(id, updateQuestionDto);
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard, AdminGuard)
-  remove(@Param('id') id: string): Promise<void> {
+  @UseGuards(AdminGuard)
+  remove(
+    @Param('id') id: string,
+    @Req() request: AuthedRequest
+  ): Promise<void> {
     return this.questionsService.remove(id);
   }
 } 

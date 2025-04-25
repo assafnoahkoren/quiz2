@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
+import { AuthedRequest } from './types/authed-request.interface';
 
 export class RegisterDto {
   email: string;
@@ -29,8 +30,8 @@ export class AuthController {
 
   @Post('refresh')
   @UseGuards(AuthGuard)
-  refresh(@Req() req) {
+  refresh(@Req() request: AuthedRequest) {
     // The user data comes from the AuthGuard and is attached to the request
-    return this.authService.refresh(req.user);
+    return this.authService.refresh(request.user);
   }
 } 

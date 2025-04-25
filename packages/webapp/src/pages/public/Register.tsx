@@ -96,7 +96,7 @@ export const Register = () => {
               mt="md"
               leftSection={<IconUserPlus size={16} />}
               loading={registerMutation.isPending}
-              disabled
+              disabled={registerMutation.isPending}
             >
               הרשם
             </Button>

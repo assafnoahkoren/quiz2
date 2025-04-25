@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto, UpdateSubjectDto, SubjectTreeItemDto } from './dto/subject.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
+import { AuthedRequest } from '../auth/types/authed-request.interface';
 
 @Controller('api/subjects')
 export class SubjectsController {
@@ -10,7 +11,10 @@ export class SubjectsController {
 
   @Post()
   @UseGuards(AuthGuard, AdminGuard)
-  create(@Body() createSubjectDto: CreateSubjectDto) {
+  create(
+    @Body() createSubjectDto: CreateSubjectDto,
+    @Req() request: AuthedRequest
+  ) {
     return this.subjectsService.create(createSubjectDto);
   }
 
@@ -25,13 +29,20 @@ export class SubjectsController {
 
   @Patch(':id')
   @UseGuards(AuthGuard, AdminGuard)
-  update(@Param('id') id: string, @Body() updateSubjectDto: UpdateSubjectDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSubjectDto: UpdateSubjectDto,
+    @Req() request: AuthedRequest
+  ) {
     return this.subjectsService.update(id, updateSubjectDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard, AdminGuard)
-  remove(@Param('id') id: string) {
+  remove(
+    @Param('id') id: string,
+    @Req() request: AuthedRequest
+  ) {
     return this.subjectsService.remove(id);
   }
 } 
