@@ -445,4 +445,18 @@ export class QuestionsService {
       throw error;
     }
   }
+
+  // Count answers for a specific user
+  async countAnswers(userId: string): Promise<number> {
+    try {
+      const count = await this.prisma.userExamQuestion.count({
+        where: { userId },
+      });
+      return count;
+    } catch (error) {
+      // Log the error or handle it as needed
+      console.error(`Error counting answers for user ${userId}:`, error);
+      throw new BadRequestException('Error counting user answers');
+    }
+  }
 } 

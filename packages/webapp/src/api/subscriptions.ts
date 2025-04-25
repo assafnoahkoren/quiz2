@@ -2,6 +2,7 @@ import { useMutation, useQueryClient, UseMutationOptions, useQuery } from '@tans
 import { Subscription, CreateSubscriptionDto, UpdateSubscriptionDto } from '../types/subscription';
 import apiClient from './client';
 import { userKeys } from './users';
+import { SubscriptionStatusDto } from '../types/subscription';
 
 const SUBSCRIPTIONS_ENDPOINT = 'api/subscriptions'; // Path relative to base URL in apiClient
 
@@ -29,6 +30,12 @@ export const getUserSubscriptions = async (userId: string): Promise<Subscription
   return response.data;
 };
 
+// API client function to get the current user's subscription status
+export const getMySubscriptionStatus = async (): Promise<SubscriptionStatusDto> => {
+  const response = await apiClient.get<SubscriptionStatusDto>(`${SUBSCRIPTIONS_ENDPOINT}/mine`); // No ID needed, uses auth
+  return response.data;
+};
+
 // Query Keys Factory
 export const subscriptionKeys = {
   all: ['subscriptions'] as const,
@@ -37,6 +44,7 @@ export const subscriptionKeys = {
   details: () => [...subscriptionKeys.all, 'detail'] as const,
   detail: (id: string) => [...subscriptionKeys.details(), id] as const,
   userSubscriptions: (userId: string) => [...subscriptionKeys.lists(), { userId }] as const,
+  myStatus: () => [...subscriptionKeys.all, 'my-status'] as const,
 };
 
 // Hook to create a subscription
@@ -101,5 +109,14 @@ export const useUserSubscriptions = (userId: string) => {
     queryKey: subscriptionKeys.userSubscriptions(userId),
     queryFn: () => getUserSubscriptions(userId),
     enabled: !!userId,
+  });
+};
+
+// Hook to get the current user's subscription status
+export const useMySubscriptionStatus = () => {
+  return useQuery({
+    queryKey: subscriptionKeys.myStatus(),
+    queryFn: getMySubscriptionStatus,
+    // Add other options like staleTime, gcTime if needed
   });
 }; 

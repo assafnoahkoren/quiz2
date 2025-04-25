@@ -29,4 +29,11 @@ export interface UpdateSubscriptionDto {
   currency?: string;
   price?: number;
   expiresAt?: string;
+}
+
+// Add the DTO for subscription status
+export interface SubscriptionStatusDto {
+  type: 'demo' | 'paid';
+  freeQuestionsLeft: number | null;
+  expirationDate: string | null; // Use string for dates in DTOs typically
 } 

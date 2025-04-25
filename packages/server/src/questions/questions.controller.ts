@@ -4,6 +4,7 @@ import { CreateQuestionDto, UpdateQuestionDto, QuestionResponseDto } from './dto
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
 import { AuthedRequest } from '../auth/types/authed-request.interface';
+import { SubscriptionGuard } from 'src/subscriptions/guards/subscription.guard';
 
 @Controller('api/questions')
 @UseGuards(AuthGuard)
@@ -38,6 +39,7 @@ export class QuestionsController {
   }
 
   @Post(':id/answer')
+  @UseGuards(SubscriptionGuard)
   answerExercise(
     @Param('id') questionId: string,
     @Body() data: { chosenOption: string, isCorrect: boolean },
@@ -47,6 +49,7 @@ export class QuestionsController {
   }
 
   @Post('random')
+  @UseGuards(SubscriptionGuard)
   getRandomQuestion(
     @Body() body: { subjectIds: string[] },
     @Req() request: AuthedRequest

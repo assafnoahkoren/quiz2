@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
 import { CreateQuestionDto, Question, UpdateQuestionDto } from './types';
 import { subjectKeys } from './subjects';
+import { useMySubscriptionStatus, subscriptionKeys } from './subscriptions';
+import { SubscriptionStatusDto } from '../types/subscription';
 
 // Query keys
 export const questionKeys = {
@@ -155,11 +157,19 @@ export const useRandomQuestion = () => {
 };
 
 export const useAnswerExercise = () => {
+  const { data: subscriptionStatus } = useMySubscriptionStatus();
+  const isFreeUser = subscriptionStatus?.type === 'demo';
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ questionId, chosenOption, isCorrect }: { 
       questionId: string;
       chosenOption: string;
       isCorrect: boolean;
-    }) => answerExercise(questionId, { chosenOption, isCorrect })
+    }) => answerExercise(questionId, { chosenOption, isCorrect }),
+    onSuccess: () => {     
+      if (isFreeUser) {
+        queryClient.invalidateQueries({ queryKey: subscriptionKeys.myStatus() });
+      }
+    },
   });
 }; 

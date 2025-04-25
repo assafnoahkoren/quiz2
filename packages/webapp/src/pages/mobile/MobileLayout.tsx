@@ -1,11 +1,13 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon } from '@mantine/core';
+import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon, Badge } from '@mantine/core';
 import { IconLogout, IconHome, IconMenu2, IconUser, IconX } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../components/auth/AuthContext';
 import { useCurrentUser } from '../../api/users';
 import { useGovExams } from '../../api/gov-exam';
+import { useMySubscriptionStatus } from '../../api/subscriptions';
+import { SubscriptionStatusHandler } from '../../components/SubscriptionStatusHandler';
 
 interface MobileLayoutProps {
   children?: ReactNode;
@@ -21,6 +23,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
   const navigate = useNavigate();
   const [opened, { toggle, close }] = useDisclosure();
   const { data: currentUser } = useCurrentUser();
+  const { data: subscriptionStatus, isLoading: isLoadingStatus } = useMySubscriptionStatus();
   
   useGovExams(); // prefetch data - not needed for this page
 
@@ -48,6 +51,11 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
                 קוויז
               </Text>
             </Group>
+            {!isLoadingStatus && subscriptionStatus?.type === 'demo' && (
+              <Badge radius="sm" variant="light" color="gray">
+                {`שאלות חינם: ${subscriptionStatus.freeQuestionsLeft}`}
+              </Badge>
+            )}
           </Group>
         </Container>
       </AppShell.Header>
@@ -111,6 +119,8 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       <AppShell.Main>
         {children || <Outlet />}
       </AppShell.Main>
+
+      <SubscriptionStatusHandler />
     </AppShell>
   );
 }; 
