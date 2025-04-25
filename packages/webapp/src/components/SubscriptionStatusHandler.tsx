@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useMySubscriptionStatus } from '../api/subscriptions';
 import { useDisclosure } from '@mantine/hooks';
 import { Modal, Text, Button, Stack } from '@mantine/core';
+import { IconCrown } from '@tabler/icons-react';
 
 export const SubscriptionStatusHandler = () => {
 	const { data: subscriptionStatus, isLoading } = useMySubscriptionStatus();
@@ -46,6 +47,8 @@ export const SubscriptionStatusHandler = () => {
 				rel="noopener noreferrer"
 				mt="lg" 
 				color="green"
+				variant="outline"
+				leftSection={<IconCrown size={18} />}
 			>
 				רכוש מנוי
 			</Button>
