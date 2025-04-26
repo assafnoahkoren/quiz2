@@ -47,7 +47,6 @@ const UsersPage: React.FC = () => {
       </div>
     );
   }
-  return null;
   
   return (
     <div className="flex flex-col p-4">
@@ -114,7 +113,7 @@ const UsersPage: React.FC = () => {
       />
 
       {/* Create User Modal */}
-      <Modal
+      {/* <Modal
         opened={createModalOpened}
         onClose={handleModalClose}
         title="הוספת משתמש חדש"
@@ -124,7 +123,7 @@ const UsersPage: React.FC = () => {
           onSuccess={handleModalClose}
           onCancel={handleModalClose}
         />
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
