@@ -53,6 +53,7 @@ export const Login = () => {
         <Stack gap="md">
           <TextInput
             label="אימייל"
+            type="email"
             placeholder="your@email.com"
             required
             radius="md"

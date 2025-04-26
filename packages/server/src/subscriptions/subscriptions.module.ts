@@ -5,6 +5,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { QuestionsModule } from '../questions/questions.module';
 import { MySubscriptionController } from './my-subscription.controller';
+import { PaymentController } from './payment.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MySubscriptionController } from './my-subscription.controller';
   controllers: [
     MySubscriptionController,
     SubscriptionsController,
+    PaymentController,
   ],
   exports: [SubscriptionsService],
 })

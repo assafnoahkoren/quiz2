@@ -1,12 +1,19 @@
 import { useEffect } from 'react';
 import { useMySubscriptionStatus } from '../api/subscriptions';
 import { useDisclosure } from '@mantine/hooks';
-import { Modal, Text, Button, Stack } from '@mantine/core';
-import { IconCrown } from '@tabler/icons-react';
+import { Modal, Text, Button, Stack, Group } from '@mantine/core';
+import { IconBrandWhatsapp, IconCrown, IconLogout, IconMail, IconPhone } from '@tabler/icons-react';
+import { useAuth } from './auth/AuthContext';
 
 export const SubscriptionStatusHandler = () => {
 	const { data: subscriptionStatus, isLoading } = useMySubscriptionStatus();
 	const [opened, { open, close }] = useDisclosure(false);
+	const { logout } = useAuth();
+
+	const handleLogout = () => {
+		logout();
+		close();
+	};
 
 	useEffect(() => {
 		// Only trigger if not loading and status is demo with 0 questions left
@@ -47,11 +54,31 @@ export const SubscriptionStatusHandler = () => {
 				rel="noopener noreferrer"
 				mt="lg" 
 				color="green"
-				variant="outline"
+				variant="light"
 				leftSection={<IconCrown size={18} />}
 			>
 				רכוש מנוי
 			</Button>
+
+			<Group mt="md" grow justify="center">
+				<Button
+					variant="subtle"
+					color="red"
+					leftSection={<IconLogout size={18} />}
+					onClick={handleLogout}
+				>
+					התנתק
+				</Button>
+				<Button
+					variant="subtle"
+					component="a"
+					href="https://wa.me/972509733829"
+					rel="noopener noreferrer"
+					leftSection={<IconBrandWhatsapp size={18} />}
+				>
+					צור קשר
+				</Button>
+			</Group>
 
 		</Modal>
 	);
