@@ -11,11 +11,19 @@ export const subjectKeys = {
     [...subjectKeys.lists(), { ...filters }] as const,
   details: () => [...subjectKeys.all, 'detail'] as const,
   detail: (id: string) => [...subjectKeys.details(), id] as const,
+  scores: () => [...subjectKeys.all, 'score'] as const,
+  score: (subjectId: string) => [...subjectKeys.scores(), subjectId] as const,
 };
 
 // Fetch subjects by gov exam id
 export const fetchSubjectsByExamId = async (examId: string): Promise<GovExamResponse> => {
   const response = await apiClient.get<GovExamResponse>(`/api/subjects/exam/${examId}`);
+  return response.data;
+};
+
+// Fetch the score for a specific subject
+export const fetchSubjectScore = async (subjectId: string): Promise<number> => {
+  const response = await apiClient.get<number>(`/api/subjects/${subjectId}/score`);
   return response.data;
 };
 
@@ -83,5 +91,14 @@ export const useDeleteSubject = () => {
       // We don't know the examId after deletion, so invalidate all subject lists
       queryClient.invalidateQueries({ queryKey: subjectKeys.lists() });
     },
+  });
+};
+
+// Hook to fetch the score for a specific subject
+export const useSubjectScore = (subjectId: string | undefined) => {
+  return useQuery<number, Error>({
+    queryKey: subjectKeys.score(subjectId!),
+    queryFn: () => fetchSubjectScore(subjectId!),
+    enabled: !!subjectId,
   });
 }; 

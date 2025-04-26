@@ -5,6 +5,7 @@ import { useSubjectsByExamId } from '../../../api';
 import { SubjectTreeItem } from '../../../api/types';
 import { IconChevronLeft, IconChevronRight, IconPlayerPlay, IconPlayerPlayFilled } from '@tabler/icons-react';
 import exerciseStoreInstance from './exerciseStore';
+import { SubjectScore } from '../../../components/SubjectScore/SubjectScore';
 
 // Custom hook for animated counter
 const useCountAnimation = (value: number, duration: number = 500) => {
@@ -292,76 +293,57 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
     };
 
     return (
-      <div 
-        key={subject.id} 
+      <Box
+        key={subject.id}
+        className={`subject-item level-${level} ${hasChildren ? 'has-children' : ''}`}
         style={{
-          padding: level === 0 ? '8px 18px' : '0px 16px',
           paddingLeft: `${leftPadding}px`,
-          marginLeft: level > 0 ? '8px' : '0',
-          marginRight: level > 0 ? '8px' : '0'
+          paddingRight: '16px',
+          paddingTop: '12px',
+          paddingBottom: '12px',
+          marginLeft: `${level * 10}px`, // Add indentation based on level
         }}
-        className={`subject-item ${hasChildren ? 'has-children' : ''} level-${level}`}
         onClick={handleCardClick}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {canBeFolded && (
-              <div 
-                className={`fold-icon ${isExpanded ? 'expanded' : ''}`}
-                onClick={handleFoldToggle}
-              >
-                <IconChevronLeft size={16} stroke={2} />
-              </div>
-            )}
-            <span 
-              onClick={handleTextClick}
-              style={{ 
-                fontWeight: hasChildren || level === 0 ? 600 : 400,
-                fontSize: hasChildren || level === 0 ? '15px' : '14px',
-                color: level === 0 ? '#1864ab' : level === 1 ? '#1971c2' : 'inherit',
-                padding: level === 0 || level === 1 ? '10px 0' : '',
-                cursor: 'pointer'
-              }}
-            >
-              {subject.name}
-            </span>
-          </div>
+        <Group justify="space-between" wrap="nowrap">
+          <Group wrap="nowrap" className="checkbox-container">
+            <Checkbox
+              checked={isChecked}
+              indeterminate={isIndeterminate}
+              onChange={handleCheckboxChangeWithStopPropagation}
+              size="md"
+              aria-label={`Select ${subject.name}`}
+              onClick={(e) => e.stopPropagation()} // Stop propagation on checkbox itself
+            />
+            <Box onClick={handleTextClick} style={{ cursor: 'pointer' }}>
+              <Text fw={level === 0 ? 600 : 400} size={level === 0 ? 'md' : 'sm'}>
+                {subject.name}
+              </Text>
+
+            </Box>
+          </Group>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {hasChildren && nodeInfo && (
-              <span 
-                className="subcategory-badge"
-                style={{ 
-                  fontSize: '12px', 
-                  minWidth: 'max-content',
-                  color: '#868e96',
-                  backgroundColor: level === 0 ? '#e7f5ff' : level === 1 ? '#e3fafc' : '#f1f3f5',
-                  padding: '2px 8px',
-                  borderRadius: '12px'
-                }}
-                onClick={handleBadgeClick}
-              >
-                {nodeInfo.childrenIds.length} תתי נושאים
-              </span>
-            )}
-            <div className="checkbox-container" onClick={(e) => e.stopPropagation()}> 
-              <Checkbox
-                checked={isChecked}
-                indeterminate={isIndeterminate}
-                onChange={handleCheckboxChangeWithStopPropagation}
-              />
-            </div>
-          </div>
-        </div>
+          {/* Conditionally render SubjectScore for level 0 */} 
+          {level === 1 && (
+            <Box style={{ marginRight: '10px' }}> {/* Add some margin */} 
+              <SubjectScore subjectId={subject.id} />
+            </Box>
+          )}
+
+          {canBeFolded && (
+            <Box className={`fold-icon ${isExpanded ? 'expanded' : ''}`} onClick={handleFoldToggle}>
+              <IconChevronLeft size={16} stroke={2} />
+            </Box>
+          )}
+        </Group>
         {hasChildren && (
           <div 
             className={`item-children-container ${isExpanded ? 'expanded' : ''}`}
-            onClick={(e) => e.stopPropagation()}
           >
-            {subject.children && subject.children.map(child => renderSubjectNode(child, level + 1))}
+            {subject.children.map(child => renderSubjectNode(child, level + 1))}
           </div>
         )}
-      </div>
+      </Box>
     );
   }
 

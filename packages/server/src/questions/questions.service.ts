@@ -459,4 +459,47 @@ export class QuestionsService {
       throw new BadRequestException('Error counting user answers');
     }
   }
+
+  // Get grouped answers by question for a specific user and subject
+  async getGroupedAnswers(userId: string, subjectId: string): Promise<Record<string, { correct: number; wrong: number }>> {
+    try {
+      // Fetch and group user answers using Prisma's groupBy
+      const groupedData = await this.prisma.userExamQuestion.groupBy({
+        by: ['questionId', 'isCorrect'],
+        where: {
+          userId: userId,
+          Question: { // Ensure relation name casing is correct
+            subjectId: subjectId,
+          },
+        },
+        _count: {
+          _all: true, // Count all records in each group
+        },
+      });
+
+      // Process the grouped data into the desired format
+      const groupedAnswers: Record<string, { correct: number; wrong: number }> = {};
+
+      groupedData.forEach(group => {
+        const { questionId, isCorrect } = group;
+        const count = group._count._all;
+
+        if (!groupedAnswers[questionId]) {
+          groupedAnswers[questionId] = { correct: 0, wrong: 0 };
+        }
+
+        if (isCorrect) {
+          groupedAnswers[questionId].correct = count;
+        } else {
+          groupedAnswers[questionId].wrong = count;
+        }
+      });
+
+      return groupedAnswers;
+    } catch (error) {
+      // Removed NotFoundException check as user deleted it previously
+      console.error(`Error getting grouped answers for user ${userId} and subject ${subjectId}:`, error);
+      throw new BadRequestException('Error retrieving grouped answers');
+    }
+  }
 } 

@@ -46,4 +46,8 @@ export class AppConfigService extends ConfigService {
   get ANTHROPIC_API_KEY(): string {
     return this.getOrThrow('ANTHROPIC_API_KEY');
   }
+
+  get CORRECTNESS_THRESHOLD(): number {
+    return this.get<number>('CORRECTNESS_THRESHOLD', 3);
+  }
 } 

@@ -27,6 +27,15 @@ export class SubjectsController {
     return this.subjectsService.findByGovExamId(examId);
   }
 
+  @Get(':subjectId/score')
+  @UseGuards(AuthGuard)
+  getCorrectScore(
+    @Param('subjectId') subjectId: string,
+    @Req() request: AuthedRequest
+  ): Promise<number> {
+    return this.subjectsService.getCorrectScore(request.user.id, subjectId);
+  }
+
   @Patch(':id')
   @UseGuards(AuthGuard, AdminGuard)
   update(

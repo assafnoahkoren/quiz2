@@ -1,10 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubjectDto, UpdateSubjectDto, SubjectTreeItemDto } from './dto/subject.dto';
+import { QuestionsService } from '../questions/questions.service';
+import { AppConfigService } from '../config/config.service';
 
 @Injectable()
 export class SubjectsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private questionsService: QuestionsService,
+    private appConfigService: AppConfigService
+  ) {}
 
   // Create a new subject
   async create(createSubjectDto: CreateSubjectDto) {
@@ -152,4 +158,51 @@ export class SubjectsService {
         children: this.buildSubjectTree(subjects, subject.id, questionCountMap),
       }));
   }
-} 
+
+  // Calculate the percentage of questions answered correctly >= N times for a user in a subject
+  async getCorrectScore(userId: string, subjectId: string): Promise<number> {
+    try {
+      // 1. & 2. Fetch total questions and grouped answers in parallel
+      const [totalQuestions, groupedAnswers] = await Promise.all([
+        this.prisma.question.count({
+          where: { subjectId: subjectId },
+        }),
+        this.questionsService.getGroupedAnswers(userId, subjectId)
+      ]);
+
+      if (totalQuestions === 0) {
+        return 0; // No questions in the subject, so score is 0%
+      }
+      // If no answers yet, return 0%
+      if (Object.keys(groupedAnswers).length === 0) {
+        return 0;
+      }
+
+      // 3. Count questions answered correctly at least N times
+      let correctlyAnsweredCount = 0;
+      for (const questionId in groupedAnswers) {
+        if (groupedAnswers[questionId].correct >= this.appConfigService.CORRECTNESS_THRESHOLD) {
+          correctlyAnsweredCount++;
+        }
+      }
+
+      // 4. Calculate the percentage
+      const percentage = (correctlyAnsweredCount / totalQuestions) * 100;
+
+      // Return rounded percentage
+      return Math.round(percentage);
+
+    } catch (error) {
+      // Check for specific errors if needed, e.g., NotFoundException from getGroupedAnswers
+      if (error instanceof NotFoundException) {
+        // Handle case where subjectId might be invalid for groupedAnswers (though checked earlier)
+        console.error(`Subject not found for score calculation: ${subjectId}`, error);
+        throw error; // Re-throw specific error
+      }
+      // Log generic error appropriately
+      console.error(`Error calculating correct score for user ${userId} in subject ${subjectId}:`, error);
+      // Re-throw or handle as appropriate for your application error strategy
+      throw new Error('Failed to calculate correct score');
+    }
+  }
+}
