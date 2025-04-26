@@ -7,11 +7,11 @@ import { AuthedRequest } from '../auth/types/authed-request.interface';
 import { SubscriptionGuard } from 'src/subscriptions/guards/subscription.guard';
 
 @Controller('api/questions')
-@UseGuards(AuthGuard)
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   @UseGuards(AdminGuard)
   create(
     @Body() createQuestionDto: CreateQuestionDto,
@@ -22,6 +22,7 @@ export class QuestionsController {
 
   @Post('generate')
   @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard)
   generateQuestion(
     @Body() data: { text: string; subjectId: string },
     @Req() request: AuthedRequest
@@ -31,6 +32,7 @@ export class QuestionsController {
 
   @Post(':id/solve')
   @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard)
   solveQuestion(
     @Param('id') id: string,
     @Req() request: AuthedRequest
@@ -40,6 +42,7 @@ export class QuestionsController {
 
   @Post(':id/answer')
   @UseGuards(SubscriptionGuard)
+  @UseGuards(AuthGuard)
   answerExercise(
     @Param('id') questionId: string,
     @Body() data: { chosenOption: string, isCorrect: boolean },
@@ -50,6 +53,7 @@ export class QuestionsController {
 
   @Post('random')
   @UseGuards(SubscriptionGuard)
+  @UseGuards(AuthGuard)
   getRandomQuestion(
     @Body() body: { subjectIds: string[] },
     @Req() request: AuthedRequest
@@ -75,6 +79,7 @@ export class QuestionsController {
 
   @Patch(':id')
   @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard)
   update(
     @Param('id') id: string,
     @Body() updateQuestionDto: UpdateQuestionDto,
@@ -85,6 +90,7 @@ export class QuestionsController {
 
   @Delete(':id')
   @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard)
   remove(
     @Param('id') id: string,
     @Req() request: AuthedRequest

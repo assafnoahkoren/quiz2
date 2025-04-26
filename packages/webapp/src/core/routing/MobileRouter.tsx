@@ -7,6 +7,7 @@ import { Register } from '../../pages/public/Register';
 import { MobileLayout } from '../../pages/mobile/MobileLayout';
 import ExerciseComponent from '../../pages/mobile/exercise/ExerciseComponent';
 import { ThankYouPage } from '../../pages/ThankYouPage';
+import QuestionPage from '../../pages/public/QuestionPage';
 
 // These components would need to be created
 // const Exercise = () => <div>Exercise Page</div>;
@@ -19,6 +20,7 @@ const MobileRouter = () => {
       <Route path="/" element={<Layout />}>
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="question/:id" element={<QuestionPage />} />
       </Route>
 
       {/* Protected routes with MobileLayout */}
