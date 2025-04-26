@@ -112,7 +112,7 @@ export const Home = () => {
             מבחן מלא
           </Title>
           <Text className='opacity-75'>
-            100 שאלות, על זמן
+            100 שאלות, 3:30 שעות
           </Text>
         </Stack>
         <Box style={{ 
