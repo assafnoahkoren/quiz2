@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion } from '@mantine/core';
+import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion, ActionIcon } from '@mantine/core';
 import { useRandomQuestion, useAnswerExercise } from '../../../api/questions';
 import { Question } from '../../../api/types';
-import { IconAlertCircle, IconArrowRight, IconArrowLeft } from '@tabler/icons-react';
+import { IconAlertCircle, IconArrowRight, IconArrowLeft, IconShare, IconLink, IconCheck } from '@tabler/icons-react';
 import { useExerciseStore } from './exerciseStore';
 import { getFullViewHeight } from '../MobileLayout';
+import { useClipboard } from '@mantine/hooks';
 
 // Define a type for our answers map
 interface AnswerState {
@@ -37,8 +38,16 @@ const QuestionsPage: React.FC = () => {
   // Reference to the footer element
   const footerRef = useRef<HTMLDivElement>(null);
   
+  // Clipboard hook for copy link functionality
+  const clipboard = useClipboard({ timeout: 500 });
+
   const randomQuestionMutation = useRandomQuestion();
   const answerExerciseMutation = useAnswerExercise();
+
+  // Helper function to generate the question URL
+  const getQuestionUrl = (questionId: string): string => {
+    return `${window.location.origin}/question/${questionId}`;
+  };
 
   // Update footer spacer height whenever needed
   useEffect(() => {
@@ -216,6 +225,31 @@ const QuestionsPage: React.FC = () => {
     exerciseStore.finishExercise();
   };
 
+  // Share current question
+  const handleShare = async () => {
+    if (!currentQuestion) return;
+
+    const shareData = {
+      title: 'שתף שאלה',
+      text: currentQuestion.question, // Share the question text
+      url: getQuestionUrl(currentQuestion.id), // Use helper function for URL
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        console.log('Question shared successfully');
+      } catch (error) {
+        console.error('Error sharing question:', error);
+        // Optionally notify the user about the error
+      }
+    } else {
+      console.log('Web Share API not supported in this browser.');
+      // Optionally implement a fallback (e.g., copy to clipboard or show a message)
+      alert('שיתוף אינו נתמך בדפדפן זה.');
+    }
+  };
+
   // If not in exercising phase, don't render the questions UI
   if (exerciseStore.currentPhase !== 'exercising') {
     return null;
@@ -267,7 +301,43 @@ const QuestionsPage: React.FC = () => {
           
           {/* Question and explanation section */}
           <Box>
-            <Paper p="md">
+			<Group justify="space-between" align="flex-start">
+				<Group gap={0}> {/* Group share and copy buttons */}
+					{/* Share button */}
+					<Button
+					  variant="subtle"
+					  size="xs"
+					  c="gray"
+					  onClick={handleShare}
+					  aria-label="Share question"
+					  leftSection={<IconShare size={16} />}
+					>
+					  שתף שאלה
+					</Button>
+
+					{/* Copy Link button */}
+					<Button
+                      variant="subtle"
+					  c="gray"
+					  size="xs"
+                      onClick={() => {
+                        if (currentQuestion) {
+                          const questionUrl = getQuestionUrl(currentQuestion.id); // Use helper function
+                          clipboard.copy(questionUrl);
+                        }
+                      }}
+                      aria-label="Copy link"
+                      leftSection={clipboard.copied ? <IconCheck size={20} /> : <IconLink size={16} />}
+                      color={clipboard.copied ? 'teal' : 'blue'}
+                    >
+                      {clipboard.copied ? 'הקישור הועתק' : 'העתק קישור'}
+                    </Button>
+				</Group>
+
+				{/* Empty element to push buttons left if needed or add other controls */}
+				<Box />
+			</Group>
+            <Paper p="md" pt={0}>
               <Text size="lg" fw={700} mb="md">
                 {currentQuestion.question}
               </Text>
