@@ -55,7 +55,7 @@ const UsersPage: React.FC = () => {
         <Button onClick={() => setCreateModalOpened(true)}>הוסף משתמש</Button>
       </div>
       
-      <DataTable
+      {/* <DataTable
         withTableBorder
         borderRadius="sm"
         withColumnBorders
@@ -110,7 +110,7 @@ const UsersPage: React.FC = () => {
             לא נמצאו משתמשים
           </Text>
         }
-      />
+      /> */}
 
       {/* Create User Modal */}
       {/* <Modal
