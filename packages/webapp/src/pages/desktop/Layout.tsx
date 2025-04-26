@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { AppShell, Container, Group, Text, Button, Stack, MantineProvider, DirectionProvider } from '@mantine/core';
+import { AppShell, Container, Group, Text, Button } from '@mantine/core';
 import { IconLogin, IconUserPlus, IconLogout, IconClipboard, IconUsers } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../components/auth/AuthContext';
@@ -20,9 +20,6 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   };
 
   return (
-    <DirectionProvider initialDirection="rtl" detectDirection>
-
-      <MantineProvider>
         <AppShell
           header={{ height: 60 }}
           padding="md"
@@ -75,7 +72,5 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
             </Container>
           </AppShell.Main>
         </AppShell>
-      </MantineProvider>
-    </DirectionProvider>
   );
 }; 

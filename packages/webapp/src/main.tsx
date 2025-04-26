@@ -10,7 +10,6 @@ import '@mantine/core/styles.css';
 import 'mantine-datatable/styles.layer.css';
 
 import 'uno.css';
-import { MantineProvider, DirectionProvider } from '@mantine/core';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -23,15 +22,11 @@ const queryClient = new QueryClient({
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <DirectionProvider initialDirection="rtl" detectDirection>
-    <MantineProvider>
-      <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <App />
-          <ClickToComponent editor="cursor"/>
-          {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-        </QueryClientProvider>
-      </React.StrictMode>
-    </MantineProvider>
-  </DirectionProvider>,
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+      <ClickToComponent editor="cursor" />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+    </QueryClientProvider>
+  </React.StrictMode>,
 ); 
