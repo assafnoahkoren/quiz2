@@ -47,7 +47,8 @@ const UsersPage: React.FC = () => {
       </div>
     );
   }
-
+  return null;
+  
   return (
     <div className="flex flex-col p-4">
       <div className="flex justify-between items-center mb-4">
