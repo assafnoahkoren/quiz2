@@ -28,14 +28,14 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
       userId: initialUserId || '',
       govExamId: '',
       currency: 'ILS',
-      price: 99,
+      price: 0,
       expiresAt: '',
     },
     validate: {
       userId: (value) => (!value ? 'משתמש נדרש' : null),
       govExamId: (value) => (!value ? 'מבחן נדרש' : null),
       currency: (value) => (!value ? 'מטבע נדרש' : null),
-      price: (value) => (value === undefined || value <= 0 ? 'מחיר נדרש' : null),
+      price: (value) => (value === undefined || value === null || value < 0 ? 'מחיר נדרש' : null),
     },
   });
 
@@ -159,7 +159,6 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             <NumberInput
               label="מחיר"
               placeholder="הכנס מחיר"
-              required
               min={0}
               {...form.getInputProps('price')}
             />
@@ -180,6 +179,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             type="date"
             label="תאריך תפוגה"
             placeholder="בחר תאריך תפוגה"
+            
             required
             {...form.getInputProps('expiresAt')}
           />

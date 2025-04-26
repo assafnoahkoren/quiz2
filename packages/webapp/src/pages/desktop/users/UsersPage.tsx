@@ -47,7 +47,7 @@ const UsersPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col p-4">
       <div className="flex justify-between items-center mb-4">
@@ -68,24 +68,43 @@ const UsersPage: React.FC = () => {
             title: '#',
             width: '130px',
             textAlign: 'right',
+            render: (record) => <UserIdCell id={record.id} />,
           },
           { accessor: 'name', title: 'שם' },
           { accessor: 'email', title: 'דוא״ל' },
           {
             accessor: 'role',
             title: 'תפקיד',
+            render: (record) => {
+              return <UserRoleCell role={record.role} />;
+            },
           },
           {
             accessor: 'subscription',
             title: 'מנוי',
+            render: (record) => {
+              // Use type assertion to access Subscriptions property
+              const user = record as EnrichedUser;
+              return <UserSubscriptionCell subscriptions={user.Subscriptions} />;
+            },
           },
           {
             accessor: 'actions',
             title: 'פעולות',
             textAlign: 'center',
             width: '100px',
+            render: (record) => {
+              return <UserActionsCell 
+                user={record as EnrichedUser} 
+                onEdit={handleEditUser} 
+                onDelete={handleDeleteUser} 
+              />;
+            },
           },
         ]}
+        onRowClick={({ record }) => {
+          console.log('Clicked on user:', record);
+        }}
         emptyState={
           <Text fw={500} ta="center" p="xl">
             לא נמצאו משתמשים
