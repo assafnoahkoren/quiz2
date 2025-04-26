@@ -305,7 +305,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
         }}
         onClick={handleCardClick}
       >
-        <Group justify="space-between" wrap="nowrap">
+        <Group justify="space-between" wrap="nowrap" style={{position: 'relative'}}>
           <Group wrap="nowrap" className="checkbox-container">
             <Checkbox
               checked={isChecked}
@@ -325,7 +325,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
           
           {/* Conditionally render SubjectScore for level 0 */} 
           {level === 1 && (
-            <Box style={{ marginRight: '10px' }}> {/* Add some margin */} 
+            <Box style={{ marginRight: '10px', position: 'absolute', left: '-10px' }}> {/* Add some margin */} 
               <SubjectScore subjectId={subject.id} />
             </Box>
           )}

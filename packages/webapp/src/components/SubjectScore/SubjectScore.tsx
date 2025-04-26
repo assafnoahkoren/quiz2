@@ -35,7 +35,7 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
       thickness={5}
 	  rootColor="#00000010"
       roundCaps={scoreValue === 0 ? false : true}
-	  style={{zoom: 0.7}}
+	  style={{zoom: 0.6 }}
       sections={[{ value: scoreValue, color: scoreColor }]}
       label={
         scoreValue === 100 ? (
@@ -44,7 +44,7 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
           </Center>
         ) : (
           <Text c={scoreColor} fw={700} ta="center" size="lg">
-            {`${Math.round(scoreValue)}`}<span className="text-xs me-0.5">%</span>
+            {`${Math.round(scoreValue)}`}<span className="text-sm me-0.5">%</span>
           </Text>
         )
       }
