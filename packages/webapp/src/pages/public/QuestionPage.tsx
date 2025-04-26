@@ -13,7 +13,7 @@ import {
   Button
 } from '@mantine/core';
 import { useQuestion } from '../../api/questions'; // Import the hook
-import { IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle, IconHome } from '@tabler/icons-react';
 import { useAuth } from '../../components/auth/AuthContext'; // Import useAuth
 
 const HEADER_HEIGHT = 50; // Match MobileLayout height
@@ -66,18 +66,28 @@ const QuestionPage: React.FC = () => {
               </Text>
             </Group>
             
-            {/* Center: Registration Promo (only if not logged in) */}
+            {/* Center: Conditional content based on auth state */}
             {!isAuthenticated && (
               <Button 
                 variant="light"
-                size="compact-sm" // Make it less imposing
+                size="compact-sm"
                 onClick={() => navigate('/register')}
               >
                 רוצה לתרגל עוד? הירשם עכשיו!
               </Button>
             )}
+            {isAuthenticated && (
+              <Button 
+                variant="light" 
+                size="compact-sm" 
+                leftSection={<IconHome size={16} />} // Add home icon
+                onClick={() => navigate('/')} // Navigate home
+              >
+                חזור לדף הבית
+              </Button>
+            )}
+
             {/* If user is logged in, render an empty Box to keep balance */}
-            {isAuthenticated && <Box style={{ width: '1px'}}/>}
 
             {/* Right: Empty (keeps promo centered) */}
             <Box style={{ width: '60px'}} /> {/* Add placeholder to balance the left brand */}

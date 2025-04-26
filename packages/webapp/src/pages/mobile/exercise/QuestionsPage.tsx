@@ -231,7 +231,7 @@ const QuestionsPage: React.FC = () => {
 
     const shareData = {
       title: 'שתף שאלה',
-      text: currentQuestion.question, // Share the question text
+      text: 'הנה קישור לשאלה:',
       url: getQuestionUrl(currentQuestion.id), // Use helper function for URL
     };
 
