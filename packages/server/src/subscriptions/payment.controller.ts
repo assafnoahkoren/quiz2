@@ -45,7 +45,7 @@ export class PaymentController {
       }
 
       // 2. Find User
-      const userPromise = this.prisma.user.findUnique({ where: { email } });
+      const userPromise = this.prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
 	  
       // 3. Await the required GovExam (uses cached promise)
       const govExam = await requiredGovExamPromise;
