@@ -42,7 +42,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
         <Container h="100%" px="xs">
           <Group h="100%" justify="space-between">
             <Group>
-              <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+              <Burger opened={opened} onClick={toggle} size="sm" />
               <Text
                 size="lg"
                 fw={700}

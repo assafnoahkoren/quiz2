@@ -70,7 +70,7 @@ export const Home = () => {
             radius="md" 
             withBorder
             style={{ cursor: 'pointer' }}
-            onClick={() => navigate(`/gov-exam/${exam.id}`)}
+            onClick={() => navigate(`/admin/gov-exam/${exam.id}`)}
           >
             <Title order={3}>{exam.name}</Title>
             {exam.description && (

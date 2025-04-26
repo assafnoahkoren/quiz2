@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { PrivateRoute } from '../../components/auth/PrivateRoute';
 import { Layout } from '../../components/Layout';
 import { Home } from '../../pages/mobile/Home';
@@ -12,61 +12,29 @@ import { ThankYouPage } from '../../pages/ThankYouPage';
 // const Exercise = () => <div>Exercise Page</div>;
 const Exam = () => <div>Exam Page</div>;
 
-const mobileRoutes: RouteObject[] = [
-  // Public routes with Layout
-  {
-    path: '/',
-    element: <Layout />,
-    children: [
-      {
-        path: 'login',
-        element: <Login />,
-      },
-      {
-        path: 'register',
-        element: <Register />,
-      },
-    ],
-  },
-  // Protected routes with MobileLayout
-  {
-    path: '/',
-    element: <PrivateRoute />,
-    children: [
-      {
-        element: <MobileLayout />,
-        children: [
-          {
-            index: true,
-            element: <Home />,
-          },
-          {
-            path: 'exercise',
-            element: <ExerciseComponent />,
-          },
-          {
-            path: 'exam',
-            element: <Exam />,
-          },
-          {
-            path: 'thank-you',
-            element: <ThankYouPage />,
-          },
-        ],
-      },
-    ],
-  },
-  // Fallback route
-  {
-    path: '*',
-    element: <Navigate to="/" replace />,
-  },
-];
-
-const mobileRouter = createBrowserRouter(mobileRoutes);
-
 const MobileRouter = () => {
-  return <RouterProvider router={mobileRouter} />;
+  return (
+    <Routes>
+      {/* Public routes with Layout */}
+      <Route path="/" element={<Layout />}>
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+      </Route>
+
+      {/* Protected routes with MobileLayout */}
+      <Route element={<PrivateRoute />}>
+        <Route element={<MobileLayout />}>
+          <Route index element={<Home />} />
+          <Route path="exercise" element={<ExerciseComponent />} />
+          <Route path="exam" element={<Exam />} />
+          <Route path="thank-you" element={<ThankYouPage />} />
+        </Route>
+      </Route>
+
+      {/* Fallback route - Adjusted for nested structure */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 };
 
 export default MobileRouter; 

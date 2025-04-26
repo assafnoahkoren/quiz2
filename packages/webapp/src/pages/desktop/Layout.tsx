@@ -30,7 +30,7 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
             <Group gap="0">
               <Text
                 component={Link}
-                to="/"
+                to="/admin"
                 size="xl"
                 fw={700}
                 style={{ textDecoration: 'none', color: 'inherit', marginInlineEnd: '32px' }}
@@ -40,7 +40,7 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
               <Button
                 variant="subtle"
                 component={Link}
-                to="/"
+                to="/admin"
                 leftSection={<IconClipboard size={20} />}
               >
                 בחינות
@@ -48,7 +48,7 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
               <Button
                 variant="subtle"
                 component={Link}
-                to="/users"
+                to="/admin/users"
                 leftSection={<IconUsers size={20} />}
               >
                 משתמשים
