@@ -1,13 +1,14 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon, Badge } from '@mantine/core';
-import { IconLogout, IconHome, IconMenu2, IconUser, IconX } from '@tabler/icons-react';
+import { IconLogout, IconHome, IconMenu2, IconUser, IconX, IconSettings } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../components/auth/AuthContext';
 import { useCurrentUser } from '../../api/users';
 import { useGovExams } from '../../api/gov-exam';
 import { useMySubscriptionStatus } from '../../api/subscriptions';
 import { SubscriptionStatusHandler } from '../../components/SubscriptionStatusHandler';
+import { UserRole } from '../../types/user';
 
 interface MobileLayoutProps {
   children?: ReactNode;
@@ -96,6 +97,21 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
           >
             דף הבית
           </Button>
+          
+          {currentUser?.role === UserRole.ADMIN && (
+            <Button
+              variant="subtle"
+              fullWidth
+              leftSection={<IconSettings size={18} />}
+              onClick={() => {
+                close();
+                navigate('/admin');
+              }}
+              justify="start"
+            >
+              ממשק ניהול
+            </Button>
+          )}
           
           <div style={{ flexGrow: 1 }} />
           

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RingProgress, Text, Center, Loader } from '@mantine/core';
+import { Progress, Text, Center, Loader, Popover } from '@mantine/core';
 import { useSubjectScore } from '../../api/subjects';
 import { IconCheck } from '@tabler/icons-react';
 
@@ -30,24 +30,30 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
   const scoreColor = scoreValue >= 70 ? 'green' : scoreValue >= 40 ? 'yellow' : 'gray';
 
   return (
-    <RingProgress
-      size={70}
-      thickness={5}
-	  rootColor="#00000010"
-      roundCaps={scoreValue === 0 ? false : true}
-	  style={{zoom: 0.6 }}
-      sections={[{ value: scoreValue, color: scoreColor }]}
-      label={
-        scoreValue === 100 ? (
-          <Center>
-            <IconCheck size={30} color={scoreColor}/>
-          </Center>
-        ) : (
-          <Text c={scoreColor} fw={700} ta="center" size="lg">
-            {`${Math.round(scoreValue)}`}<span className="text-sm me-0.5">%</span>
-          </Text>
-        )
-      }
-    />
+    <Popover position="top" withArrow shadow="md" >
+      <Popover.Target>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '70px', cursor: 'pointer' }}
+          onClick={(e) => e.stopPropagation()}>
+          <Progress
+            value={scoreValue}
+            color={scoreColor}
+            size="md"
+            style={{ flexGrow: 1 }}
+          />
+          {scoreValue === 100 ? (
+            <IconCheck size={16} color={scoreColor} style={{ flexShrink: 0 }}/>
+          ) : (
+            <Text c={scoreColor} fw={700} fz={10} style={{ flexShrink: 0 }}>
+              {`${Math.round(scoreValue)}%`}
+            </Text>
+          )}
+        </div>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Text size="sm">
+          אחוז הידע שלך בנושא הוא {Math.round(scoreValue)}%
+        </Text>
+      </Popover.Dropdown>
+    </Popover>
   );
 }; 

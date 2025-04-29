@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppShell, Container, Group, Text, Button } from '@mantine/core';
-import { IconLogin, IconUserPlus, IconLogout, IconClipboard, IconUsers } from '@tabler/icons-react';
+import { IconLogin, IconUserPlus, IconLogout, IconClipboard, IconUsers, IconHome } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../components/auth/AuthContext';
 
@@ -54,14 +54,24 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                     משתמשים
                   </Button>
                 </Group>
-                <Button
-                  variant="transparent"
-                  color="red"
-                  leftSection={<IconLogout size={20} />}
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
+                <Group>
+                  <Button
+                    variant="transparent"
+                    color="red"
+                    leftSection={<IconLogout size={20} />}
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                  <Button
+                    variant="subtle"
+                    component={Link}
+                    to="/"
+                    leftSection={<IconHome size={20} />}
+                  >
+                    חזרה לאפליקציה
+                  </Button>
+                </Group>
               </Group>
             </Container>
           </AppShell.Header>
