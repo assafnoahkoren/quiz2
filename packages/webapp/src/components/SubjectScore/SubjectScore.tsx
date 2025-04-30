@@ -13,7 +13,7 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
   if (isLoading) {
     return (
       <Center>
-        <Loader size="sm" />
+        <Loader size="xs" />
       </Center>
     );
   }
