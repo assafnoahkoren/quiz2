@@ -161,12 +161,19 @@ export const useAnswerExercise = () => {
   const isFreeUser = subscriptionStatus?.type === 'demo';
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ questionId, chosenOption, isCorrect }: { 
+    mutationFn: ({ questionId, chosenOption, isCorrect, subjectId }: {
       questionId: string;
       chosenOption: string;
       isCorrect: boolean;
+      subjectId?: string;
     }) => answerExercise(questionId, { chosenOption, isCorrect }),
-    onSuccess: () => {     
+    onSuccess: (data, variables) => {
+      if (variables.subjectId) {
+        queryClient.invalidateQueries({ queryKey: subjectKeys.score(variables.subjectId) });
+      } else {
+        queryClient.invalidateQueries({ queryKey: subjectKeys.scores() });
+      }
+
       if (isFreeUser) {
         queryClient.invalidateQueries({ queryKey: subscriptionKeys.myStatus() });
       }

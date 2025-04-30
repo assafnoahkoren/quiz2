@@ -32,8 +32,7 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
   return (
     <Popover position="top" withArrow shadow="md" >
       <Popover.Target>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '70px', cursor: 'pointer' }}
-          onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '70px', cursor: 'pointer', marginInlineEnd: '10px' }}>
           <Progress
             value={scoreValue}
             color={scoreColor}

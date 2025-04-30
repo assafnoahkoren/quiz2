@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion, ActionIcon } from '@mantine/core';
+import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion, ActionIcon, Tooltip } from '@mantine/core';
 import { useRandomQuestion, useAnswerExercise } from '../../../api/questions';
 import { Question } from '../../../api/types';
 import { IconAlertCircle, IconArrowRight, IconArrowLeft, IconShare, IconLink, IconCheck } from '@tabler/icons-react';
 import { useExerciseStore } from './exerciseStore';
 import { getFullViewHeight } from '../MobileLayout';
 import { useClipboard } from '@mantine/hooks';
+import { SubjectScore } from '../../../components/SubjectScore/SubjectScore';
 
 // Define a type for our answers map
 interface AnswerState {
@@ -178,7 +179,8 @@ const QuestionsPage: React.FC = () => {
       answerExerciseMutation.mutate({
         questionId: currentQuestion.id,
         chosenOption: JSON.stringify(selectedOptionObj),
-        isCorrect
+        isCorrect,
+		subjectId: currentQuestion.subjectId
       });
     }
   };
@@ -301,7 +303,7 @@ const QuestionsPage: React.FC = () => {
           
           {/* Question and explanation section */}
           <Box>
-			<Group justify="space-between" align="flex-start">
+			<Group justify="space-between" align="center">
 				<Group gap={0}> {/* Group share and copy buttons */}
 					{/* Share button */}
 					<Button
@@ -332,10 +334,24 @@ const QuestionsPage: React.FC = () => {
                     >
                       {clipboard.copied ? 'הקישור הועתק' : 'העתק קישור'}
                     </Button>
+					
 				</Group>
 
-				{/* Empty element to push buttons left if needed or add other controls */}
-				<Box />
+				{/* Replace empty Box with SubjectScore for end alignment */}
+				<Group>
+                  {/* Add Text component to display the subject name with truncation and tooltip */}
+                  <Tooltip label={exerciseStore.allSubjectsFlatMap.get(currentQuestion.subjectId)?.name || ''}>
+                    <Text 
+                      size="sm" 
+                      c="dimmed" 
+                      truncate 
+                      style={{ maxWidth: 100, cursor: 'default' }}
+                    >
+                      {exerciseStore.allSubjectsFlatMap.get(currentQuestion.subjectId)?.name}
+                    </Text>
+                  </Tooltip>
+				  <SubjectScore subjectId={currentQuestion.subjectId} />
+				</Group>
 			</Group>
             <Paper p="md" pt={0}>
               <Text size="lg" fw={700} mb="md">

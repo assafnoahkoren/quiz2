@@ -325,7 +325,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
           
           {/* Conditionally render SubjectScore for level 0 */} 
           {level === 1 && (
-            <Box style={{ marginRight: '10px', position: 'absolute', left: '-10px' }}> {/* Add some margin */} 
+            <Box style={{ marginRight: '10px', position: 'absolute', left: '-10px' }} onClick={(e) => e.stopPropagation()}>
               <SubjectScore subjectId={subject.id} />
             </Box>
           )}

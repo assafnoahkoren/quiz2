@@ -440,7 +440,7 @@ export class QuestionsService {
       return userExamQuestion;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new BadRequestException('Error recording question answer');
+        throw new BadRequestException(error);
       }
       throw error;
     }

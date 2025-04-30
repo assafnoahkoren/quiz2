@@ -28,14 +28,14 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
       userId: initialUserId || '',
       govExamId: '',
       currency: 'ILS',
-      price: 0,
+      price: 99,
       expiresAt: '',
     },
     validate: {
       userId: (value) => (!value ? 'משתמש נדרש' : null),
       govExamId: (value) => (!value ? 'מבחן נדרש' : null),
       currency: (value) => (!value ? 'מטבע נדרש' : null),
-      price: (value) => (value === undefined || value === null || value < 0 ? 'מחיר נדרש' : null),
+      price: (value) => (value === undefined || value <= 0 ? 'מחיר נדרש' : null),
     },
   });
 
