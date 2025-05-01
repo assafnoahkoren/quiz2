@@ -27,7 +27,7 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
 
   // Ensure score is a number and within 0-100 range
   const scoreValue = typeof score === 'number' ? Math.max(0, Math.min(100, score)) : 0;
-  const scoreColor = scoreValue >= 70 ? 'green' : scoreValue >= 40 ? 'yellow' : 'gray';
+  const scoreColor = scoreValue >= 70 ? '#40c057' : scoreValue >= 40 ? '#fab005' : '#868e96';
 
   return (
     <Popover position="top" withArrow shadow="md" >
@@ -37,7 +37,7 @@ export const SubjectScore: React.FC<SubjectScoreProps> = ({ subjectId }) => {
             value={scoreValue}
             color={scoreColor}
             size="md"
-            style={{ flexGrow: 1 }}
+            style={{ flexGrow: 1, backgroundColor: `${scoreColor}50` }}
           />
           {scoreValue === 100 ? (
             <IconCheck size={16} color={scoreColor} style={{ flexShrink: 0 }}/>

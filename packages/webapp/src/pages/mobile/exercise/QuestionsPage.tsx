@@ -275,18 +275,21 @@ const QuestionsPage: React.FC = () => {
 				</Alert>
 			) : currentQuestion ? (
 				<Stack gap={0} style={{ height: '100%', position: 'relative' }}>
-					<Group justify="space-between">
+					<Group justify="space-between" gap={2}>
 						{/* Add Text component to display the subject name with truncation and tooltip */}
-						<SubjectScore subjectId={currentQuestion.subjectId} />
+						<Box style={{ flex: 2 }}>
+							<SubjectScore subjectId={currentQuestion.subjectId} />
+						</Box>
 						<Text
 							size="sm"
 							c="dimmed"
 							truncate
-							style={{ cursor: 'default' }}
+							style={{ cursor: 'default', flex: 6, overflow: 'hidden', textAlign: 'center' }} // Allow text to grow/shrink but aim for 60%
 						>
 							{exerciseStore.allSubjectsFlatMap.get(currentQuestion.subjectId)?.name}
 						</Text>
-						<Box style={{ pointerEvents: 'none', opacity: 0 }}>
+						<Box style={{ pointerEvents: 'none', opacity: 0, flex: 2 }}>
+							{/* This Box is likely for spacing, keep its basis */}
 							<SubjectScore subjectId={currentQuestion.subjectId} />
 						</Box>
 					</Group>
