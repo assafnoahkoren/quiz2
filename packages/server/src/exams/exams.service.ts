@@ -35,7 +35,7 @@ export class ExamsService {
 
     // 2. Get 100 random question IDs for those subjects
     const questionIds = await this.getRandomQuestions({
-      count: 3, // Get 100 questions
+      count: 100, // Get 100 questions
       subjectIds,
     });
 
