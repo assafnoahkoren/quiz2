@@ -87,7 +87,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
         imageUrl: questionData.imageUrl || '',
         imageFile: null,
         subjectId: questionData.subjectId || subjectId,
-        options: questionData.options.map((opt: { answer: string; isCorrect: boolean }) => ({
+        options: questionData.Options.map((opt: { answer: string; isCorrect: boolean }) => ({
           answer: opt.answer,
           isCorrect: opt.isCorrect,
         })),

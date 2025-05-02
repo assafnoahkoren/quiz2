@@ -103,7 +103,7 @@ const QuestionPage: React.FC = () => {
         </Paper>
 
         <Stack gap="md">
-          {question.options.map((option) => (
+          {question.Options.map((option) => (
             <Paper
               key={option.id}
               p="md"

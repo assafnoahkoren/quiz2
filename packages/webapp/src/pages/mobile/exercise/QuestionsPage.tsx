@@ -91,7 +91,7 @@ const QuestionsPage: React.FC = () => {
 
 			// Shuffle the options when we get the question
 			if (question) {
-				question.options = shuffleArray(question.options);
+				question.Options = shuffleArray(question.Options);
 			}
 
 			return question;
@@ -178,7 +178,7 @@ const QuestionsPage: React.FC = () => {
 		// Get the current question and check if answer is correct
 		const currentQuestion = questions[currentQuestionIndex];
 		if (currentQuestion && selectedOption) {
-			const selectedOptionObj = currentQuestion.options.find(opt => opt.id === selectedOption);
+			const selectedOptionObj = currentQuestion.Options.find(opt => opt.id === selectedOption);
 			const isCorrect = selectedOptionObj?.isCorrect || false;
 
 			// Save answer to server
@@ -444,7 +444,7 @@ const QuestionsPage: React.FC = () => {
 								onChange={(value) => handleOptionSelect(value)}
 							>
 								<Stack>
-									{currentQuestion.options.map((option) => (
+									{currentQuestion.Options.map((option) => (
 										<Paper
 											key={option.id}
 											p="sm"

@@ -428,7 +428,7 @@ export class QuestionsService {
       status: question.status,
       createdAt: question.createdAt,
       updatedAt: question.updatedAt,
-      options: question.Options.map(option => ({
+      Options: question.Options.map(option => ({
         id: option.id,
         answer: option.answer,
         isCorrect: option.isCorrect,

@@ -85,7 +85,7 @@ export class QuestionResponseDto {
   status: QuestionStatus;
   createdAt: Date;
   updatedAt: Date;
-  options: {
+  Options: {
     id: string;
     answer: string;
     isCorrect: boolean;
