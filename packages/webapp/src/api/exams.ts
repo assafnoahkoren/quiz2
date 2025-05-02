@@ -1,0 +1,99 @@
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import apiClient from './client';
+
+// Define types based on backend DTOs and expected return values
+// Adjust these based on your actual Prisma schema/API response
+export interface CreateExamDto {
+  govExamId: string;
+}
+
+export interface UserExam {
+  id: string;
+  userId: string;
+  govExamId: string;
+  startedAt: string; // Dates are often serialized as strings
+  completedAt: string | null;
+  UserExamQuestions: UserExamQuestion[]; // Add related questions
+  // Include other fields returned by your API if necessary
+}
+
+// Define the UserExamQuestion type based on likely schema
+export interface UserExamQuestion {
+  id: string;
+  questionId: string;
+  userExamId: string;
+  userId: string;
+  status: string; // Adjust type if using an enum (e.g., QuestionStatus)
+  userAnswerId: string | null;
+  // Add other relevant fields from your UserExamQuestion model
+}
+
+// Query keys for exams
+export const examKeys = {
+  all: ['exams'] as const,
+  lists: () => [...examKeys.all, 'list'] as const,
+  details: () => [...examKeys.all, 'detail'] as const, // Key for single items
+  detail: (id: string) => [...examKeys.details(), id] as const, // Key for specific item
+  current: () => [...examKeys.all, 'current'] as const, // Key for current running exam
+  // Add more specific keys as needed, e.g., for fetching user's exams
+  // userExams: (userId: string) => [...examKeys.lists(), { userId }] as const,
+};
+
+// API call function to create an exam
+export const createExam = async (data: CreateExamDto): Promise<UserExam> => {
+  const response = await apiClient.post<UserExam>('/api/exams', data);
+  return response.data;
+};
+
+// API call function to get the current running exam
+export const getCurrentRunningExam = async (durationMinutes?: number): Promise<UserExam | null> => {
+  // Construct the URL, adding the duration parameter if provided
+  const url = durationMinutes ? `/api/exams/current?duration=${durationMinutes}` : '/api/exams/current';
+  const response = await apiClient.get<UserExam | null>(url); // Expect UserExam or null if none found
+  return response.data;
+};
+
+// API call function to get an exam by ID
+export const getExamById = async (examId: string): Promise<UserExam> => {
+  const response = await apiClient.get<UserExam>(`/api/exams/${examId}`);
+  return response.data;
+};
+
+// React Query hook for creating an exam
+export const useCreateExam = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createExam,
+    onSuccess: (data) => {
+      // Invalidate queries that might be affected by a new exam,
+      // e.g., a list of the user's exams.
+      // Add appropriate invalidations here based on your application's needs.
+      // Example: queryClient.invalidateQueries({ queryKey: examKeys.userExams(data.userId) });
+      console.log('Exam created successfully:', data);
+    },
+    onError: (error) => {
+      // Handle or log errors
+      console.error('Error creating exam:', error);
+    },
+  });
+};
+
+// React Query hook for fetching a single exam by ID
+export const useGetExamById = (examId: string | undefined) => {
+  return useQuery({
+    queryKey: examKeys.detail(examId!), // Use the specific detail key
+    queryFn: () => getExamById(examId!), // Call the API function
+    enabled: !!examId, // Only run the query if examId is defined
+  });
+};
+
+// React Query hook for fetching the current running exam
+export const useGetCurrentRunningExam = (durationMinutes: number = 210) => {
+  return useQuery<UserExam | null, Error>({
+    queryKey: examKeys.current(), // Use the specific key for the current exam
+    queryFn: () => getCurrentRunningExam(durationMinutes), // Call the API function
+    // Add any options like staleTime, cacheTime if needed
+    // Example: staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}; 

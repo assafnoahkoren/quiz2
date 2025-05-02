@@ -1,18 +1,36 @@
-import { Stack, Button, Text, Box, Title, Modal, Loader, Alert } from '@mantine/core';
+import { Stack, Button, Text, Box, Title, Modal, Loader, Alert, useMantineTheme } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { getFullViewHeight } from './MobileLayout';
 import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle, IconListCheck, IconArchive, IconClock, IconStopwatch } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useGovExams } from '../../api/gov-exam';
+import { useGetCurrentRunningExam } from '../../api/exams';
 import exerciseStoreInstance from './exercise/exerciseStore';
 
 export const Home = () => {
   const navigate = useNavigate();
+  const theme = useMantineTheme();
   const exerciseStore = exerciseStoreInstance;
   const [modalOpen, setModalOpen] = useState(false);
   
+  const { isLoading: isLoadingGovExams, error: errorGovExams } = useGovExams();
+  const { data: currentExam, isLoading: isLoadingCurrentExam, error: errorCurrentExam } = useGetCurrentRunningExam();
 
-  const { isLoading, error } = useGovExams();
+  // Define styles for the Full Exam button
+  const fullExamBaseStyle = {
+    fontSize: '1.2rem',
+    borderRadius: '10px',
+    background: 'linear-gradient(45deg, #2B86C5, #00C9A7)',
+    height: '70px',
+    position: 'relative' as const,
+  };
+
+  const fullExamConditionalStyle = currentExam ? {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0
+  } : {};
+
+  const finalFullExamStyle = { ...fullExamBaseStyle, ...fullExamConditionalStyle };
 
   const handleNavigateToExercise = () => {
     exerciseStore.currentPhase = 'pickingSubjects';
@@ -92,43 +110,68 @@ export const Home = () => {
         </Box>
       </Button>
 
-      <Button 
-        size="lg" 
-        fullWidth 
-        onClick={() => setModalOpen(true)}
+      <Stack 
+        gap={0} 
         style={{ 
+          width: '100%',
           maxWidth: 300, 
-          fontSize: '1.2rem',
-          borderRadius: '10px',
-          background: 'linear-gradient(45deg, #2B86C5, #00C9A7)',
-          opacity: 0.5,
-          height: '70px',
-          marginTop: '20px',
-          position: 'relative',
+          marginTop: '20px' 
         }}
       >
-        <Stack gap={0}>
-          <Title order={4}>
-            מבחן מלא
-          </Title>
-          <Text className='opacity-75'>
-            100 שאלות, 3:30 שעות
-          </Text>
-        </Stack>
-        <Box style={{ 
-          position: 'absolute', 
-          right: '16px', 
-          top: '50%', 
-          transform: 'translateY(-50%)' 
-        }}>
-          <IconStopwatch size={24} />
-        </Box>
-      </Button>
+        <Button 
+          size="lg" 
+          fullWidth 
+          onClick={() => navigate('/create-exam')}
+          style={finalFullExamStyle}
+        >
+          <Stack gap={0}>
+            <Title order={4}>
+              מבחן מלא
+            </Title>
+            <Text className='opacity-75'>
+              100 שאלות, 3:30 שעות
+            </Text>
+          </Stack>
+          <Box style={{ 
+            position: 'absolute', 
+            right: '16px', 
+            top: '50%', 
+            transform: 'translateY(-50%)' 
+          }}>
+            <IconStopwatch size={24} />
+          </Box>
+        </Button>
 
-      {isLoading && <Loader mt="xl" />}
-      {error && (
+        {!isLoadingCurrentExam && currentExam && (
+          <Button
+            size="sm"
+            fullWidth
+            onClick={() => navigate(`/exam/${currentExam.id}`)}
+            style={(theme) => ({ 
+              marginTop: 0, 
+              borderTopLeftRadius: 0, 
+              borderTopRightRadius: 0, 
+              borderBottomLeftRadius: '10px', 
+              borderBottomRightRadius: '10px', 
+              backgroundColor: theme.colors.gray[1], 
+              paddingTop: theme.spacing.xs, 
+              paddingBottom: theme.spacing.xs, 
+              color: theme.colors.gray[7],
+              '&:hover': { 
+                backgroundColor: theme.colors.gray[2],
+              },
+            })}
+            leftSection={<IconClock size={16} />}
+          >
+            חזור למבחן הפעיל
+          </Button>
+        )}
+      </Stack>
+
+      {(isLoadingGovExams || isLoadingCurrentExam) && <Loader mt="xl" />}
+      {(errorGovExams || errorCurrentExam) && (
         <Alert icon={<IconAlertCircle size="1rem" />} title="Error!" color="red" mt="xl">
-          Failed to load data needed for exercises: {error.message}
+          Failed to load data: {errorGovExams?.message || errorCurrentExam?.message}
         </Alert>
       )}
 

@@ -8,10 +8,11 @@ import { MobileLayout } from '../../pages/mobile/MobileLayout';
 import ExerciseComponent from '../../pages/mobile/exercise/ExerciseComponent';
 import { ThankYouPage } from '../../pages/ThankYouPage';
 import QuestionPage from '../../pages/public/QuestionPage';
+import ExamCreationPage from '../../pages/exam/ExamCreationPage';
+import ExamPage from '../../pages/exam/ExamPage';
 
 // These components would need to be created
 // const Exercise = () => <div>Exercise Page</div>;
-const Exam = () => <div>Exam Page</div>;
 
 const MobileRouter = () => {
   return (
@@ -28,7 +29,8 @@ const MobileRouter = () => {
         <Route element={<MobileLayout />}>
           <Route index element={<Home />} />
           <Route path="exercise" element={<ExerciseComponent />} />
-          <Route path="exam" element={<Exam />} />
+          <Route path="exam/:id" element={<ExamPage />} />
+          <Route path="create-exam" element={<ExamCreationPage />} />
           <Route path="thank-you" element={<ThankYouPage />} />
         </Route>
       </Route>

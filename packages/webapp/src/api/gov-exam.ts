@@ -21,4 +21,4 @@ export const useGovExams = () => {
     queryKey: govExamKeys.list(),
     queryFn: fetchGovExams,
   });
-}; 
+};
