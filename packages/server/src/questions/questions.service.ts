@@ -86,27 +86,48 @@ export class QuestionsService {
   }
 
   // Get a random question from an array of subject IDs
-  async getRandomQuestion(subjectIds: string[]): Promise<QuestionResponseDto> {
+  async getRandomQuestion(subjectIds: string[], skipAnswered: boolean = false, userId: string | null): Promise<QuestionResponseDto | null> {
     if (!subjectIds || subjectIds.length === 0) {
       throw new BadRequestException('At least one subject ID must be provided');
     }
 
-    try {
-      // Use Prisma's raw query to get a random question with ORDER BY RANDOM()
-      // Convert enum to string to avoid type comparison issues
-      const draftStatus = QuestionStatus.DRAFT.toString();
-      
-      const randomQuestionResult = await this.prisma.$queryRaw<{id: string}[]>`
-        SELECT q.* 
+    const correctnessThreshold = Number(this.appConfigService.CORRECTNESS_THRESHOLD);
+    const isPublished = QuestionStatus.PUBLISHED.toString();
+
+    let query;
+
+    if (skipAnswered && userId && correctnessThreshold > 0) {
+      // If skipAnswered is true, userId is provided, and threshold is valid, filter out questions
+      // the user has answered correctly >= correctnessThreshold times.
+      query = Prisma.sql`
+        SELECT q.id
         FROM "Question" q
+        LEFT JOIN "UserExamQuestion" ueq ON q.id = ueq."questionId" AND ueq."userId" = ${userId}
         WHERE q."subjectId" IN (${Prisma.join(subjectIds)})
-        AND q."status"::text != ${draftStatus}
-        ORDER BY RANDOM() 
+        AND q."status"::text = ${isPublished}
+        GROUP BY q.id
+        HAVING COUNT(CASE WHEN ueq."isCorrect" = TRUE THEN 1 END) < ${correctnessThreshold}
+        ORDER BY RANDOM()
         LIMIT 1
       `;
+    } else {
+      // Otherwise, get any random question matching the subject IDs and not in DRAFT status.
+      query = Prisma.sql`
+        SELECT q.id
+        FROM "Question" q
+        WHERE q."subjectId" IN (${Prisma.join(subjectIds)})
+        AND q."status"::text = ${isPublished}
+        ORDER BY RANDOM()
+        LIMIT 1
+      `;
+    }
+
+    try {
+      // Use Prisma's raw query to get a random question ID
+      const randomQuestionResult = await this.prisma.$queryRaw<{ id: string }[]>(query);
 
       if (!randomQuestionResult || randomQuestionResult.length === 0) {
-        throw new NotFoundException('No questions found for the specified subjects');
+        return null;
       }
 
       // Get the question with its options

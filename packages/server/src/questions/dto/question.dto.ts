@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsUUID, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsUUID, IsArray, ValidateNested, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { QuestionStatus, QuestionType } from '@prisma/client';
 
@@ -90,4 +90,16 @@ export class QuestionResponseDto {
     answer: string;
     isCorrect: boolean;
   }[];
+}
+
+// DTO for the random question request body
+export class GetRandomQuestionDto {
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty()
+  subjectIds: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  skipAnswered?: boolean;
 } 

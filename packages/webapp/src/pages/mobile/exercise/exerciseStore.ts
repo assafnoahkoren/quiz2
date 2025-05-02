@@ -1,4 +1,4 @@
-import { makeAutoObservable, computed } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { createContext, useContext } from 'react';
 import { SubjectTreeItem } from '../../../api/types'; // Adjust import path again
 
@@ -28,12 +28,10 @@ export class ExerciseStore {
   allSubjectsFlatMap = new Map<string, SubjectTreeItem>(); // For easy question count lookup
   shouldSelectAllOnLoad = false; // Flag to trigger selection after load
   currentPhase: ExercisePhase = "pickingSubjects"; // Track exercise phase
+  skipAnswered: boolean = true;
 
   constructor() {
-    makeAutoObservable(this, {
-        selectedSubjectsCount: computed,
-        // totalSelectedQuestions: computed // Keep this calculation in component for now if it depends on external data like examData directly
-    });
+    makeAutoObservable(this);
     // Initialize state properties here
   }
 
@@ -146,6 +144,12 @@ export class ExerciseStore {
   resetPhase() {
       this.currentPhase = "pickingSubjects";
   }
+
+  // Method to set skipAnswered
+  setSkipAnswered(value: boolean) {
+    this.skipAnswered = value;
+  }
+  
 
   // Computed property for selected count
   get selectedSubjectsCount(): number {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion, ActionIcon, Tooltip } from '@mantine/core';
+import { Box, Text, Button, Radio, Group, Stack, Paper, Loader, Alert, Accordion } from '@mantine/core';
 import { useRandomQuestion, useAnswerExercise } from '../../../api/questions';
 import { Question } from '../../../api/types';
 import { IconAlertCircle, IconArrowRight, IconArrowLeft, IconShare, IconLink, IconCheck } from '@tabler/icons-react';
@@ -7,6 +7,7 @@ import { useExerciseStore } from './exerciseStore';
 import { getFullViewHeight } from '../MobileLayout';
 import { useClipboard } from '@mantine/hooks';
 import { SubjectScore } from '../../../components/SubjectScore/SubjectScore';
+import { observer } from 'mobx-react-lite';
 
 // Define a type for our answers map
 interface AnswerState {
@@ -78,10 +79,13 @@ const QuestionsPage: React.FC = () => {
 
 	const fetchRandomQuestion = async (): Promise<Question | null> => {
 		try {
-			const subjectIds = Array.from(exerciseStore.selectedSubjectIds);
+			const subjectIds: string[] = Array.from(exerciseStore.selectedSubjectIds);
 			if (subjectIds.length === 0) return null;
 
-			const question = await randomQuestionMutation.mutateAsync(subjectIds);
+			const question = await randomQuestionMutation.mutateAsync({
+				subjectIds,
+				skipAnswered: exerciseStore.skipAnswered,
+			});
 
 			// Shuffle the options when we get the question
 			if (question) {
@@ -488,6 +492,20 @@ const QuestionsPage: React.FC = () => {
 					color="blue"
 				>
 					אין שאלות זמינות לנושאים שנבחרו.
+					<Button
+						mt="md"
+						onClick={() => {
+							exerciseStore.setSkipAnswered(false);
+							// exerciseStore.resetPhase();
+							// Note: For this to immediately refetch, the useEffect that calls
+							// initializeQuestions might need to include exerciseStore.skipAnswered
+							// in its dependency array. Assuming that change is made elsewhere or
+							// the user is expected to navigate back/restart.
+							// If the useEffect IS updated, this button will trigger a new fetch attempt.
+						}}
+					>
+						הצג גם שאלות שכבר נענו נכון
+					</Button>
 				</Alert>
 			)}
 		</Box>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Checkbox, Loader, Alert, Stack, Box, Group, Text, Title, Button } from '@mantine/core';
+import { Checkbox, Loader, Alert, Stack, Box, Group, Text, Title, Button, Accordion, Switch, Paper } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useSubjectsByExamId } from '../../../api';
 import { SubjectTreeItem } from '../../../api/types';
@@ -12,43 +12,43 @@ const useCountAnimation = (value: number, duration: number = 500) => {
   const [displayValue, setDisplayValue] = useState(0);
   const previousValueRef = useRef(0);
   const animationRef = useRef<number | null>(null);
-  
+
   useEffect(() => {
     previousValueRef.current = displayValue;
-    
+
     // Function to animate the count
     const animateCount = (timestamp: number, startValue: number, endValue: number, startTime: number) => {
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       // Use easeOutExpo for smoother animation
       const easeOutExpo = (t: number) => (t === 1) ? 1 : 1 - Math.pow(2, -10 * t);
       const easedProgress = easeOutExpo(progress);
-      
+
       // Calculate current value based on animation progress
       const currentValue = Math.floor(startValue + (endValue - startValue) * easedProgress);
       setDisplayValue(currentValue);
-      
+
       // Continue animation if not complete
       if (progress < 1) {
-        animationRef.current = requestAnimationFrame((newTimestamp) => 
+        animationRef.current = requestAnimationFrame((newTimestamp) =>
           animateCount(newTimestamp, startValue, endValue, startTime)
         );
       }
     };
-    
+
     // Cancel any existing animation
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
-    
+
     // Start new animation
     if (previousValueRef.current !== value) {
-      animationRef.current = requestAnimationFrame((timestamp) => 
+      animationRef.current = requestAnimationFrame((timestamp) =>
         animateCount(timestamp, previousValueRef.current, value, timestamp)
       );
     }
-    
+
     // Cleanup animation on unmount
     return () => {
       if (animationRef.current) {
@@ -56,7 +56,7 @@ const useCountAnimation = (value: number, duration: number = 500) => {
       }
     };
   }, [value, duration]);
-  
+
   return displayValue;
 };
 
@@ -131,14 +131,14 @@ const getAllDescendantIds = (subject: SubjectTreeItem): string[] => {
 // Helper function to get all subject IDs including children (for stats calculation)
 const getAllSubjectIds = (subjects: SubjectTreeItem[]): Map<string, SubjectTreeItem> => {
   const result = new Map<string, SubjectTreeItem>();
-  
+
   const processSubject = (subject: SubjectTreeItem) => {
     result.set(subject.id, subject);
     if (subject.children && subject.children.length > 0) {
       subject.children.forEach(processSubject);
     }
   };
-  
+
   subjects.forEach(processSubject);
   return result;
 };
@@ -159,20 +159,20 @@ const buildSubjectMap = (subjects: SubjectTreeItem[], parentId: string | null = 
 
 // Helper function to get descendants (needed for indeterminate calculation)
 const getAllDescendantIdsFromNodeInfo = (
-  node: { subject: SubjectTreeItem, parentId: string | null, childrenIds: string[] }, 
+  node: { subject: SubjectTreeItem, parentId: string | null, childrenIds: string[] },
   map: Map<string, { subject: SubjectTreeItem, parentId: string | null, childrenIds: string[] }>
 ): string[] => {
-    let ids: string[] = [];
-    if (node.childrenIds.length > 0) {
-        node.childrenIds.forEach(childId => {
-            const childNodeInfo = map.get(childId);
-            if (childNodeInfo) {
-                ids.push(childId);
-                ids = ids.concat(getAllDescendantIdsFromNodeInfo(childNodeInfo, map)); // Recursive call
-            }
-        });
-    }
-    return ids;
+  let ids: string[] = [];
+  if (node.childrenIds.length > 0) {
+    node.childrenIds.forEach(childId => {
+      const childNodeInfo = map.get(childId);
+      if (childNodeInfo) {
+        ids.push(childId);
+        ids = ids.concat(getAllDescendantIdsFromNodeInfo(childNodeInfo, map)); // Recursive call
+      }
+    });
+  }
+  return ids;
 };
 
 export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExamId }) => {
@@ -180,7 +180,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
   const exerciseStore = exerciseStoreInstance;
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [totalQuestions, setTotalQuestions] = useState(0);
-  
+
   const animatedSubjectsCount = useCountAnimation(exerciseStore.selectedSubjectsCount);
   const animatedQuestionsCount = useCountAnimation(totalQuestions);
 
@@ -199,7 +199,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
       setTotalQuestions(0);
       return;
     }
-    
+
     let questionSum = 0;
     exerciseStore.selectedSubjectIds.forEach(id => {
       const subject = exerciseStore.allSubjectsFlatMap.get(id);
@@ -207,7 +207,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
         questionSum += subject.questionCount;
       }
     });
-    
+
     setTotalQuestions(questionSum);
   }, [exerciseStore.selectedSubjectIds, exerciseStore.allSubjectsFlatMap]);
 
@@ -232,7 +232,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
     const hasChildren = nodeInfo && nodeInfo.childrenIds.length > 0;
     const isExpanded = expandedIds.has(subject.id);
     const canBeFolded = hasChildren && (level === 0 || level === 1);
-    
+
     const basePadding = 16;
     const levelPadding = level * 0;
     const leftPadding = levelPadding + basePadding + (level === 0 ? 2 : 0);
@@ -241,19 +241,19 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
       e.stopPropagation();
       const target = e.target as HTMLElement;
       if (
-        target.tagName === 'INPUT' || 
-        target.closest('.subcategory-badge') || 
+        target.tagName === 'INPUT' ||
+        target.closest('.subcategory-badge') ||
         target.closest('.checkbox-container') ||
         e.defaultPrevented
       ) {
         return;
       }
-      
+
       if (!hasChildren) {
         exerciseStore.toggleSubjectSelection(subject.id);
         return;
       }
-      
+
       if (canBeFolded) {
         handleFoldToggle(e);
       }
@@ -278,7 +278,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
         handleFoldToggle(e);
       }
     };
-    
+
     const handleFoldToggle = (e: React.MouseEvent) => {
       e.stopPropagation();
       setExpandedIds(prev => {
@@ -305,7 +305,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
         }}
         onClick={handleCardClick}
       >
-        <Group justify="space-between" wrap="nowrap" style={{position: 'relative'}}>
+        <Group justify="space-between" wrap="nowrap" style={{ position: 'relative' }}>
           <Group wrap="nowrap" className="checkbox-container">
             <Checkbox
               checked={isChecked}
@@ -322,8 +322,8 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
 
             </Box>
           </Group>
-          
-          {/* Conditionally render SubjectScore for level 0 */} 
+
+          {/* Conditionally render SubjectScore for level 0 */}
           {level === 1 && (
             <Box style={{ marginRight: '10px', position: 'absolute', left: '-10px' }} onClick={(e) => e.stopPropagation()}>
               <SubjectScore subjectId={subject.id} />
@@ -337,7 +337,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
           )}
         </Group>
         {hasChildren && (
-          <div 
+          <div
             className={`item-children-container ${isExpanded ? 'expanded' : ''}`}
           >
             {subject.children.map(child => renderSubjectNode(child, level + 1))}
@@ -364,7 +364,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
   }
 
   if (exerciseStore.subjectMap.size === 0 && examData?.subjects?.length > 0) {
-     return <div><Loader size="sm" /> Initializing...</div>;
+    return <div><Loader size="sm" /> Initializing...</div>;
   }
 
   return (
@@ -374,8 +374,8 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
       {/* Stats Cards */}
       <Group style={{ display: 'flex', gap: '4rem', margin: '1rem 0', justifyContent: 'center' }}>
         <Stack gap={0} style={{ textAlign: 'center' }}>
-          <Text size="xl" fw={700} style={{ 
-            fontSize: '2.5rem', 
+          <Text size="xl" fw={700} style={{
+            fontSize: '2.5rem',
             lineHeight: '3rem',
             color: '#228be6',
             transition: 'transform 0.3s ease',
@@ -385,10 +385,10 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
           </Text>
           <Title order={6} fw={400} opacity={0.5} mb="xs">נושאים שנבחרו</Title>
         </Stack>
-        
+
         <Stack gap={0} style={{ textAlign: 'center' }}>
-          <Text size="xl" fw={700} style={{ 
-            fontSize: '2.5rem', 
+          <Text size="xl" fw={700} style={{
+            fontSize: '2.5rem',
             lineHeight: '3rem',
             color: '#228be6',
             transition: 'transform 0.3s ease',
@@ -400,18 +400,32 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
         </Stack>
       </Group>
 
-      <Button 
-        onClick={handleStartPractice} 
+      <Button
+        onClick={handleStartPractice}
         disabled={exerciseStore.selectedSubjectIds.size === 0}
         size="lg"
         color={exerciseStore.selectedSubjectIds.size > 0 ? "blue" : "gray"}
-        style={{ transition: 'all 0.3s ease', width:'max-content', marginInline:'auto', marginBottom:'1.8rem' }}
-        rightSection={<IconPlayerPlayFilled size={18} className='rotate-180'/>}
+        style={{ transition: 'all 0.3s ease', width: 'max-content', marginInline: 'auto', marginBottom: '1.8rem' }}
+        rightSection={<IconPlayerPlayFilled size={18} className='rotate-180' />}
       >
         התחל תרגול
       </Button>
 
-      
+      <Stack px="lg" gap={2} mb="lg">
+        <Group justify="space-between">
+          <Text size="sm">דלג על שאלות שנענו נכון</Text>
+          <Switch
+            checked={exerciseStore.skipAnswered}
+            onChange={(event) => exerciseStore.skipAnswered = event.currentTarget.checked}
+            aria-label="Toggle skip answered questions"
+          />
+        </Group>
+        <Text size="xs" c="dimmed" mt={4}>
+          כאשר מופעל, המערכת לא תציג שאלות שכבר ענית עליהן נכון לפחות 3 פעמים בעבר.
+        </Text>
+      </Stack>
+
+
       {examData.subjects.map(subject => renderSubjectNode(subject))}
     </Stack>
   );

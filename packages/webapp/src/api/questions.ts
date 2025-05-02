@@ -57,8 +57,8 @@ export const solveQuestion = async (id: string): Promise<{ correctOption: any, e
 };
 
 // Get a random question from specified subjects
-export const getRandomQuestion = async (subjectIds: string[]): Promise<Question> => {
-  const response = await apiClient.post<Question>('/api/questions/random', { subjectIds });
+export const getRandomQuestion = async (params: { subjectIds: string[], skipAnswered: boolean }): Promise<Question> => {
+  const response = await apiClient.post<Question>('/api/questions/random', params);
   return response.data;
 };
 

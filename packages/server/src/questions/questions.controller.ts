@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
-import { CreateQuestionDto, UpdateQuestionDto, QuestionResponseDto } from './dto/question.dto';
+import { CreateQuestionDto, UpdateQuestionDto, QuestionResponseDto, GetRandomQuestionDto } from './dto/question.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
 import { AuthedRequest } from '../auth/types/authed-request.interface';
@@ -55,10 +55,11 @@ export class QuestionsController {
   @UseGuards(SubscriptionGuard)
   @UseGuards(AuthGuard)
   getRandomQuestion(
-    @Body() body: { subjectIds: string[] },
+    @Body() body: GetRandomQuestionDto,
     @Req() request: AuthedRequest
   ): Promise<QuestionResponseDto> {
-    return this.questionsService.getRandomQuestion(body.subjectIds);
+    const userId = request.user.id ?? null;
+    return this.questionsService.getRandomQuestion(body.subjectIds, body.skipAnswered, userId);
   }
 
   @Get('subject/:subjectId')
