@@ -38,7 +38,7 @@ const ExamCreationPage: React.FC = () => {
   }
 
   return (
-    <Paper p="xl" radius="md" style={{ maxWidth: '600px', margin: '40px auto' }}>
+    <Paper p="xl" px="sm" radius="md" style={{ maxWidth: '600px', margin: '40px auto' }}>
       <Stack align="center">
         <Title order={1}>התחלת מבחן</Title>
         <Text c="dimmed" ta="center" mb="lg">
@@ -48,22 +48,22 @@ const ExamCreationPage: React.FC = () => {
         </Text>
 
         {/* Infographic Section */}
-        <Paper p="lg" radius="md" style={{ width: '100%' }}>
-          <Group justify="space-around" align="center">
-            <Stack align="center" flex={1} p={12} px={24} gap="xs" style={{ backgroundColor: 'var(--mantine-color-blue-0)', borderRadius: '10px' }}>
+        <Paper p="lg" py={0} radius="md" style={{ width: '100%' }}>
+          <Group justify="space-around" align="center" wrap='nowrap'>
+            <Stack align="center" flex={1} p={12} px={12} gap="xs" style={{ backgroundColor: 'var(--mantine-color-blue-0)', borderRadius: '10px' }}>
               <IconChecklist size={32} stroke={1.5} color="var(--mantine-color-blue-6)" />
               <Text fz="2rem" fw={700} c="blue.6">100</Text>
               <Text size="sm" c="blue.6">שאלות</Text>
             </Stack>
-            <Stack align="center" flex={1} p={12} px={24} gap="xs" style={{ backgroundColor: 'var(--mantine-color-orange-0)', borderRadius: '10px' }}>
+            <Stack align="center" flex={1} p={12} px={12} gap="xs" style={{ backgroundColor: 'var(--mantine-color-orange-0)', borderRadius: '10px' }}>
               <IconClockHour4 size={32} stroke={1.5} color="var(--mantine-color-orange-6)" />
               <Text fz="2rem" fw={700} c="orange.6">3:30</Text>
               <Text size="sm" c="orange.6">שעות</Text>
             </Stack>
-            <Stack align="center" flex={1} p={12} px={24} gap="xs" style={{ backgroundColor: 'var(--mantine-color-green-0)', borderRadius: '10px' }}	>
+            <Stack align="center" flex={1} p={12} px={12} gap="xs" style={{ backgroundColor: 'var(--mantine-color-green-0)', borderRadius: '10px' }}	>
               <IconCircleCheck size={32} stroke={1.5} color="var(--mantine-color-green-6)" />
               <Text fz="2rem" fw={700} c="green.6">60</Text>
-              <Text size="sm" c="green.6">ציון עובר</Text>
+              <Text size="sm" c="green.6" ta="center">ציון עובר</Text>
             </Stack>
           </Group>
         </Paper>
@@ -72,7 +72,7 @@ const ExamCreationPage: React.FC = () => {
           onClick={() => handleCreateExam(govExamId)}
           loading={createExamMutation.isPending}
           size="lg"
-          mt="xl"
+		  mt="md"
         >
           {createExamMutation.isPending ? 'יוצר מבחן...' : 'התחל מבחן'}
         </Button>
