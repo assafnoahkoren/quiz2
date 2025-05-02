@@ -15,8 +15,8 @@ interface MobileLayoutProps {
 }
 
 const HEADER_HEIGHT = 50;
-export const getFullViewHeight = () => {
-  return `calc(100dvh - ${HEADER_HEIGHT}px)`;
+export const getFullViewHeight = (extraHeight: number = 0) => {
+  return `calc(100dvh - ${HEADER_HEIGHT}px + ${extraHeight}px)`;
 }
 
 export const MobileLayout = ({ children }: MobileLayoutProps) => {

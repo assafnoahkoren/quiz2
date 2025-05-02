@@ -137,6 +137,7 @@ model UserExam {
   GovExam           GovExam            @relation(fields: [govExamId], references: [id])
   startedAt         DateTime?
   completedAt       DateTime?
+  score             Float?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   UserExamQuestions UserExamQuestion[]

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import apiClient from './client';
+import { Question } from './types';
 
 // Define types based on backend DTOs and expected return values
 // Adjust these based on your actual Prisma schema/API response
@@ -13,7 +14,7 @@ export interface UserExam {
   govExamId: string;
   startedAt: string; // Dates are often serialized as strings
   completedAt: string | null;
-  UserExamQuestions: UserExamQuestion[]; // Add related questions
+  UserExamQuestions: EnrichedUserExamQuestion[]; // Add related questions
   // Include other fields returned by your API if necessary
 }
 
@@ -26,6 +27,11 @@ export interface UserExamQuestion {
   status: string; // Adjust type if using an enum (e.g., QuestionStatus)
   userAnswerId: string | null;
   // Add other relevant fields from your UserExamQuestion model
+}
+
+// Enriched type including nested Question details and Options
+export interface EnrichedUserExamQuestion extends UserExamQuestion {
+  Question: Question; // Embed the full Question details
 }
 
 // Query keys for exams
@@ -59,6 +65,17 @@ export const getExamById = async (examId: string): Promise<UserExam> => {
   return response.data;
 };
 
+// Interface for the data needed to end an exam
+export interface EndExamData {
+  score: number;
+}
+
+// API call function to end an exam
+export const endExam = async (examId: string, data: EndExamData): Promise<UserExam> => {
+  const response = await apiClient.patch<UserExam>(`/api/exams/${examId}/end`, data);
+  return response.data;
+};
+
 // React Query hook for creating an exam
 export const useCreateExam = () => {
   const queryClient = useQueryClient();
@@ -70,11 +87,34 @@ export const useCreateExam = () => {
       // e.g., a list of the user's exams.
       // Add appropriate invalidations here based on your application's needs.
       // Example: queryClient.invalidateQueries({ queryKey: examKeys.userExams(data.userId) });
+	  queryClient.invalidateQueries({ queryKey: examKeys.current() });
       console.log('Exam created successfully:', data);
     },
     onError: (error) => {
       // Handle or log errors
       console.error('Error creating exam:', error);
+    },
+  });
+};
+
+// React Query hook for ending an exam
+export const useEndExam = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ examId, data }: { examId: string; data: EndExamData }) => endExam(examId, data),
+    onSuccess: (data, variables) => {
+      // When an exam ends, invalidate the specific exam detail query
+      queryClient.invalidateQueries({ queryKey: examKeys.detail(variables.examId) });
+      // Also invalidate the 'current' running exam query, as it should now be null
+      queryClient.invalidateQueries({ queryKey: examKeys.current() });
+      // Optionally, invalidate other relevant queries like user's exam list
+      // queryClient.invalidateQueries({ queryKey: examKeys.userExams(data.userId) }); // Assuming you have such a key
+      console.log('Exam ended successfully:', data);
+    },
+    onError: (error) => {
+      // Handle or log errors
+      console.error('Error ending exam:', error);
     },
   });
 };

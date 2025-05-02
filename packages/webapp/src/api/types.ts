@@ -72,7 +72,7 @@ export interface Question {
   status: QuestionStatus;
   createdAt: string;
   updatedAt: string;
-  options: {
+  Options: {
     id: string;
     answer: string;
     isCorrect: boolean;

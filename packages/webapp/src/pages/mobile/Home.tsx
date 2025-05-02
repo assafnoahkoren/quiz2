@@ -15,11 +15,16 @@ export const Home = () => {
   
   const { isLoading: isLoadingGovExams, error: errorGovExams } = useGovExams();
   const { data: currentExam, isLoading: isLoadingCurrentExam, error: errorCurrentExam } = useGetCurrentRunningExam();
+  console.log('currentExam', currentExam);
+  
 
   // Define styles for the Full Exam button
   const fullExamBaseStyle = {
     fontSize: '1.2rem',
-    borderRadius: '10px',
+    borderTopLeftRadius: '10px',
+    borderTopRightRadius: '10px',
+    borderBottomLeftRadius: '10px',
+    borderBottomRightRadius: '10px',
     background: 'linear-gradient(45deg, #2B86C5, #00C9A7)',
     height: '70px',
     position: 'relative' as const,

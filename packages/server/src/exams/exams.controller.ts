@@ -1,16 +1,16 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Param, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Param, Query, ParseIntPipe, DefaultValuePipe, Patch } from '@nestjs/common';
 import { ExamsService } from './exams.service';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { AuthGuard } from '../auth/auth.guard';
-import { SubscriptionGuard } from '../subscriptions/guards/subscription.guard';
 import { AuthedRequest } from '../auth/types/authed-request.interface';
+import { EndExamDto } from './dto/end-exam.dto';
 
 @Controller('api/exams')
 export class ExamsController {
   constructor(private readonly examsService: ExamsService) {}
 
   @Post()
-  @UseGuards(AuthGuard, SubscriptionGuard)
+  @UseGuards(AuthGuard)
   create(
     @Body() createExamDto: CreateExamDto,
     @Req() request: AuthedRequest,
@@ -28,6 +28,17 @@ export class ExamsController {
   ) {
     const userId = request.user.id;
     return this.examsService.findCurrentRunningExam(userId, durationMinutes);
+  }
+
+  @Patch(':id/end')
+  @UseGuards(AuthGuard)
+  endExam(
+    @Param('id') userExamId: string,
+    @Body() endExamDto: EndExamDto,
+    @Req() request: AuthedRequest,
+  ) {
+    const userId = request.user.id;
+    return this.examsService.endExam(userExamId, userId, endExamDto.score);
   }
   
   @Get(':id')

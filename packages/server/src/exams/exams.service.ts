@@ -35,7 +35,7 @@ export class ExamsService {
 
     // 2. Get 100 random question IDs for those subjects
     const questionIds = await this.getRandomQuestions({
-      count: 100, // Get 100 questions
+      count: 3, // Get 100 questions
       subjectIds,
     });
 
@@ -116,11 +116,6 @@ export class ExamsService {
       },
     });
 
-    if (runningExam) {
-      console.log(`[findCurrentRunningExam] Found running exam: ID ${runningExam.id}, StartedAt: ${runningExam.startedAt}`);
-    } else {
-      console.log(`[findCurrentRunningExam] No running exam found for userId: ${userId}`);
-    }
 
     return runningExam; // Returns the exam or null if none is found
   }
@@ -132,7 +127,15 @@ export class ExamsService {
         userId: userId, // Ensure the exam belongs to the user
       },
       include: {
-        UserExamQuestions: true,
+        UserExamQuestions: {
+			include: {
+				Question: {
+					include: {
+						Options: true,
+					},
+				},
+			},
+		},
       }
     });
 
@@ -141,5 +144,40 @@ export class ExamsService {
     }
 
     return userExam;
+  }
+
+  async endExam(userExamId: string, userId: string, score: number) {
+    // First, verify the exam exists and belongs to the user
+    const existingExam = await this.prisma.userExam.findUnique({
+      where: {
+        id: userExamId,
+        userId: userId,
+      },
+    });
+
+    if (!existingExam) {
+      throw new NotFoundException(`Exam with ID ${userExamId} not found or does not belong to the user.`);
+    }
+
+    if (existingExam.completedAt) {
+        // Optionally handle cases where the exam is already completed
+        // e.g., throw new Error('Exam is already completed.');
+        console.warn(`Exam with ID ${userExamId} was already completed at ${existingExam.completedAt}. Overwriting completion date and score.`);
+    }
+
+    // Update the exam record with the completion date and score
+    const updatedExam = await this.prisma.userExam.update({
+      where: {
+        id: userExamId,
+        // We already verified userId, but including it again ensures atomicity if needed
+        // However, id is unique, so technically not required here for the update itself
+      },
+      data: {
+        completedAt: new Date(),
+        score: score, // Assuming a 'score' field exists on the UserExam model
+      },
+    });
+
+    return updatedExam;
   }
 } 
