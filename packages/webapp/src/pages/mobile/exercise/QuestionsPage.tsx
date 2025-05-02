@@ -39,6 +39,8 @@ const QuestionsPage: React.FC = () => {
 	const [footerHeight, setFooterHeight] = useState(0);
 	// Reference to the footer element
 	const footerRef = useRef<HTMLDivElement>(null);
+	// Ref for the explanation panel
+	const explanationPanelRef = useRef<HTMLDivElement>(null);
 
 	// Clipboard hook for copy link functionality
 	const clipboard = useClipboard({ timeout: 500 });
@@ -395,8 +397,21 @@ const QuestionsPage: React.FC = () => {
 									}}
 								>
 									<Accordion.Item value="explanation">
-										<Accordion.Control py={0}>הצג הסבר</Accordion.Control>
-										<Accordion.Panel px={0}>
+										<Accordion.Control
+											py={0}
+											onClick={() => {
+												// Use setTimeout to allow the panel to open before scrolling
+												setTimeout(() => {
+													explanationPanelRef.current?.scrollIntoView({
+														behavior: 'smooth',
+														block: 'start'
+													});
+												}, 150); // Adjust delay if needed
+											}}
+										>
+											הצג הסבר
+										</Accordion.Control>
+										<Accordion.Panel ref={explanationPanelRef} px={0}>
 											<Text style={{ whiteSpace: 'pre-line' }}>{currentQuestion.explanation}</Text>
 										</Accordion.Panel>
 									</Accordion.Item>
