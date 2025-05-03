@@ -14,6 +14,7 @@ export interface UserExam {
   govExamId: string;
   startedAt: string; // Dates are often serialized as strings
   completedAt: string | null;
+  score: number | null; // Add the score field
   UserExamQuestions: EnrichedUserExamQuestion[]; // Add related questions
   // Include other fields returned by your API if necessary
 }
@@ -42,7 +43,7 @@ export const examKeys = {
   detail: (id: string) => [...examKeys.details(), id] as const, // Key for specific item
   current: () => [...examKeys.all, 'current'] as const, // Key for current running exam
   // Add more specific keys as needed, e.g., for fetching user's exams
-  // userExams: (userId: string) => [...examKeys.lists(), { userId }] as const,
+  userExams: () => [...examKeys.lists(), 'user'] as const, // Key for user's exams list
 };
 
 // API call function to create an exam
@@ -135,5 +136,19 @@ export const useGetCurrentRunningExam = (durationMinutes: number = 210) => {
     queryFn: () => getCurrentRunningExam(durationMinutes), // Call the API function
     // Add any options like staleTime, cacheTime if needed
     // Example: staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// API call function to get all exams for the current user
+export const getUserExams = async (): Promise<UserExam[]> => {
+  const response = await apiClient.get<UserExam[]>('/api/exams/user/all');
+  return response.data;
+};
+
+// React Query hook for fetching all exams for the current user
+export const useGetUserExams = () => {
+  return useQuery<UserExam[], Error>({
+    queryKey: examKeys.userExams(), // Use the specific key for the user's exams
+    queryFn: getUserExams, // Call the API function
   });
 }; 

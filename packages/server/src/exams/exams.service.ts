@@ -180,4 +180,17 @@ export class ExamsService {
 
     return updatedExam;
   }
+
+  async findUserExams(userId: string) {
+    return this.prisma.userExam.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        startedAt: 'desc', // Order by most recent first
+      },
+      // Optionally include related data if needed, e.g., GovExam details
+      // include: { GovExam: true }
+    });
+  }
 } 

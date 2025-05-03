@@ -48,4 +48,10 @@ export class ExamsController {
     return this.examsService.findOne(id, userId);
   }
 
+  @Get('user/all')
+  @UseGuards(AuthGuard)
+  findUserExams(@Req() request: AuthedRequest) {
+    const userId = request.user.id;
+    return this.examsService.findUserExams(userId);
+  }
 } 

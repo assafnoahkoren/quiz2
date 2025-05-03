@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon, Badge } from '@mantine/core';
-import { IconLogout, IconHome, IconMenu2, IconUser, IconX, IconSettings } from '@tabler/icons-react';
+import { IconLogout, IconHome, IconMenu2, IconUser, IconX, IconSettings, IconHistory } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../components/auth/AuthContext';
 import { useCurrentUser } from '../../api/users';
@@ -96,6 +96,19 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
             justify="start"
           >
             דף הבית
+          </Button>
+          
+          <Button
+            variant="subtle"
+            fullWidth
+            leftSection={<IconHistory size={18} />}
+            onClick={() => {
+              close();
+              navigate('/exam-history');
+            }}
+            justify="start"
+          >
+            היסטוריית בחינות
           </Button>
           
           {currentUser?.role === UserRole.ADMIN && (

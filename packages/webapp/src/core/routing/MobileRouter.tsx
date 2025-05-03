@@ -10,6 +10,7 @@ import { ThankYouPage } from '../../pages/ThankYouPage';
 import QuestionPage from '../../pages/public/QuestionPage';
 import ExamCreationPage from '../../pages/exam/ExamCreationPage';
 import ExamPage from '../../pages/exam/ExamPage';
+import ExamsHistoryPage from '../../pages/exams/ExamsHistoryPage';
 
 // These components would need to be created
 // const Exercise = () => <div>Exercise Page</div>;
@@ -32,6 +33,7 @@ const MobileRouter = () => {
           <Route path="exam/:id" element={<ExamPage />} />
           <Route path="create-exam" element={<ExamCreationPage />} />
           <Route path="thank-you" element={<ThankYouPage />} />
+          <Route path="exam-history" element={<ExamsHistoryPage />} />
         </Route>
       </Route>
 
