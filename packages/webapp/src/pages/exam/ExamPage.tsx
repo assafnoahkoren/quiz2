@@ -362,10 +362,24 @@ const ExamPageComponent: React.FC = () => {
 							</Group>
 
 							{/* Timer component */}
-							<ExamTimer 
-								startTimeString={examStore.currentExam?.startedAt} // Use startedAt based on grep search
-								durationMinutes={examDuration} 
-							/>
+							<Box style={{ display: 'flex', alignItems: 'center', gap: '8px' }}> {/* Wrap timer and conditional button */}
+								<ExamTimer 
+									startTimeString={examStore.currentExam?.startedAt} // Use startedAt based on grep search
+									durationMinutes={examDuration} 
+								/>
+								{/* Conditional Finish button when time is up */}
+								{examStore.isTimeUp && (
+									<Button 
+										variant="filled" 
+										color="red" 
+										size="xs" 
+										onClick={handleSubmitExam} // Use handleSubmitExam directly
+										rightSection={<IconCheck size="1rem" />}
+									>
+										סיים
+									</Button>
+								)}
+							</Box>
 						</Group>
 
 						{/* Question Display Area */}
