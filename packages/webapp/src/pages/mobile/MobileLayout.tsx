@@ -70,10 +70,13 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
         withCloseButton={false}
         styles={{
           body: {
+            maxWidth: '300px',
             height: '100%',
             padding: 0
           },
           inner: {
+            maxWidth: '600px',
+
             height: '100%'
           }
         }}

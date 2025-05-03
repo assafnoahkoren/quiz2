@@ -66,7 +66,7 @@ const ExamsHistoryPage: React.FC = () => {
 
 	return (
 		<Container dir="rtl">
-			<Title order={1} mb="lg">היסטוריית בחינות</Title>
+			<Title order={3} mb="lg" mt="md">היסטוריית בחינות</Title>
 			{(!exams || exams.length === 0) ? (
 				<Center style={{ height: '200px' }}>
 					<Stack align="center">
