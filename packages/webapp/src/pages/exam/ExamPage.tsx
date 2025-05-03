@@ -79,6 +79,10 @@ const ExamPageComponent: React.FC = () => {
 		if (isSuccess && examData) {
 			examStore.loadExamData(examData);
 			initializeLocalAnswers(examData); // Initialize local state
+			// Check if the exam was already completed
+			if (examData.completedAt) {
+				examStore.setTimeUp(); // Set time up if completedAt exists
+			}
 		}
 	}, [isSuccess, examData, examStore, localState]); // Added dependencies
 
@@ -395,7 +399,7 @@ const ExamPageComponent: React.FC = () => {
 									durationMinutes={examDuration} 
 								/>
 								{/* Conditional Finish button when time is up */}
-								{examStore.isTimeUp && (
+								{examStore.isTimeUp && !examStore.currentExam?.completedAt && (
 									<Button 
 										variant="filled" 
 										color="red" 
