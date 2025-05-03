@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGetExamById, EnrichedUserExamQuestion, useEndExam } from '../../api/exams'; // Corrected import
+import { useGetExamById, EnrichedUserExamQuestion, useEndExam, useSetUserExamQuestionAnswer, UserExam } from '../../api/exams'; // Corrected import
 import { Loader, Alert, Title, Text, Paper, Box, Stack, Radio, Group, Button, ScrollArea, ScrollAreaProps, Modal, List, Accordion } from '@mantine/core'; // Import Mantine components & ScrollArea, ScrollAreaProps, Modal, List, Accordion
 import { IconAlertCircle, IconArrowLeft, IconArrowRight, IconShare, IconLink, IconCheck, IconListCheck, IconHome } from '@tabler/icons-react';
 import examStoreInstance from '../../stores/examStore'; // Import the exam store instance
@@ -51,20 +51,36 @@ const ExamPageComponent: React.FC = () => {
 	const [finalScore, setFinalScore] = useState<number | null>(null); // State for the final score percentage
 	const [isCalculatingScore, setIsCalculatingScore] = useState(false); // State for score calculation loading
 	const endExamMutation = useEndExam(); // Instantiate the hook
+	const setAnswerMutation = useSetUserExamQuestionAnswer(); // Instantiate the set answer hook
 	const examDuration = useExamDuration();
 	const navigate = useNavigate();
 	
+	// Function to initialize local answers from fetched data
+	const initializeLocalAnswers = (initialExamData: UserExam) => {
+		if (initialExamData?.UserExamQuestions) {
+			initialExamData.UserExamQuestions.forEach(userExamQuestion => {
+				const questionKey = userExamQuestion.questionId; // Key used in local state
+				const chosenOptionId = userExamQuestion.chosenOptionId; 
+				if (chosenOptionId !== null && chosenOptionId !== undefined) {
+					localState.setSelectedAnswer(questionKey, chosenOptionId);
+					// Optional: console.log(`Initialized answer for question ${questionKey}: ${chosenOptionId}`);
+				}
+			});
+		}
+	};
+
 	const handleScoreModalClose = () => {
 		closeScoreModal();
 		navigate('/');
 	};
 
-	// Effect to load data into the store once fetched
+	// Effect to load data into the store and initialize local answers
 	useEffect(() => {
 		if (isSuccess && examData) {
 			examStore.loadExamData(examData);
+			initializeLocalAnswers(examData); // Initialize local state
 		}
-	}, [isSuccess]);
+	}, [isSuccess, examData, examStore, localState]); // Added dependencies
 
 	// Effect to measure footer height
 	useEffect(() => {
@@ -178,7 +194,7 @@ const ExamPageComponent: React.FC = () => {
 		return `${window.location.origin}/question/${questionId}`;
 	};
 
-	// Handler for selecting an answer - updates local state
+	// Handler for selecting an answer - updates local state and calls mutation
 	const handleOptionSelect = (optionId: string) => {
 		// Prevent changes if time is up
 		if (examStore.isTimeUp) {
@@ -186,13 +202,24 @@ const ExamPageComponent: React.FC = () => {
 			return; 
 		}
 
-		if (currentQuestion?.questionId) {
-			localState.setSelectedAnswer(currentQuestion.questionId, optionId);
+		if (currentQuestion?.id) { // Use currentQuestion.id which is the UserExamQuestion ID
+			// Update local state first for immediate UI feedback
+			localState.setSelectedAnswer(currentQuestion.questionId, optionId); 
+
+			// Call the mutation to update the backend
+			setAnswerMutation.mutate(
+				{ 
+					userExamQuestionId: currentQuestion.id, // Pass the UserExamQuestion ID
+					data: { chosenOptionId: optionId } 
+				},
+			);
+		} else {
+			console.error("Cannot set answer: current question or its ID is missing.");
 		}
 
 		// Keep this commented until store logic is clear
 		// examStore.answerQuestion(optionId); // Linter Error: Expected 2 arguments, but got 1. TODO: Determine the correct arguments for answerQuestion.
-		console.log("Selected option (local state update):", optionId);
+		// console.log("Selected option (local state update):", optionId); // Redundant now
 	};
 
 	// Share current question handler

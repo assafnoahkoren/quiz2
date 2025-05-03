@@ -4,6 +4,7 @@ import { CreateExamDto } from './dto/create-exam.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { AuthedRequest } from '../auth/types/authed-request.interface';
 import { EndExamDto } from './dto/end-exam.dto';
+import { SetAnswerDto } from './dto/set-answer.dto';
 
 @Controller('api/exams')
 export class ExamsController {
@@ -53,5 +54,20 @@ export class ExamsController {
   findUserExams(@Req() request: AuthedRequest) {
     const userId = request.user.id;
     return this.examsService.findUserExams(userId);
+  }
+
+  @Patch('questions/:userExamQuestionId/answer')
+  @UseGuards(AuthGuard)
+  setAnswer(
+    @Param('userExamQuestionId') userExamQuestionId: string,
+    @Body() setAnswerDto: SetAnswerDto,
+    @Req() request: AuthedRequest,
+  ) {
+    const userId = request.user.id;
+    return this.examsService.setUserExamQuestionAnswer(
+      userExamQuestionId,
+      setAnswerDto.chosenOptionId,
+      userId,
+    );
   }
 } 

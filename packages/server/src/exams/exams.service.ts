@@ -128,6 +128,9 @@ export class ExamsService {
       },
       include: {
         UserExamQuestions: {
+			orderBy: {
+				id: 'asc',
+			},
 			include: {
 				Question: {
 					include: {
@@ -192,5 +195,40 @@ export class ExamsService {
       // Optionally include related data if needed, e.g., GovExam details
       // include: { GovExam: true }
     });
+  }
+
+  async setUserExamQuestionAnswer(
+    userExamQuestionId: string,
+    chosenOptionId: string | null, // Allow null to clear the answer
+    userId: string,
+  ) {
+    // 1. Verify the UserExamQuestion exists and belongs to the user
+    const userExamQuestion = await this.prisma.userExamQuestion.findUnique({
+      where: {
+        id: userExamQuestionId,
+        userId: userId, // Ensure the question is associated with this user
+      },
+    });
+
+    if (!userExamQuestion) {
+      throw new NotFoundException(
+        `User exam question with ID ${userExamQuestionId} not found or does not belong to the user.`,
+      );
+    }
+
+    // 2. Update the UserExamQuestion with the chosen option
+    const updatedUserExamQuestion = await this.prisma.userExamQuestion.update({
+      where: {
+        id: userExamQuestionId,
+        // Redundant userId check here as findUnique already verified it,
+        // but good for clarity or if logic changes.
+      },
+      data: {
+        chosenOptionId: chosenOptionId,
+        // answeredAt: new Date(), // Optionally track when the answer was submitted - Removed as it doesn't exist
+      },
+    });
+
+    return updatedUserExamQuestion;
   }
 } 

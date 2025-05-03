@@ -120,13 +120,14 @@ model Question {
 }
 
 model Options {
-  id         String   @id @default(uuid())
-  questionId String
-  Question   Question @relation(fields: [questionId], references: [id])
-  answer     String
-  isCorrect  Boolean
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String             @id @default(uuid())
+  questionId       String
+  Question         Question           @relation(fields: [questionId], references: [id])
+  answer           String
+  isCorrect        Boolean
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  UserExamQuestion UserExamQuestion[]
 }
 
 model UserExam {
@@ -144,15 +145,17 @@ model UserExam {
 }
 
 model UserExamQuestion {
-  id         String    @id @default(uuid())
-  userId     String
-  User       User      @relation(fields: [userId], references: [id])
-  userExamId String?
-  UserExam   UserExam? @relation(fields: [userExamId], references: [id])
-  questionId String
-  Question   Question  @relation(fields: [questionId], references: [id])
-  answer     String?
-  isCorrect  Boolean?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  userId         String
+  User           User      @relation(fields: [userId], references: [id])
+  userExamId     String?
+  UserExam       UserExam? @relation(fields: [userExamId], references: [id])
+  questionId     String
+  Question       Question  @relation(fields: [questionId], references: [id])
+  answer         String?
+  chosenOptionId String?
+  ChosenOption   Options?  @relation(fields: [chosenOptionId], references: [id], onDelete: NoAction)
+  isCorrect      Boolean?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }

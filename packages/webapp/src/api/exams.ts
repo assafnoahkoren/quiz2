@@ -27,6 +27,7 @@ export interface UserExamQuestion {
   userId: string;
   status: string; // Adjust type if using an enum (e.g., QuestionStatus)
   userAnswerId: string | null;
+  chosenOptionId: string | null; // Added chosenOptionId field
   // Add other relevant fields from your UserExamQuestion model
 }
 
@@ -150,5 +151,34 @@ export const useGetUserExams = () => {
   return useQuery<UserExam[], Error>({
     queryKey: examKeys.userExams(), // Use the specific key for the user's exams
     queryFn: getUserExams, // Call the API function
+  });
+};
+
+// --- Set User Exam Question Answer ---
+
+// Interface for the data needed to set an answer
+export interface SetAnswerData {
+  chosenOptionId: string | null;
+}
+
+// API call function to set the answer for a UserExamQuestion
+export const setUserExamQuestionAnswerApi = async (
+  userExamQuestionId: string,
+  data: SetAnswerData
+): Promise<UserExamQuestion> => { // Assuming the backend returns the updated UserExamQuestion
+  const response = await apiClient.patch<UserExamQuestion>(
+    `/api/exams/questions/${userExamQuestionId}/answer`,
+    data
+  );
+  return response.data;
+};
+
+// React Query hook for setting an answer
+export const useSetUserExamQuestionAnswer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userExamQuestionId, data }: { userExamQuestionId: string; data: SetAnswerData }) =>
+      setUserExamQuestionAnswerApi(userExamQuestionId, data),
   });
 }; 
