@@ -368,7 +368,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
   }
 
   return (
-    <Stack px="md" gap={0}>
+    <Stack px="md" gap={0} style={{ maxWidth: '600px', marginInline: 'auto' }}>
       <style>{subjectItemStyles}</style>
 
       {/* Stats Cards */}
