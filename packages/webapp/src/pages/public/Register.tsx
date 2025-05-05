@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Stack } from '@mantine/core';
+import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Stack, Checkbox, Modal, Anchor } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { IconUserPlus, IconMail, IconLock, IconUser } from '@tabler/icons-react';
 import { useRegisterMutation } from '../../api';
 
@@ -9,8 +10,10 @@ export const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
   const registerMutation = useRegisterMutation();
+  const [opened, { open, close }] = useDisclosure(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +91,22 @@ export const Register = () => {
               disabled={registerMutation.isPending}
             />
             
+            <Checkbox
+              label={
+                <Text size="sm">
+                  אני מסכים/ה לתנאי השימוש.{' '}
+                  <Anchor component="button" type="button" onClick={open} size="sm">
+                    לצפייה בתקנון
+                  </Anchor>
+                </Text>
+              }
+              required
+              checked={agreedToTerms}
+              onChange={(event) => setAgreedToTerms(event.currentTarget.checked)}
+              disabled={registerMutation.isPending}
+              mt="md"
+            />
+            
             <Button
               type="submit"
               fullWidth
@@ -96,13 +115,25 @@ export const Register = () => {
               mt="md"
               leftSection={<IconUserPlus size={16} />}
               loading={registerMutation.isPending}
-              disabled={registerMutation.isPending}
+              disabled={!agreedToTerms || registerMutation.isPending}
             >
               הרשם
             </Button>
           </Stack>
         </form>
         
+        <Modal opened={opened} onClose={close} title="תנאי שימוש">
+          {/* Replace with your actual Terms of Service content */}
+          <Text size="sm">
+            כאן יופיע תוכן התקנון המלא...
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Integer posuere erat a ante.
+          </Text>
+          <Group justify="flex-end" mt="md">
+             <Button onClick={close}>סגור</Button>
+          </Group>
+        </Modal>
+
         <Group justify="center" mt="lg">
           <Text size="sm">
             כבר יש לך חשבון? <Link to="/login" style={{ color: 'var(--mantine-color-blue-filled)' }}>התחבר</Link>
