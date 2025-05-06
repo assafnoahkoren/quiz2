@@ -2,21 +2,28 @@ import { Stack, Button, Text, Box, Title, Modal, Loader, Alert, useMantineTheme 
 import { useNavigate } from 'react-router-dom';
 import { getFullViewHeight } from './MobileLayout';
 import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle, IconListCheck, IconArchive, IconClock, IconStopwatch } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGovExams } from '../../api/gov-exam';
 import { useGetCurrentRunningExam } from '../../api/exams';
 import exerciseStoreInstance from './exercise/exerciseStore';
+import { subscriptionKeys } from '../../api/subscriptions';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const Home = () => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
   const exerciseStore = exerciseStoreInstance;
   const [modalOpen, setModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   
   const { isLoading: isLoadingGovExams, error: errorGovExams } = useGovExams();
   const { data: currentExam, isLoading: isLoadingCurrentExam, error: errorCurrentExam } = useGetCurrentRunningExam();
   console.log('currentExam', currentExam);
   
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: subscriptionKeys.myStatus() });
+  }, [queryClient]);
 
   // Define styles for the Full Exam button
   const fullExamBaseStyle = {

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../components/auth/AuthContext';
 import { Button, Container, PasswordInput, TextInput, Title, Text, Group, Stack, Alert } from '@mantine/core';
 import { IconLogin, IconMail, IconLock, IconAlertCircle } from '@tabler/icons-react';
 import { useLoginMutation } from '../../api';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +14,11 @@ export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const loginMutation = useLoginMutation();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.clear();
+  }, [queryClient]);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
