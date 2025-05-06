@@ -10,6 +10,7 @@ import { AppConfigModule } from './config/config.module';
 import { UserModule } from './users/users.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ExamsModule } from './exams/exams.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ExamsModule } from './exams/exams.module';
     UserModule,
     SubscriptionsModule,
     ExamsModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -8,7 +8,7 @@ import exerciseStoreInstance from './exerciseStore';
 import { SubjectScore } from '../../../components/SubjectScore/SubjectScore';
 
 // Custom hook for animated counter
-const useCountAnimation = (value: number, duration: number = 500) => {
+export const useCountAnimation = (value: number, duration: number = 500) => {
   const [displayValue, setDisplayValue] = useState(0);
   const previousValueRef = useRef(0);
   const animationRef = useRef<number | null>(null);

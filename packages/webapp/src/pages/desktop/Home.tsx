@@ -1,13 +1,13 @@
-import { Container, Title, Text, SimpleGrid, Card, Group, Button, Loader, Alert } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { Container, Title, Text, SimpleGrid, Card, Group, Loader, Alert, Stack } from '@mantine/core';
 import { useGovExams } from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { useRefreshTokenMutation } from '../../api/auth';
 import { useEffect } from 'react';
 import { useAuth } from '../../components/auth/AuthContext';
-import { AuthResponse } from '../../api/types';
+import { StatisticsBlock } from '../../components/StatisticsBlock';
+
 export const Home = () => {
-  const { data: govExams, isLoading, error } = useGovExams();
+  const { data: govExams, isLoading: isLoadingGovExams, error: errorGovExams } = useGovExams();
   const navigate = useNavigate();
   const refreshToken = useRefreshTokenMutation();
   const { logout } = useAuth();
@@ -15,10 +15,8 @@ export const Home = () => {
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        // Only make the request if we don't have data
         const response = await refreshToken.mutateAsync();
         
-        // Check if user is admin using the data from refresh token
         if (response?.user.role !== 'ADMIN') {
           logout();
           navigate('/login');
@@ -32,7 +30,7 @@ export const Home = () => {
     checkAdmin();
   }, []);
 
-  if (isLoading) {
+  if (isLoadingGovExams) {
     return (
       <Container size="xl" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
         <Loader size="xl" />
@@ -40,7 +38,7 @@ export const Home = () => {
     );
   }
 
-  if (error) {
+  if (errorGovExams) {
     return (
       <Container size="xl">
         <Alert color="red" title="Error">
@@ -58,9 +56,11 @@ export const Home = () => {
             צור ופתור מבחנים כדי לבדוק את הידע שלך
           </Text>
         </div>
-
       </Group>
 
+      <StatisticsBlock />
+
+      <Title order={3} mb="md">מבחנים ממשלתיים</Title> 
       <SimpleGrid cols={3} spacing="lg">
         {govExams?.map((exam) => (
           <Card 
