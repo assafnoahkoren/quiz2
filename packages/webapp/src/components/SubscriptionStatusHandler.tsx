@@ -63,14 +63,6 @@ export const SubscriptionStatusHandler = () => {
 			<Group mt="md" grow justify="center">
 				<Button
 					variant="subtle"
-					color="red"
-					leftSection={<IconLogout size={18} />}
-					onClick={handleLogout}
-				>
-					התנתק
-				</Button>
-				<Button
-					variant="subtle"
 					component="a"
 					href="https://wa.me/972509733829"
 					rel="noopener noreferrer"
