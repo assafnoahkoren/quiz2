@@ -1,20 +1,47 @@
 import React, { useEffect } from 'react';
 import { useCreateExam } from '../../api/exams'; // Adjust path as needed
+import { useMySubscriptionStatus } from '../../api/subscriptions';
 import { useGovExams } from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { IconChecklist, IconClockHour4, IconCircleCheck, IconAlertCircle } from '@tabler/icons-react';
 import { Paper, Title, Text, Button, Group, Stack, Alert, Loader, Center } from '@mantine/core'; // Import Mantine components
+import { modals } from '@mantine/modals';
 
 const ExamCreationPage: React.FC = () => {
   const createExamMutation = useCreateExam();
   const navigate = useNavigate();
+  const { data: mySubscription, isLoading: isLoadingMySubscription } = useMySubscriptionStatus();
 
   const { data: govExams, isLoading: isLoadingGovExams } = useGovExams();
   const govExam = govExams?.find(exam => exam.name.includes('קלינאות'));
   const govExamId = govExam?.id;
 
   const handleCreateExam = (id: string) => {
-    createExamMutation.mutate({ govExamId: id });
+    if (isLoadingMySubscription) {
+      console.warn("Subscription status is still loading. Please wait a moment.");
+      return;
+    }
+
+    const hasActiveSubscription = mySubscription?.type === 'paid';
+
+    if (!hasActiveSubscription) {
+      modals.openConfirmModal({
+        title: 'שים לב!',
+        centered: true,
+        children: (
+          <Group wrap="nowrap" align="center">
+            <IconAlertCircle size={48} color="orange" />
+            <Text size="sm">
+              ללא מנוי, יווצר מבחן עם 20 שאלות בלבד. האם להמשיך?
+            </Text>
+          </Group>
+        ),
+        labels: { confirm: 'המשך', cancel: 'בטל' },
+        onConfirm: () => createExamMutation.mutate({ govExamId: id }),
+      });
+    } else {
+      createExamMutation.mutate({ govExamId: id });
+    }
   };
 
   useEffect(() => {

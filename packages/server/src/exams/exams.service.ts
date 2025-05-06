@@ -3,13 +3,21 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { QuestionStatus } from '@prisma/client';
 import { GetRandomQuestionsDto } from './dto/get-random-questions.dto';
+import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 
 @Injectable()
 export class ExamsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly subscriptionsService: SubscriptionsService,
+  ) {}
 
   async create(createExamDto: CreateExamDto, userId: string) {
     const { govExamId } = createExamDto;
+
+    // Check for active subscription
+    const hasSubscription = await this.subscriptionsService.hasValidSubscription(userId);
+    const questionCount = hasSubscription ? 100 : 20;
 
     // 1. Fetch GovExam and its subject IDs
     const govExam = await this.prisma.govExam.findUnique({
@@ -33,9 +41,9 @@ export class ExamsService {
         throw new Error(`Government exam with ID ${govExamId} has no associated subjects.`);
     }
 
-    // 2. Get 100 random question IDs for those subjects
+    // 2. Get random question IDs for those subjects
     const questionIds = await this.getRandomQuestions({
-      count: 100, // Get 100 questions
+      count: questionCount, // Use dynamic question count
       subjectIds,
     });
 

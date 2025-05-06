@@ -5,13 +5,14 @@ import { AuthGuard } from '../auth/auth.guard';
 import { AuthedRequest } from '../auth/types/authed-request.interface';
 import { EndExamDto } from './dto/end-exam.dto';
 import { SetAnswerDto } from './dto/set-answer.dto';
+import { SubscriptionGuard } from 'src/subscriptions/guards/subscription.guard';
 
 @Controller('api/exams')
 export class ExamsController {
   constructor(private readonly examsService: ExamsService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SubscriptionGuard)
   create(
     @Body() createExamDto: CreateExamDto,
     @Req() request: AuthedRequest,
