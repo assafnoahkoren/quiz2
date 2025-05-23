@@ -41,21 +41,50 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
     >
       <AppShell.Header>
         <Container h="100%" px="xs">
-          <Group h="100%" justify="space-between">
-            <Group>
+          <Group h="100%" justify="space-between" gap="xs" wrap="nowrap">
+            <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
               <Burger opened={opened} onClick={toggle} size="sm" />
               <Text
                 size="lg"
                 fw={700}
-                style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                style={{ 
+                  textDecoration: 'none', 
+                  color: 'inherit', 
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
                 onClick={() => navigate('/')}
               >
                 קוויז
               </Text>
             </Group>
             {!isLoadingStatus && subscriptionStatus?.type === 'demo' && (
-              <Badge radius="sm" variant="light" color="gray">
+              <Badge 
+                radius="sm" 
+                variant="light" 
+                color="gray"
+                size="sm"
+                style={{ 
+                  flexShrink: 0,
+                  maxWidth: '120px'
+                }}
+                className="hidden sm:block"
+              >
                 {`שאלות חינם: ${subscriptionStatus.freeQuestionsLeft}`}
+              </Badge>
+            )}
+            {!isLoadingStatus && subscriptionStatus?.type === 'demo' && (
+              <Badge 
+                radius="sm" 
+                variant="light" 
+                color="gray"
+                size="xs"
+                style={{ 
+                  flexShrink: 0
+                }}
+                className="block sm:hidden"
+              >
+                {subscriptionStatus.freeQuestionsLeft}
               </Badge>
             )}
           </Group>
