@@ -121,8 +121,8 @@ model Question {
 
 model Options {
   id               String             @id @default(uuid())
-  questionId       String
-  Question         Question           @relation(fields: [questionId], references: [id])
+  questionId       String?
+  Question         Question?          @relation(fields: [questionId], references: [id], onDelete: SetNull)
   answer           String
   isCorrect        Boolean
   createdAt        DateTime           @default(now())
@@ -151,10 +151,10 @@ model UserExamQuestion {
   userExamId     String?
   UserExam       UserExam? @relation(fields: [userExamId], references: [id])
   questionId     String
-  Question       Question  @relation(fields: [questionId], references: [id])
+  Question       Question  @relation(fields: [questionId], references: [id], onDelete: NoAction)
   answer         String?
   chosenOptionId String?
-  ChosenOption   Options?  @relation(fields: [chosenOptionId], references: [id], onDelete: NoAction)
+  ChosenOption   Options?  @relation(fields: [chosenOptionId], references: [id], onDelete: SetNull)
   isCorrect      Boolean?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
