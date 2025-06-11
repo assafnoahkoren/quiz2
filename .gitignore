@@ -37,3 +37,5 @@ lerna-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea 
+
+packages/server/scripts/local
