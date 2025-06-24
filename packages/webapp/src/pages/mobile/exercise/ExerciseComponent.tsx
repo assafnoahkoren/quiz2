@@ -43,7 +43,7 @@ const ExerciseComponent: React.FC = () => {
   if (exerciseStoreInstance.currentPhase === "pickingSubjects") {
     content = <SubjectsPicker govExamId={klinautExam.id} />;
   } else if (exerciseStoreInstance.currentPhase === "exercising") {
-    content = <QuestionsPage />;
+    content = <QuestionsPage govExamId={klinautExam.id} />;
   } else if (exerciseStoreInstance.currentPhase === "done") {
     // TODO: Add a component for the results/done phase
     content = <div>Exercise Done! Results coming soon...</div>;

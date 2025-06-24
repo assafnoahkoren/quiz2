@@ -11,6 +11,7 @@ import { UserModule } from './users/users.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ExamsModule } from './exams/exams.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     SubscriptionsModule,
     ExamsModule,
     StatisticsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

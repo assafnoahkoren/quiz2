@@ -38,6 +38,7 @@ model User {
   UserExams         UserExam[]
   Subscriptions     Subscription[]
   UserExamQuestion  UserExamQuestion[]
+  Reports           Report[]
 }
 
 model Subscription {
@@ -63,6 +64,7 @@ model GovExam {
   Subject       Subject[]
   Subscriptions Subscription[]
   Users         User[]
+  Reports       Report[]
 }
 
 model GovExamInstance {
@@ -104,6 +106,12 @@ enum QuestionStatus {
   ARCHIVED
 }
 
+enum ReportType {
+  TECHNICAL_ISSUE
+  CONTENT_ERROR
+  OTHER
+}
+
 model Question {
   id                String             @id @default(uuid())
   subjectId         String
@@ -117,6 +125,7 @@ model Question {
   updatedAt         DateTime           @updatedAt
   Options           Options[]
   UserExamQuestions UserExamQuestion[]
+  Reports           Report[]
 }
 
 model Options {
@@ -158,4 +167,20 @@ model UserExamQuestion {
   isCorrect      Boolean?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+model Report {
+  id           String       @id @default(uuid())
+  type         ReportType
+  reporterId   String
+  Reporter     User         @relation(fields: [reporterId], references: [id])
+  message      String
+  phoneNumber  String
+  questionId   String?
+  Question     Question?    @relation(fields: [questionId], references: [id])
+  govExamId    String
+  GovExam      GovExam      @relation(fields: [govExamId], references: [id])
+  questionData Json
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }

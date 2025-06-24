@@ -10,6 +10,7 @@ import { makeObservable, observable, action, computed } from 'mobx'; // Import M
 import { useClipboard, useDisclosure } from '@mantine/hooks'; // Import useClipboard, useDisclosure
 import ExamTimer from './ExamTimer'; // Import the new timer component
 import { useExamDuration } from './utils';
+import { ReportIssueButton } from '../../components/reports';
 
 // Helper class to manage local answer state
 class LocalExamState {
@@ -390,6 +391,17 @@ const ExamPageComponent: React.FC = () => {
 								>
 									{clipboard.copied ? 'הקישור הועתק' : 'העתק קישור'}
 								</Button>
+
+								{/* Report Issue button */}
+								{currentQuestion && examData && (
+									<ReportIssueButton
+										questionId={currentQuestion.questionId}
+										govExamId={examData.govExamId}
+										questionData={currentQuestion.Question}
+										size="xs"
+										c="gray"
+									/>
+								)}
 							</Group>
 
 							{/* Timer component */}

@@ -8,6 +8,7 @@ import { getFullViewHeight } from '../MobileLayout';
 import { useClipboard } from '@mantine/hooks';
 import { SubjectScore } from '../../../components/SubjectScore/SubjectScore';
 import { observer } from 'mobx-react-lite';
+import { ReportIssueButton } from '../../../components/reports';
 
 // Define a type for our answers map
 interface AnswerState {
@@ -25,7 +26,11 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 	return newArray;
 };
 
-const QuestionsPage: React.FC = () => {
+interface QuestionsPageProps {
+	govExamId: string;
+}
+
+const QuestionsPage: React.FC<QuestionsPageProps> = ({ govExamId }) => {
 	const exerciseStore = useExerciseStore();
 	const [questions, setQuestions] = useState<Question[]>([]);
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -359,6 +364,17 @@ const QuestionsPage: React.FC = () => {
 								>
 									{clipboard.copied ? 'הקישור הועתק' : 'העתק קישור'}
 								</Button>
+
+								{/* Report Issue button */}
+								{currentQuestion && (
+									<ReportIssueButton
+										questionId={currentQuestion.id}
+										govExamId={govExamId}
+										questionData={currentQuestion}
+										size="xs"
+										c="gray"
+									/>
+								)}
 
 							</Group>
 
