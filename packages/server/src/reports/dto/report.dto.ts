@@ -1,4 +1,4 @@
-import { ReportType } from '@prisma/client';
+import { ReportType, ReportStatus } from '@prisma/client';
 
 export class ReportDto {
   id: string;
@@ -9,6 +9,7 @@ export class ReportDto {
   questionId?: string | null;
   govExamId: string;
   questionData: any;
+  status: ReportStatus;
   createdAt: Date;
   updatedAt: Date;
 }

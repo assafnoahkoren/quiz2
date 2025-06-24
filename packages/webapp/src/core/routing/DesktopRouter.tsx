@@ -6,6 +6,7 @@ import { GovExam } from '../../pages/desktop/GovExam';
 import { Login } from '../../pages/public/Login';
 import { Register } from '../../pages/public/Register';
 import UsersPage from '../../pages/desktop/users/UsersPage';
+import { ReportsPage } from '../../pages/desktop/reports/ReportsPage';
 
 const DesktopRouter = () => {
   // Note: The base path '/admin' is handled in AppRouter.tsx
@@ -23,6 +24,7 @@ const DesktopRouter = () => {
           <Route index element={<Home />} />
           <Route path="gov-exam/:govExamId" element={<GovExam />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="reports" element={<ReportsPage />} />
           {/* Fallback within /admin */}
           <Route path="*" element={<Navigate to="." replace />} />
         </Route>

@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { ReportDto } from './dto/report.dto';
+import { UpdateReportStatusDto } from './dto/update-report-status.dto';
+import { ReportStatus } from '@prisma/client';
 
 @Injectable()
 export class ReportsService {
@@ -50,8 +52,9 @@ export class ReportsService {
     return report;
   }
 
-  async findAll(): Promise<ReportDto[]> {
+  async findAll(status?: ReportStatus): Promise<ReportDto[]> {
     return this.prisma.report.findMany({
+      where: status ? { status } : undefined,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -66,5 +69,20 @@ export class ReportsService {
     }
 
     return report;
+  }
+
+  async updateStatus(id: string, updateStatusDto: UpdateReportStatusDto): Promise<ReportDto> {
+    const report = await this.findOne(id);
+
+    return this.prisma.report.update({
+      where: { id },
+      data: { status: updateStatusDto.status },
+    });
+  }
+
+  async getPendingCount(): Promise<number> {
+    return this.prisma.report.count({
+      where: { status: ReportStatus.PENDING },
+    });
   }
 }

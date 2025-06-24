@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { AppShell, Container, Group, Text, Button } from '@mantine/core';
-import { IconLogin, IconUserPlus, IconLogout, IconClipboard, IconUsers, IconHome } from '@tabler/icons-react';
+import { AppShell, Container, Group, Text, Button, Badge } from '@mantine/core';
+import { IconLogin, IconUserPlus, IconLogout, IconClipboard, IconUsers, IconHome, IconFlag } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../components/auth/AuthContext';
+import { usePendingReportsCount } from '../../api/reports';
 
 interface DesktopLayoutProps {
   children?: ReactNode;
@@ -12,6 +13,7 @@ interface DesktopLayoutProps {
 export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { data: pendingCount } = usePendingReportsCount();
 
   const handleLogout = () => {
     logout();
@@ -44,6 +46,21 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                     leftSection={<IconClipboard size={20} />}
                   >
                     בחינות
+                  </Button>
+                  <Button
+                    variant="subtle"
+                    component={Link}
+                    to="/admin/reports"
+                    leftSection={<IconFlag size={20} />}
+                    rightSection={
+                      pendingCount && pendingCount > 0 ? (
+                        <Badge size="sm" circle color="orange">
+                          {pendingCount}
+                        </Badge>
+                      ) : null
+                    }
+                  >
+                    דיווחים
                   </Button>
                   <Button
                     variant="subtle"

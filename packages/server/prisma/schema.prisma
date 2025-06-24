@@ -112,6 +112,11 @@ enum ReportType {
   OTHER
 }
 
+enum ReportStatus {
+  PENDING
+  RESOLVED
+}
+
 model Question {
   id                String             @id @default(uuid())
   subjectId         String
@@ -181,6 +186,7 @@ model Report {
   govExamId    String
   GovExam      GovExam      @relation(fields: [govExamId], references: [id])
   questionData Json
+  status       ReportStatus @default(PENDING)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
