@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon, Badge } from '@mantine/core';
-import { IconLogout, IconHome, IconMenu2, IconUser, IconX, IconSettings, IconHistory } from '@tabler/icons-react';
+import { AppShell, Container, Group, Text, Button, Stack, Burger, Drawer, ActionIcon, Badge, Tooltip } from '@mantine/core';
+import { IconLogout, IconHome, IconMenu2, IconUser, IconX, IconSettings, IconHistory, IconBug } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../components/auth/AuthContext';
 import { useCurrentUser } from '../../api/users';
@@ -9,6 +9,7 @@ import { useGovExams } from '../../api/gov-exam';
 import { useMySubscriptionStatus } from '../../api/subscriptions';
 import { SubscriptionStatusHandler } from '../../components/SubscriptionStatusHandler';
 import { UserRole } from '../../types/user';
+import { ReportIssueButton } from '../../components/reports';
 
 interface MobileLayoutProps {
   children?: ReactNode;
@@ -26,8 +27,10 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
   const [opened, { toggle, close }] = useDisclosure();
   const { data: currentUser } = useCurrentUser();
   const { data: subscriptionStatus, isLoading: isLoadingStatus } = useMySubscriptionStatus();
+  const { data: govExams } = useGovExams();
   
-  useGovExams(); // prefetch data - not needed for this page
+  // Find the klinaut exam for report context
+  const klinautExam = govExams?.find(exam => exam.name.includes('קלינאות'));
 
   const handleLogout = () => {
     logout();
@@ -53,11 +56,23 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
                 קוויז
               </Text>
             </Group>
-            {!isLoadingStatus && subscriptionStatus?.type === 'demo' && (
-              <Badge radius="sm" variant="light" color="gray">
-                {`שאלות חינם: ${subscriptionStatus.freeQuestionsLeft}`}
-              </Badge>
-            )}
+            <Group gap="xs">
+              {klinautExam && (
+                <ReportIssueButton
+                  govExamId={klinautExam.id}
+                  variant="subtle"
+                  size="sm"
+                  withIcon={true}
+                >
+                  דווח על בעיה
+                </ReportIssueButton>
+              )}
+              {!isLoadingStatus && subscriptionStatus?.type === 'demo' && (
+                <Badge radius="sm" variant="light" color="gray">
+                  {`שאלות חינם: ${subscriptionStatus.freeQuestionsLeft}`}
+                </Badge>
+              )}
+            </Group>
           </Group>
         </Container>
       </AppShell.Header>

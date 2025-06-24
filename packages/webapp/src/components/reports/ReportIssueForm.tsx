@@ -53,7 +53,7 @@ export const ReportIssueForm: React.FC<ReportIssueFormProps> = ({
 
   const form = useForm<CreateReportData>({
     initialValues: {
-      type: ReportType.CONTENT_ERROR,
+      type: questionId ? ReportType.CONTENT_ERROR : ReportType.TECHNICAL_ISSUE,
       message: '',
       phoneNumber: '',
       questionId,

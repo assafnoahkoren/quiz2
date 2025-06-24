@@ -373,7 +373,9 @@ const QuestionsPage: React.FC<QuestionsPageProps> = ({ govExamId }) => {
 										questionData={currentQuestion}
 										size="xs"
 										c="gray"
-									/>
+									>
+										דווח על טעות
+									</ReportIssueButton>
 								)}
 
 							</Group>
