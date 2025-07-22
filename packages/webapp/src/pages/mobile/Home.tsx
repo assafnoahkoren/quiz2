@@ -1,13 +1,14 @@
-import { Stack, Button, Text, Box, Title, Modal, Loader, Alert, useMantineTheme } from '@mantine/core';
+import { Stack, Button, Text, Box, Title, Modal, Loader, Alert, useMantineTheme, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { getFullViewHeight } from './MobileLayout';
-import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle, IconListCheck, IconArchive, IconClock, IconStopwatch } from '@tabler/icons-react';
+import { IconBackhoe, IconBarrierBlock, IconBook2, IconHammer, IconNotes, IconTools, IconAlertCircle, IconListCheck, IconArchive, IconClock, IconStopwatch, IconSparkles } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useGovExams } from '../../api/gov-exam';
 import { useGetCurrentRunningExam } from '../../api/exams';
 import exerciseStoreInstance from './exercise/exerciseStore';
 import { subscriptionKeys } from '../../api/subscriptions';
 import { useQueryClient } from '@tanstack/react-query';
+import updateModalsStoreInstance from '../../stores/updateModalsStore';
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -57,7 +58,22 @@ export const Home = () => {
   };
 
   return (
-    <Stack style={{ height: getFullViewHeight() }} py="xl" align="center" px="md">
+    <Stack style={{ height: getFullViewHeight() }} pt="0" pb="xl" align="center" px="0">
+      <Box mb="lg" h="50px" w="100%" style={{ backgroundColor: theme.colors.gray[2] }}>
+        <Group h="100%" px="md" justify="center" align="center">
+          <Text size="sm" fw={500}>
+            בהצלחה במבחן הממשלתי מחר! 
+          </Text>
+          <Button 
+            size="xs" 
+            variant="light"
+            leftSection={<IconSparkles size={16} />}
+            onClick={() => updateModalsStoreInstance.showModal('good-luck-exam')}
+          >
+            קרא עוד
+          </Button>
+        </Group>
+      </Box>
       <Button 
         size="lg" 
         fullWidth 
