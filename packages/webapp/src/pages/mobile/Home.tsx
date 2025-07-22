@@ -26,6 +26,10 @@ export const Home = () => {
     queryClient.invalidateQueries({ queryKey: subscriptionKeys.myStatus() });
   }, [queryClient]);
 
+  useEffect(() => {
+    updateModalsStoreInstance.showIfNeverSeen('good-luck-exam');
+  }, []);
+
   // Define styles for the Full Exam button
   const fullExamBaseStyle = {
     fontSize: '1.2rem',
