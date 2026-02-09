@@ -63,7 +63,7 @@ export const Home = () => {
 
   return (
     <Stack style={{ height: getFullViewHeight() }} pt="0" pb="xl" align="center" px="0">
-      <Box mb="lg" h="50px" w="100%" style={{ backgroundColor: theme.colors.gray[2] }}>
+      {/* <Box mb="lg" h="50px" w="100%" style={{ backgroundColor: theme.colors.gray[2] }}>
         <Group h="100%" px="md" justify="center" align="center">
           <Text size="sm" fw={500}>
             בהצלחה במבחן הממשלתי מחר! 
@@ -77,7 +77,7 @@ export const Home = () => {
             קרא עוד
           </Button>
         </Group>
-      </Box>
+      </Box> */}
       <Button 
         size="lg" 
         fullWidth 
@@ -85,6 +85,7 @@ export const Home = () => {
         style={{ 
           maxWidth: 300, 
           fontSize: '1.2rem',
+          marginTop: '20px',
           borderRadius: '10px',
           background: 'linear-gradient(45deg, #4158D0, #C850C0)',
           height: '70px',
