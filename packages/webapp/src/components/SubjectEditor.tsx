@@ -17,7 +17,7 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
   const { data: questions, isLoading, error } = useQuestionsBySubjectId(subjectId);
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<QuestionStatus | null>(null);
-  const [orderBy, setOrderBy] = useState<OrderBy | null>(null);
+  const [orderBy, setOrderBy] = useState<OrderBy | null>('createdAt-desc');
   const [openItems, setOpenItems] = useState<string[]>([]);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
