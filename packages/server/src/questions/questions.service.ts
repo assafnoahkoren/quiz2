@@ -273,7 +273,7 @@ export class QuestionsService {
       }
 
       const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-5-20250929",
+        model: "claude-opus-4-6",
         max_tokens: 6000,
         messages: [{ role: 'user', content: `
           I have a question with answer options. Please analyze it, identify the correct answer,
@@ -374,7 +374,7 @@ export class QuestionsService {
       ).join('\n');
 
       const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-5-20250929",
+        model: "claude-opus-4-6",
         max_tokens: 4000,
         messages: [{ role: 'user', content: `
           Please solve this multiple-choice question:
