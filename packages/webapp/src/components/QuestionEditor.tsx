@@ -1,7 +1,7 @@
 import { Stack, Text, TextInput, Textarea, Select, Button, Group, Switch, SimpleGrid, FileButton, Image, LoadingOverlay, Alert, Modal, ActionIcon } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useQuestion, useCreateQuestion, useUpdateQuestion, fetchQuestionById, useSolveQuestion } from '../api/questions';
+import { useQuestion, useCreateQuestion, useUpdateQuestion, fetchQuestionById, useSolveQuestion, useDeleteQuestion } from '../api/questions';
 import { QuestionType, QuestionStatus, Question } from '../api/types';
 import { notifications } from '@mantine/notifications';
 import React, { useRef, useEffect, useState } from 'react';
@@ -38,6 +38,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
   const [solutionModalOpen, setSolutionModalOpen] = useState(false);
   const [solution, setSolution] = useState<{ correctOption: any, explanation: string } | null>(null);
   const [savingSolution, setSavingSolution] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   // Fetch question data if in edit mode
   const { data: questionData, isLoading, error: questionError } = useQuestion(questionId);
@@ -45,6 +46,7 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
   const createMutation = useCreateQuestion();
   const updateMutation = useUpdateQuestion();
   const solveMutation = useSolveQuestion();
+  const deleteMutation = useDeleteQuestion();
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -304,6 +306,30 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
     }
   };
 
+  const handleDelete = async () => {
+    if (!questionId) return;
+    try {
+      await deleteMutation.mutateAsync(questionId);
+      queryClient.invalidateQueries({
+        queryKey: subjectKeys.list({ examId: govExamId })
+      });
+      notifications.show({
+        title: 'הצלחה',
+        message: 'השאלה נמחקה בהצלחה',
+        color: 'green',
+      });
+      setDeleteConfirmOpen(false);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      notifications.show({
+        title: 'שגיאה',
+        message: 'לא ניתן למחוק את השאלה',
+        color: 'red',
+      });
+    }
+  };
+
   const handleAddOption = () => {
     const currentOptions = [...form.values.options];
     form.setFieldValue('options', [...currentOptions, { answer: '', isCorrect: false }]);
@@ -448,21 +474,33 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
               הוסף תשובה
             </Button>
 
-            <Group justify="flex-end" mt="md">
-              {isEditMode && (
-                <Button 
-                  onClick={handleSolve}
-                  color="indigo"
-                  loading={solveMutation.isPending} 
-                  variant="light" 
-                  leftSection={<IconWand size={16} />}
+            <Group justify="space-between" mt="md">
+              {isEditMode ? (
+                <Button
+                  color="red"
+                  variant="light"
+                  leftSection={<IconTrash size={16} />}
+                  onClick={() => setDeleteConfirmOpen(true)}
                 >
-                  פתור שאלה
+                  מחק שאלה
                 </Button>
-              )}
-              <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
-                {isEditMode ? 'עדכן שאלה' : 'צור שאלה'}
-              </Button>
+              ) : <div />}
+              <Group>
+                {isEditMode && (
+                  <Button
+                    onClick={handleSolve}
+                    color="indigo"
+                    loading={solveMutation.isPending}
+                    variant="light"
+                    leftSection={<IconWand size={16} />}
+                  >
+                    פתור שאלה
+                  </Button>
+                )}
+                <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
+                  {isEditMode ? 'עדכן שאלה' : 'צור שאלה'}
+                </Button>
+              </Group>
             </Group>
           </Stack>
         </div>
@@ -512,6 +550,24 @@ export function QuestionEditor({ questionId, onSuccess, subjectId, govExamId }: 
         ) : (
           <Text>טוען פתרון...</Text>
         )}
+      </Modal>
+
+      <Modal
+        opened={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        title="מחיקת שאלה"
+        centered
+        size="sm"
+      >
+        <Stack>
+          <Text>האם אתה בטוח שברצונך למחוק שאלה זו?</Text>
+          <Group justify="flex-end">
+            <Button variant="subtle" onClick={() => setDeleteConfirmOpen(false)}>ביטול</Button>
+            <Button color="red" loading={deleteMutation.isPending} onClick={handleDelete}>
+              מחק
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </>
   );
