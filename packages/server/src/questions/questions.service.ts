@@ -273,11 +273,11 @@ export class QuestionsService {
       }
 
       const response = await anthropic.messages.create({
-        model: "claude-3-7-sonnet-20250219",
+        model: "claude-sonnet-4-5-20250929",
         max_tokens: 6000,
         messages: [{ role: 'user', content: `
           I have a question with answer options. Please analyze it, identify the correct answer,
-          and return a structured JSON response.
+          and return a structured response.
 
           The question text is: ${text}
 
@@ -285,31 +285,38 @@ export class QuestionsService {
           1. Determine the most accurate answer among the options
           2. Translate the question and all answers to Hebrew (keep technical terms in English if needed)
           3. Provide a brief explanation in Hebrew for why the selected answer is correct
-          4. Return results in this JSON format (do not include any other text because it will break the JSON parsing):
-          {
-            "question": "Hebrew translated question text",
-            "options": [
-              {
-                "answer": "Hebrew translated answer option 1",
-                "isCorrect": boolean
-              },
-              {
-                "answer": "Hebrew translated answer option 2",
-                "isCorrect": boolean
-              },
-              ...
-            ],
-            "explanation": "Hebrew explanation of the correct answer"
-          }
-
-          Please ensure only ONE option has isCorrect set to true.
-
+          4. Please ensure only ONE option has isCorrect set to true.
           ` }],
+        tools: [{
+          name: 'save_question',
+          description: 'Save the analyzed and translated question data',
+          input_schema: {
+            type: 'object' as const,
+            properties: {
+              question: { type: 'string', description: 'Hebrew translated question text' },
+              options: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    answer: { type: 'string', description: 'Hebrew translated answer option' },
+                    isCorrect: { type: 'boolean', description: 'Whether this option is the correct answer' },
+                  },
+                  required: ['answer', 'isCorrect'],
+                },
+              },
+              explanation: { type: 'string', description: 'Hebrew explanation of the correct answer' },
+            },
+            required: ['question', 'options', 'explanation'],
+          },
+        }],
+        tool_choice: { type: 'tool', name: 'save_question' },
         temperature: 0.2,
       });
 
-      // Parse the JSON response
-      const parsedResponse = JSON.parse(response.content[0]['text']);
+      // Extract the structured JSON from the tool use response
+      const toolUseBlock = response.content.find(block => block.type === 'tool_use');
+      const parsedResponse = toolUseBlock['input'] as { question: string; options: { answer: string; isCorrect: boolean }[]; explanation: string };
 
       // Create question in database
       const newQuestion = await this.prisma.question.create({
@@ -367,35 +374,48 @@ export class QuestionsService {
       ).join('\n');
 
       const response = await anthropic.messages.create({
-        model: "claude-3-7-sonnet-20250219",
+        model: "claude-sonnet-4-5-20250929",
         max_tokens: 4000,
         messages: [{ role: 'user', content: `
           Please solve this multiple-choice question:
 
           Question: ${question.question}
-          
+
           Options:
           ${optionsFormatted}
-          
+
           Instructions:
           1. Determine the correct answer option
           2. Provide a detailed explanation of why this answer is correct. The explanation should be in Hebrew (keep technical terms in English if needed). Add line breaks to the explanation for better readability.
           3. When explaining the correct answer, make sure to mention the correct option by its full text and do not use the letter.
-          4. Return results in this JSON format (do not include any other text because it will break the JSON parsing):
-          {
-            "correctOption": {
-              "id": "option_id",
-              "letter": "A/B/C/D",
-              "text": "The correct answer text"
-            },
-            "explanation": "Detailed explanation of why this answer is correct"
-          }
         ` }],
+        tools: [{
+          name: 'submit_answer',
+          description: 'Submit the solved answer with explanation',
+          input_schema: {
+            type: 'object' as const,
+            properties: {
+              correctOption: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'The option ID' },
+                  letter: { type: 'string', description: 'The letter of the correct option (A/B/C/D)' },
+                  text: { type: 'string', description: 'The correct answer text' },
+                },
+                required: ['id', 'letter', 'text'],
+              },
+              explanation: { type: 'string', description: 'Detailed explanation of why this answer is correct' },
+            },
+            required: ['correctOption', 'explanation'],
+          },
+        }],
+        tool_choice: { type: 'tool', name: 'submit_answer' },
         temperature: 0.2,
       });
 
-      // Parse the JSON response
-      const parsedResponse = JSON.parse(response.content[0]['text']);
+      // Extract the structured JSON from the tool use response
+      const toolUseBlock = response.content.find(block => block.type === 'tool_use');
+      const parsedResponse = toolUseBlock['input'] as { correctOption: { id: string; letter: string; text: string }; explanation: string };
       
       // Find the option ID based on the letter or text
       const correctOption = question.Options.find((opt, idx) => {
