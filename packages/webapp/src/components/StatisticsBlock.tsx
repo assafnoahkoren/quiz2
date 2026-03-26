@@ -3,7 +3,8 @@ import {
   useModelCounts,
   useUserCreationCounts,
   useUserExamQuestionCreationCounts,
-  CreationCountsResponse
+  CreationCountsResponse,
+  DateRange,
 } from '../api/statistics';
 import { useCountAnimation } from '../pages/mobile/exercise/SubjectsPicker';
 import { Bar } from 'react-chartjs-2';
@@ -27,10 +28,14 @@ ChartJS.register(
   Legend
 );
 
-export const StatisticsBlock = memo(() => {
-  const { data: statisticsData, isLoading: isLoadingStatistics, error: errorStatistics } = useModelCounts();
-  const { data: userCreationData, isLoading: isLoadingUserCreation, error: errorUserCreation } = useUserCreationCounts();
-  const { data: userExamQuestionCreationData, isLoading: isLoadingUserExamQuestionCreation, error: errorUserExamQuestionCreation } = useUserExamQuestionCreationCounts();
+interface StatisticsBlockProps {
+  dateRange?: DateRange;
+}
+
+export const StatisticsBlock = memo(({ dateRange }: StatisticsBlockProps) => {
+  const { data: statisticsData, isLoading: isLoadingStatistics, error: errorStatistics } = useModelCounts(dateRange);
+  const { data: userCreationData, isLoading: isLoadingUserCreation, error: errorUserCreation } = useUserCreationCounts(dateRange);
+  const { data: userExamQuestionCreationData, isLoading: isLoadingUserExamQuestionCreation, error: errorUserExamQuestionCreation } = useUserExamQuestionCreationCounts(dateRange);
 
   // State for resolved Mantine colors
   const [userChartColor, setUserChartColor] = useState('rgba(75, 192, 192, 1)'); // Fallback color

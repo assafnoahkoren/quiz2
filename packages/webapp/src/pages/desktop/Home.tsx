@@ -1,8 +1,9 @@
-import { Container, Title, Text, SimpleGrid, Card, Group, Loader, Alert, Stack } from '@mantine/core';
+import { Container, Title, Text, SimpleGrid, Card, Group, Loader, Alert, Stack, Button } from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
 import { useGovExams } from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { useRefreshTokenMutation } from '../../api/auth';
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../components/auth/AuthContext';
 import { StatisticsBlock } from '../../components/StatisticsBlock';
 
@@ -11,6 +12,19 @@ export const Home = () => {
   const navigate = useNavigate();
   const refreshToken = useRefreshTokenMutation();
   const { logout } = useAuth();
+
+  const currentYear = new Date().getFullYear();
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    new Date(currentYear, 0, 1),
+    new Date(currentYear, 11, 31),
+  ]);
+
+  const dateRangeParam = useMemo(() => {
+    const [from, to] = dateRange;
+    if (!from || !to) return undefined;
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    return { from: fmt(from), to: fmt(to) };
+  }, [dateRange]);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -58,7 +72,29 @@ export const Home = () => {
         </div>
       </Group>
 
-      <StatisticsBlock />
+      <Group mb="md" align="end">
+        <DatePickerInput
+          type="range"
+          label="טווח תאריכים"
+          value={dateRange}
+          onChange={setDateRange}
+        />
+        {[0, 1, 2].map((offset) => {
+          const year = currentYear - offset;
+          return (
+            <Button
+              key={year}
+              variant={dateRange[0]?.getFullYear() === year ? 'filled' : 'light'}
+              size="sm"
+              onClick={() => setDateRange([new Date(year, 0, 1), new Date(year, 11, 31)])}
+            >
+              {year}
+            </Button>
+          );
+        })}
+      </Group>
+
+      <StatisticsBlock dateRange={dateRangeParam} />
 
       <Title order={3} mb="md">מבחנים ממשלתיים</Title> 
       <SimpleGrid cols={3} spacing="lg">

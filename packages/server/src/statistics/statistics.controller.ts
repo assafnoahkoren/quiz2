@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
@@ -9,19 +9,19 @@ export class StatisticsController {
 
   @Get('counts')
   @UseGuards(AuthGuard, AdminGuard)
-  async getModelCounts() {
-    return this.statisticsService.getModelCounts();
+  async getModelCounts(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.statisticsService.getModelCounts(from, to);
   }
 
   @Get('user-creation-counts')
   @UseGuards(AuthGuard, AdminGuard)
-  async getNonAdminUserCreationCountsByDay() {
-    return this.statisticsService.getNonAdminUserCreationCountsByDay();
+  async getNonAdminUserCreationCountsByDay(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.statisticsService.getNonAdminUserCreationCountsByDay(from, to);
   }
 
   @Get('user-exam-question-creation-counts')
   @UseGuards(AuthGuard, AdminGuard)
-  async getUserExamQuestionCreationCountsByDay() {
-    return this.statisticsService.getUserExamQuestionCreationCountsByDay();
+  async getUserExamQuestionCreationCountsByDay(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.statisticsService.getUserExamQuestionCreationCountsByDay(from, to);
   }
 } 
