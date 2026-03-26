@@ -1,4 +1,4 @@
-import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge, Accordion, Button } from '@mantine/core';
+import { Card, Text, Loader, Alert, Stack, Group, TextInput, Select, Badge, Accordion, Button, Checkbox } from '@mantine/core';
 import { useQuestionsBySubjectId } from '../api';
 import { useState } from 'react';
 import { QuestionStatus, Question } from '../api/types';
@@ -18,6 +18,7 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<QuestionStatus | null>(null);
   const [orderBy, setOrderBy] = useState<OrderBy | null>('createdAt-desc');
+  const [missingExplanation, setMissingExplanation] = useState(false);
   const [openItems, setOpenItems] = useState<string[]>([]);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
@@ -75,7 +76,12 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
     );
   }
 
-  const filteredQuestions = questions?.filter(filterByText).filter(filterByStatus).sort(sortQuestions);
+  const filterByExplanation = (question: { explanation?: string | null }) => {
+    if (!missingExplanation) return true;
+    return !question.explanation || question.explanation.trim() === '';
+  };
+
+  const filteredQuestions = questions?.filter(filterByText).filter(filterByStatus).filter(filterByExplanation).sort(sortQuestions);
 
   return (
     <Stack p="md" py="0">
@@ -96,6 +102,11 @@ export const SubjectEditor = ({ subjectId, govExamId }: SubjectEditorProps) => {
         <GenerateQuestionButton 
           subjectId={subjectId} 
           onGenerated={handleQuestionGenerated} 
+        />
+        <Checkbox
+          label="ללא הסבר"
+          checked={missingExplanation}
+          onChange={(e) => setMissingExplanation(e.currentTarget.checked)}
         />
         <Select
           placeholder="סטטוס"
