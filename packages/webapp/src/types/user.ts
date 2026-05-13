@@ -51,4 +51,25 @@ export interface UpdateUserDto {
 // Type for the delete response
 export interface DeleteUserResponse {
   message: string;
+}
+
+export type UserSortBy = 'name' | 'email' | 'createdAt';
+export type SortOrder = 'asc' | 'desc';
+export type SubscriptionStatusFilter = 'active' | 'inactive';
+
+export interface GetUsersParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: UserRole;
+  subscriptionStatus?: SubscriptionStatusFilter;
+  sortBy?: UserSortBy;
+  sortOrder?: SortOrder;
+}
+
+export interface PaginatedUsersResponse {
+  data: EnrichedUser[];
+  total: number;
+  page: number;
+  pageSize: number;
 } 
