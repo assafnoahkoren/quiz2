@@ -65,15 +65,41 @@ describe('UserController (e2e)', () => {
     expect(createdUserId).toBeDefined();
   });
 
-  it('/users (GET) - should get all users', async () => {
+  it('/api/users (GET) - should return paginated users', async () => {
     const response = await request(app.getHttpServer())
-      .get('/users')
+      .get('/api/users')
       .expect(200);
 
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body.length).toBeGreaterThan(0);
-    expect(response.body[0].id).toEqual(createdUserId);
-    expect(response.body[0].password).toBeUndefined(); 
+    expect(response.body.data).toBeDefined();
+    expect(Array.isArray(response.body.data)).toBe(true);
+    expect(response.body.total).toBeGreaterThan(0);
+    expect(response.body.page).toBe(1);
+    expect(response.body.pageSize).toBe(25);
+    expect(response.body.data[0].password).toBeUndefined();
+  });
+
+  it('/api/users (GET) - should filter by search', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/users?search=Test')
+      .expect(200);
+
+    expect(response.body.data.length).toBeGreaterThan(0);
+    const user = response.body.data[0];
+    const matchesSearch =
+      user.name?.toLowerCase().includes('test') ||
+      user.email?.toLowerCase().includes('test');
+    expect(matchesSearch).toBe(true);
+  });
+
+  it('/api/users (GET) - should sort newest first by default', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/users')
+      .expect(200);
+
+    const dates = response.body.data.map((u: any) => new Date(u.createdAt).getTime());
+    for (let i = 1; i < dates.length; i++) {
+      expect(dates[i - 1]).toBeGreaterThanOrEqual(dates[i]);
+    }
   });
 
   it('/users/:id (GET) - should get a single user by id with subscriptions', async () => {
