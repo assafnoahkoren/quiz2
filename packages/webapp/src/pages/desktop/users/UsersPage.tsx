@@ -158,6 +158,7 @@ const UsersPage: React.FC = () => {
             accessor: 'name',
             title: 'שם',
             sortable: true,
+            render: (record) => record.name ?? '—',
           },
           {
             accessor: 'email',
@@ -205,11 +206,13 @@ const UsersPage: React.FC = () => {
       />
 
       {/* Records count */}
-      <Text size="sm" c="dimmed" mt="xs">
-        {total === 0
-          ? 'לא נמצאו משתמשים'
-          : `מציג ${firstRecord}–${lastRecord} מתוך ${total} משתמשים`}
-      </Text>
+      {!isLoading && response !== undefined && (
+        <Text size="sm" c="dimmed" mt="xs">
+          {total === 0
+            ? 'לא נמצאו משתמשים'
+            : `מציג ${firstRecord}–${lastRecord} מתוך ${total} משתמשים`}
+        </Text>
+      )}
 
       <Modal
         opened={createModalOpened}
