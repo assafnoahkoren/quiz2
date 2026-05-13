@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { User, CreateUserDto, UpdateUserDto, DeleteUserResponse, EnrichedUser } from '../types/user';
+import { User, CreateUserDto, UpdateUserDto, DeleteUserResponse, EnrichedUser, GetUsersParams, PaginatedUsersResponse } from '../types/user';
 import apiClient from './client';
 
 const USERS_ENDPOINT = 'api/users'; // Path relative to base URL in apiClient
 const ME_ENDPOINT = 'api/me'; // Endpoint for current user
 
 // API client functions
-export const getUsers = async (): Promise<EnrichedUser[]> => {
-  const response = await apiClient.get<EnrichedUser[]>(USERS_ENDPOINT);
+export const getUsers = async (params: GetUsersParams = {}): Promise<PaginatedUsersResponse> => {
+  const response = await apiClient.get<PaginatedUsersResponse>(USERS_ENDPOINT, { params });
   return response.data;
 };
 
@@ -43,17 +43,20 @@ export const deleteUser = async (id: string): Promise<DeleteUserResponse> => {
 export const userKeys = {
   all: ['users'] as const,
   lists: () => [...userKeys.all, 'list'] as const,
-  list: (filters: string) => [...userKeys.lists(), { filters }] as const,
+  list: (params: GetUsersParams) => [...userKeys.lists(), params] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
   me: () => [...userKeys.all, 'me'] as const,
 };
 
 // Hook to get all users
-export const useGetUsers = (options?: Omit<UseQueryOptions<EnrichedUser[], Error>, 'queryKey' | 'queryFn'>) => {
-  return useQuery<EnrichedUser[], Error>({
-    queryKey: userKeys.lists(),
-    queryFn: getUsers,
+export const useGetUsers = (
+  params: GetUsersParams = {},
+  options?: Omit<UseQueryOptions<PaginatedUsersResponse, Error>, 'queryKey' | 'queryFn'>,
+) => {
+  return useQuery<PaginatedUsersResponse, Error>({
+    queryKey: userKeys.list(params),
+    queryFn: () => getUsers(params),
     ...options,
   });
 };

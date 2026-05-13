@@ -40,7 +40,8 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
   });
 
   // Get users for the dropdown
-  const { data: users = [], isLoading: isLoadingUsers } = useGetUsers();
+  const { data: usersResponse, isLoading: isLoadingUsers } = useGetUsers();
+  const users = usersResponse?.data ?? [];
   
   // Get government exams for the dropdown
   const { data: govExams = [], isLoading: isLoadingGovExams } = useGovExams();
