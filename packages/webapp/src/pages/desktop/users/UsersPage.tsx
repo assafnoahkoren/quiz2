@@ -1,57 +1,11 @@
 import React, { useState } from 'react';
-import { Box, Loader, Text, Title, Button, Modal, Group, Code, Stack, ScrollArea } from '@mantine/core';
+import { Box, Loader, Text, Title, Button, Modal } from '@mantine/core';
 import { DataTable } from 'mantine-datatable';
 import { useGetUsers } from '../../../api/users';
 import { UserIdCell, UserRoleCell, UserSubscriptionCell } from './components';
 import { UserActionsCell } from './components/UserActionsCell';
 import { UserForm } from './components/UserForm';
 import { EnrichedUser } from '../../../types/user';
-import apiClient from '../../../api/client';
-
-const SPIKE_REQUESTS = [
-  { label: 'Default', path: '/api/users' },
-  { label: 'Page 2 / size 10', path: '/api/users?page=2&pageSize=10' },
-  { label: 'Search "test"', path: '/api/users?search=test' },
-  { label: 'Role: ADMIN', path: '/api/users?role=ADMIN' },
-  { label: 'Active subs', path: '/api/users?subscriptionStatus=active' },
-  { label: 'Sort name asc', path: '/api/users?sortBy=name&sortOrder=asc' },
-];
-
-const SpikePanel: React.FC = () => {
-  const [result, setResult] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-
-  const fire = async (path: string) => {
-    setLoading(true);
-    setResult('');
-    try {
-      const res = await apiClient.get(path);
-      setResult(JSON.stringify(res.data, null, 2));
-    } catch (e: any) {
-      setResult(e?.response ? JSON.stringify(e.response.data, null, 2) : String(e));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Stack gap="xs" mt="xl" p="md" style={{ border: '1px dashed #444', borderRadius: 8 }}>
-      <Text size="xs" c="dimmed" fw={600}>SPIKE — API tester (remove when done)</Text>
-      <Group gap="xs" wrap="wrap">
-        {SPIKE_REQUESTS.map(({ label, path }) => (
-          <Button key={path} size="xs" variant="outline" loading={loading} onClick={() => fire(path)}>
-            {label}
-          </Button>
-        ))}
-      </Group>
-      {result && (
-        <ScrollArea h={220}>
-          <Code block style={{ fontSize: 11 }}>{result}</Code>
-        </ScrollArea>
-      )}
-    </Stack>
-  );
-};
 
 const UsersPage: React.FC = () => {
   const { data: response, isLoading, error } = useGetUsers();
@@ -171,7 +125,6 @@ const UsersPage: React.FC = () => {
         />
       </Modal>
 
-      <SpikePanel />
     </div>
   );
 };
