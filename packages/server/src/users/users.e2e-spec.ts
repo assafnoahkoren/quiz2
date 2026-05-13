@@ -42,11 +42,19 @@ describe('UserController (e2e)', () => {
     prisma = moduleFixture.get<PrismaService>(PrismaService);
 
     // Clean up database before tests
-    await prisma.user.deleteMany({}); 
+    await prisma.userExamQuestion.deleteMany({});
+    await prisma.userExam.deleteMany({});
+    await prisma.subscription.deleteMany({});
+    await prisma.report.deleteMany({});
+    await prisma.user.deleteMany({});
   });
 
   afterAll(async () => {
     // Clean up database after tests
+    await prisma.userExamQuestion.deleteMany({});
+    await prisma.userExam.deleteMany({});
+    await prisma.subscription.deleteMany({});
+    await prisma.report.deleteMany({});
     await prisma.user.deleteMany({});
     await app.close();
   });
