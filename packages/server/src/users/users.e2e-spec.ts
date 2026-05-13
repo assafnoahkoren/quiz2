@@ -28,10 +28,10 @@ describe('UserController (e2e)', () => {
     const testUsers = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } }, select: { id: true } });
     const ids = testUsers.map(u => u.id);
     if (ids.length === 0) return;
-    await prisma.userExamQuestion.deleteMany({ where: { userExam: { userId: { in: ids } } } });
+    await prisma.userExamQuestion.deleteMany({ where: { UserExam: { userId: { in: ids } } } });
     await prisma.userExam.deleteMany({ where: { userId: { in: ids } } });
     await prisma.subscription.deleteMany({ where: { userId: { in: ids } } });
-    await prisma.report.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.report.deleteMany({ where: { reporterId: { in: ids } } });
     await prisma.user.deleteMany({ where: { id: { in: ids } } });
   };
 
