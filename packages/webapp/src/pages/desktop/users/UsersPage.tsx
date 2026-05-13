@@ -1,67 +1,151 @@
 import React, { useState } from 'react';
-import { Box, Loader, Text, Title, Button, Modal } from '@mantine/core';
-import { DataTable } from 'mantine-datatable';
+import {
+  Box,
+  Button,
+  Group,
+  Modal,
+  Select,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
+import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useGetUsers } from '../../../api/users';
 import { UserIdCell, UserRoleCell, UserSubscriptionCell } from './components';
 import { UserActionsCell } from './components/UserActionsCell';
 import { UserForm } from './components/UserForm';
-import { EnrichedUser } from '../../../types/user';
+import {
+  EnrichedUser,
+  UserRole,
+  UserSortBy,
+  SortOrder,
+  SubscriptionStatusFilter,
+} from '../../../types/user';
 
 const UsersPage: React.FC = () => {
-  const { data: response, isLoading, error } = useGetUsers();
-  const users = response?.data ?? [];
-  // State for create user modal
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [search, setSearch] = useState('');
+  const [role, setRole] = useState<UserRole | undefined>(undefined);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<
+    SubscriptionStatusFilter | undefined
+  >(undefined);
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<EnrichedUser>>({
+    columnAccessor: 'createdAt',
+    direction: 'desc',
+  });
   const [createModalOpened, setCreateModalOpened] = useState(false);
 
-  // Handle edit user
-  const handleEditUser = (user: EnrichedUser) => {
-    console.log('Edit user:', user);
-    // Implement edit functionality here
+  const [debouncedSearch] = useDebouncedValue(search, 300);
+
+  const { data: response, isLoading, error } = useGetUsers({
+    page,
+    pageSize,
+    search: debouncedSearch || undefined,
+    role,
+    subscriptionStatus,
+    sortBy: sortStatus.columnAccessor as UserSortBy,
+    sortOrder: sortStatus.direction as SortOrder,
+  });
+
+  const users = response?.data ?? [];
+  const total = response?.total ?? 0;
+
+  const handleSortChange = (status: DataTableSortStatus<EnrichedUser>) => {
+    setSortStatus(status);
+    setPage(1);
   };
 
-  // Handle delete user
-  const handleDeleteUser = (user: EnrichedUser) => {
-    console.log('Delete user:', user);
-    // Implement delete functionality here
+  const handleReset = () => {
+    setSearch('');
+    setRole(undefined);
+    setSubscriptionStatus(undefined);
+    setSortStatus({ columnAccessor: 'createdAt', direction: 'desc' });
+    setPage(1);
   };
 
-  // Handle modal close
-  const handleModalClose = () => {
-    setCreateModalOpened(false);
-  };
+  const firstRecord = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const lastRecord = Math.min(page * pageSize, total);
 
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-        <Loader size="xl" />
-      </div>
-    );
-  }
-
-  // Handle error state
   if (error) {
     return (
-      <div style={{ padding: '2rem', color: 'red' }}>
-        <Text>Error loading users: {error.message}</Text>
-      </div>
+      <Box p="md">
+        <Text c="red">שגיאה בטעינת משתמשים: {error.message}</Text>
+      </Box>
     );
   }
 
   return (
-    <div className="flex flex-col p-4">
-      <div className="flex justify-between items-center mb-4">
+    <Box className="flex flex-col p-4">
+      <Group justify="space-between" mb="md">
         <Title order={2}>ניהול משתמשים</Title>
         <Button onClick={() => setCreateModalOpened(true)}>הוסף משתמש</Button>
-      </div>
-      
+      </Group>
+
+      {/* Filter row */}
+      <Group mb="md" gap="sm" wrap="wrap">
+        <TextInput
+          placeholder="חיפוש לפי שם או דוא״ל..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.currentTarget.value);
+            setPage(1);
+          }}
+          style={{ flex: 1, minWidth: 200 }}
+        />
+        <Select
+          placeholder="כל התפקידים"
+          value={role ?? null}
+          onChange={(v) => {
+            setRole(v ? (v as UserRole) : undefined);
+            setPage(1);
+          }}
+          data={[
+            { value: UserRole.ADMIN, label: 'מנהל' },
+            { value: UserRole.USER, label: 'משתמש' },
+          ]}
+          clearable
+          w={140}
+        />
+        <Select
+          placeholder="כל המנויים"
+          value={subscriptionStatus ?? null}
+          onChange={(v) => {
+            setSubscriptionStatus(v ? (v as SubscriptionStatusFilter) : undefined);
+            setPage(1);
+          }}
+          data={[
+            { value: 'active', label: 'פעיל' },
+            { value: 'inactive', label: 'לא פעיל' },
+          ]}
+          clearable
+          w={150}
+        />
+        <Button variant="subtle" onClick={handleReset}>
+          איפוס
+        </Button>
+      </Group>
+
       <DataTable
         withTableBorder
         borderRadius="sm"
         withColumnBorders
         striped
         highlightOnHover
-        records={users || []}
+        fetching={isLoading}
+        records={users}
+        totalRecords={total}
+        recordsPerPage={pageSize}
+        page={page}
+        onPageChange={setPage}
+        recordsPerPageOptions={[10, 25, 50]}
+        onRecordsPerPageChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        sortStatus={sortStatus}
+        onSortStatusChange={handleSortChange}
         columns={[
           {
             accessor: 'id',
@@ -70,41 +154,49 @@ const UsersPage: React.FC = () => {
             textAlign: 'right',
             render: (record) => <UserIdCell id={record.id} />,
           },
-          { accessor: 'name', title: 'שם' },
-          { accessor: 'email', title: 'דוא״ל' },
+          {
+            accessor: 'name',
+            title: 'שם',
+            sortable: true,
+          },
+          {
+            accessor: 'email',
+            title: 'דוא״ל',
+            sortable: true,
+          },
           {
             accessor: 'role',
             title: 'תפקיד',
-            render: (record) => {
-              return <UserRoleCell role={record.role} />;
-            },
+            render: (record) => <UserRoleCell role={record.role} />,
           },
           {
             accessor: 'subscription',
             title: 'מנוי',
-            render: (record) => {
-              // Use type assertion to access Subscriptions property
-              const user = record as EnrichedUser;
-              return <UserSubscriptionCell subscriptions={user.Subscriptions} />;
-            },
+            render: (record) => (
+              <UserSubscriptionCell subscriptions={record.Subscriptions} />
+            ),
+          },
+          {
+            accessor: 'createdAt',
+            title: 'נוצר',
+            sortable: true,
+            render: (record) =>
+              new Date(record.createdAt).toLocaleDateString('he-IL'),
           },
           {
             accessor: 'actions',
             title: 'פעולות',
             textAlign: 'center',
             width: '100px',
-            render: (record) => {
-              return <UserActionsCell 
-                user={record as EnrichedUser} 
-                onEdit={handleEditUser} 
-                onDelete={handleDeleteUser} 
-              />;
-            },
+            render: (record) => (
+              <UserActionsCell
+                user={record}
+                onEdit={(u) => console.log('Edit user:', u)}
+                onDelete={(u) => console.log('Delete user:', u)}
+              />
+            ),
           },
         ]}
-        onRowClick={({ record }) => {
-          console.log('Clicked on user:', record);
-        }}
         emptyState={
           <Text fw={500} ta="center" p="xl">
             לא נמצאו משתמשים
@@ -112,21 +204,26 @@ const UsersPage: React.FC = () => {
         }
       />
 
-      {/* Create User Modal */}
+      {/* Records count */}
+      <Text size="sm" c="dimmed" mt="xs">
+        {total === 0
+          ? 'לא נמצאו משתמשים'
+          : `מציג ${firstRecord}–${lastRecord} מתוך ${total} משתמשים`}
+      </Text>
+
       <Modal
         opened={createModalOpened}
-        onClose={handleModalClose}
+        onClose={() => setCreateModalOpened(false)}
         title="הוספת משתמש חדש"
         size="md"
       >
         <UserForm
-          onSuccess={handleModalClose}
-          onCancel={handleModalClose}
+          onSuccess={() => setCreateModalOpened(false)}
+          onCancel={() => setCreateModalOpened(false)}
         />
       </Modal>
-
-    </div>
+    </Box>
   );
 };
 
-export default UsersPage; 
+export default UsersPage;
