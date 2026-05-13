@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../app.module';
-import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -11,7 +10,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;
-  let userService: UserService;
   let prisma: PrismaService;
   let createdUserId: string;
 
@@ -42,7 +40,6 @@ describe('UserController (e2e)', () => {
     })); // Important for DTO validation
     await app.init();
 
-    userService = moduleFixture.get<UserService>(UserService);
     prisma = moduleFixture.get<PrismaService>(PrismaService);
 
     // Clean up database before tests
@@ -63,7 +60,7 @@ describe('UserController (e2e)', () => {
     await app.close();
   });
 
-  it('/users (POST) - should create a user', async () => {
+  it('/api/users (POST) - should create a user', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/users')
       .send(createUserDto)
@@ -104,10 +101,17 @@ describe('UserController (e2e)', () => {
   });
 
   it('/api/users (GET) - should sort newest first by default', async () => {
+    // Create a second user to ensure sort order can be verified
+    await request(app.getHttpServer())
+      .post('/api/users')
+      .send({ email: 'sort.test@example.com', password: 'password123', name: 'Sort Test' })
+      .expect(201);
+
     const response = await request(app.getHttpServer())
       .get('/api/users')
       .expect(200);
 
+    expect(response.body.data.length).toBeGreaterThan(1);
     const dates = response.body.data.map((u: any) => new Date(u.createdAt).getTime());
     for (let i = 1; i < dates.length; i++) {
       expect(dates[i - 1]).toBeGreaterThanOrEqual(dates[i]);
