@@ -35,7 +35,11 @@ describe('UserController (e2e)', () => {
     .compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe()); // Important for DTO validation
+    app.useGlobalPipes(new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      whitelist: true,
+    })); // Important for DTO validation
     await app.init();
 
     userService = moduleFixture.get<UserService>(UserService);
@@ -61,7 +65,7 @@ describe('UserController (e2e)', () => {
 
   it('/users (POST) - should create a user', async () => {
     const response = await request(app.getHttpServer())
-      .post('/users')
+      .post('/api/users')
       .send(createUserDto)
       .expect(201);
 
@@ -112,7 +116,7 @@ describe('UserController (e2e)', () => {
 
   it('/users/:id (GET) - should get a single user by id with subscriptions', async () => {
     const response = await request(app.getHttpServer())
-      .get(`/users/${createdUserId}`)
+      .get(`/api/users/${createdUserId}`)
       .expect(200);
 
     expect(response.body).toBeDefined();
@@ -128,7 +132,7 @@ describe('UserController (e2e)', () => {
   it('/users/:id (PATCH) - should update a user', async () => {
     const updateUserDto: UpdateUserDto = { name: 'Updated Test User' };
     const response = await request(app.getHttpServer())
-      .patch(`/users/${createdUserId}`)
+      .patch(`/api/users/${createdUserId}`)
       .send(updateUserDto)
       .expect(200);
 
@@ -141,12 +145,12 @@ describe('UserController (e2e)', () => {
 
   it('/users/:id (DELETE) - should delete a user', async () => {
     await request(app.getHttpServer())
-      .delete(`/users/${createdUserId}`)
+      .delete(`/api/users/${createdUserId}`)
       .expect(200);
 
     // Verify the user is deleted
     await request(app.getHttpServer())
-        .get(`/users/${createdUserId}`)
+        .get(`/api/users/${createdUserId}`)
         .expect(404); // Assuming findOne throws NotFoundException or similar
   });
 }); 
