@@ -8,10 +8,12 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUsersQueryDto } from './dto/get-users-query.dto';
 // Assuming AuthGuard and AdminGuard are available for import
 // Make sure to provide the correct path if they are not in the root
 import { AuthGuard } from '../auth/auth.guard'; // Example path, adjust if needed
@@ -33,8 +35,8 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() query: GetUsersQueryDto) {
+    return this.userService.findAll(query);
   }
 
   @Get(':id')

@@ -3,7 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { GetUsersQueryDto } from './dto/get-users-query.dto';
+import { Prisma } from '@prisma/client';
+import { GetUsersQueryDto, UserSortBy } from './dto/get-users-query.dto';
 
 @Injectable()
 export class UserService {
@@ -42,6 +43,12 @@ export class UserService {
       }),
     };
 
+    const SORT_MAP: Record<UserSortBy, Prisma.UserOrderByWithRelationInput> = {
+      [UserSortBy.name]: { name: sortOrder },
+      [UserSortBy.email]: { email: sortOrder },
+      [UserSortBy.createdAt]: { createdAt: sortOrder },
+    };
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         where,
@@ -54,7 +61,7 @@ export class UserService {
           updatedAt: true,
           Subscriptions: true,
         },
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: SORT_MAP[sortBy],
         skip,
         take: pageSize,
       }),
