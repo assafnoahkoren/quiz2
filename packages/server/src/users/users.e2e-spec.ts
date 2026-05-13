@@ -22,6 +22,19 @@ describe('UserController (e2e)', () => {
     name: 'Test User',
   };
 
+  const TEST_EMAILS = ['test.user@example.com', 'sort.test@example.com'];
+
+  const cleanupTestUsers = async () => {
+    const testUsers = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } }, select: { id: true } });
+    const ids = testUsers.map(u => u.id);
+    if (ids.length === 0) return;
+    await prisma.userExamQuestion.deleteMany({ where: { userExam: { userId: { in: ids } } } });
+    await prisma.userExam.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.subscription.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.report.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.user.deleteMany({ where: { id: { in: ids } } });
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -42,21 +55,13 @@ describe('UserController (e2e)', () => {
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
 
-    // Clean up database before tests
-    await prisma.userExamQuestion.deleteMany({});
-    await prisma.userExam.deleteMany({});
-    await prisma.subscription.deleteMany({});
-    await prisma.report.deleteMany({});
-    await prisma.user.deleteMany({});
+    // Clean up only test users before tests
+    await cleanupTestUsers();
   });
 
   afterAll(async () => {
-    // Clean up database after tests
-    await prisma.userExamQuestion.deleteMany({});
-    await prisma.userExam.deleteMany({});
-    await prisma.subscription.deleteMany({});
-    await prisma.report.deleteMany({});
-    await prisma.user.deleteMany({});
+    // Clean up only test users after tests
+    await cleanupTestUsers();
     await app.close();
   });
 
