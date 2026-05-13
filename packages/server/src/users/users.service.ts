@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { GetUsersQueryDto } from './dto/get-users-query.dto';
 
 @Injectable()
 export class UserService {
@@ -19,21 +20,48 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true, 
-        email: true, 
-        name: true, 
-        role: true, // Include role in response
-        createdAt: true, 
-        updatedAt: true,
-        Subscriptions: true
-      }, // Exclude password from response
-      orderBy: {
-        createdAt: 'asc'
-      }
-    });
+  async findAll(query: GetUsersQueryDto) {
+    const { page, pageSize, search, role, subscriptionStatus, sortBy, sortOrder } = query;
+    const skip = (page - 1) * pageSize;
+
+    const now = new Date();
+
+    const where: Parameters<typeof this.prisma.user.findMany>[0]['where'] = {
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+      ...(role && { role }),
+      ...(subscriptionStatus === 'active' && {
+        Subscriptions: { some: { expiresAt: { gt: now } } },
+      }),
+      ...(subscriptionStatus === 'inactive' && {
+        Subscriptions: { none: { expiresAt: { gt: now } } },
+      }),
+    };
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          Subscriptions: true,
+        },
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return { data, total, page, pageSize };
   }
 
   async findOne(id: string) {
