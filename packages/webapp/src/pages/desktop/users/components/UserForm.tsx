@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, TextInput, Select, Button, Group, LoadingOverlay, Paper, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useGetUserById, useCreateUser, useUpdateUser, useGetUsers } from '../../../../api/users';
+import { useGetUserById, useCreateUser, useUpdateUser } from '../../../../api/users';
 import { UserRole, CreateUserDto, UpdateUserDto, User } from '../../../../types/user';
 
 interface UserFormProps {
