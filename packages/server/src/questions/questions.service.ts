@@ -86,12 +86,12 @@ export class QuestionsService {
   }
 
   // Get a random question from an array of subject IDs
-  async getRandomQuestion(subjectIds: string[], skipAnswered: boolean = false, userId: string | null): Promise<QuestionResponseDto | null> {
+  async getRandomQuestion(subjectIds: string[], skipAnswered: boolean = false, userId: string | null, threshold?: number): Promise<QuestionResponseDto | null> {
     if (!subjectIds || subjectIds.length === 0) {
       throw new BadRequestException('At least one subject ID must be provided');
     }
 
-    const correctnessThreshold = Number(this.appConfigService.CORRECTNESS_THRESHOLD);
+    const correctnessThreshold = Number(threshold ?? this.appConfigService.CORRECTNESS_THRESHOLD);
     const isPublished = QuestionStatus.PUBLISHED.toString();
 
     let query;
