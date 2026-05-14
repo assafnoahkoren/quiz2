@@ -23,6 +23,7 @@ export interface User {
   email: string;
   name?: string | null;
   role: UserRole;
+  correctnessThreshold?: number | null;
   createdAt: string; // ISO Date string
   updatedAt: string; // ISO Date string
 }
@@ -46,6 +47,7 @@ export interface UpdateUserDto {
   password?: string;
   name?: string | null;
   role?: UserRole;
+  correctnessThreshold?: number | null;
 }
 
 // Type for the delete response
