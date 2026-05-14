@@ -129,6 +129,19 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
             היסטוריית בחינות
           </Button>
           
+          <Button
+            variant="subtle"
+            fullWidth
+            leftSection={<IconSettings size={18} />}
+            onClick={() => {
+              close();
+              navigate('/settings');
+            }}
+            justify="start"
+          >
+            הגדרות
+          </Button>
+
           {currentUser?.role === UserRole.ADMIN && (
             <Button
               variant="subtle"

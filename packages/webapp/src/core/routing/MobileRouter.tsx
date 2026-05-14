@@ -11,6 +11,7 @@ import QuestionPage from '../../pages/public/QuestionPage';
 import ExamCreationPage from '../../pages/exam/ExamCreationPage';
 import ExamPage from '../../pages/exam/ExamPage';
 import ExamsHistoryPage from '../../pages/exams/ExamsHistoryPage';
+import { SettingsPage } from '../../pages/mobile/SettingsPage';
 
 // These components would need to be created
 // const Exercise = () => <div>Exercise Page</div>;
@@ -34,6 +35,7 @@ const MobileRouter = () => {
           <Route path="create-exam" element={<ExamCreationPage />} />
           <Route path="thank-you" element={<ThankYouPage />} />
           <Route path="exam-history" element={<ExamsHistoryPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
 
