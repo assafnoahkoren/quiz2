@@ -5,10 +5,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { GetUsersQueryDto, UserSortBy } from './dto/get-users-query.dto';
+import { AppConfigService } from '../config/config.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private appConfigService: AppConfigService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -119,5 +123,13 @@ export class UserService {
       }
       throw error;
     }
+  }
+
+  async getCorrectnessThreshold(userId: string): Promise<number> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { correctnessThreshold: true },
+    });
+    return user?.correctnessThreshold ?? this.appConfigService.CORRECTNESS_THRESHOLD;
   }
 } 
