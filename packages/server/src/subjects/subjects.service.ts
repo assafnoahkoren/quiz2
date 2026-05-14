@@ -160,7 +160,7 @@ export class SubjectsService {
   }
 
   // Calculate the percentage of questions answered correctly >= N times for a user in a subject
-  async getCorrectScore(userId: string, subjectId: string): Promise<number> {
+  async getCorrectScore(userId: string, subjectId: string, threshold?: number): Promise<number> {
     try {
       // 1. & 2. Fetch total questions and grouped answers in parallel
       const [totalQuestions, groupedAnswers] = await Promise.all([
@@ -181,7 +181,7 @@ export class SubjectsService {
       // 3. Count questions answered correctly at least N times
       let correctlyAnsweredCount = 0;
       for (const questionId in groupedAnswers) {
-        if (groupedAnswers[questionId].correct >= this.appConfigService.CORRECTNESS_THRESHOLD) {
+        if (groupedAnswers[questionId].correct >= (threshold ?? this.appConfigService.CORRECTNESS_THRESHOLD)) {
           correctlyAnsweredCount++;
         }
       }
