@@ -98,7 +98,15 @@ export class UserService {
       return await this.prisma.user.update({
         where: { id },
         data,
-        select: { id: true, email: true, name: true, role: true, createdAt: true, updatedAt: true }, // Include role in response
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          correctnessThreshold: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
     } catch (error) {
       // Handle potential Prisma errors, e.g., record not found
