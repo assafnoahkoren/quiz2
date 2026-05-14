@@ -5,10 +5,14 @@ import { AuthGuard } from '../auth/auth.guard';
 import { AdminGuard } from '../auth/role.guard';
 import { AuthedRequest } from '../auth/types/authed-request.interface';
 import { SubscriptionGuard } from 'src/subscriptions/guards/subscription.guard';
+import { UserService } from '../users/users.service';
 
 @Controller('api/questions')
 export class QuestionsController {
-  constructor(private readonly questionsService: QuestionsService) {}
+  constructor(
+    private readonly questionsService: QuestionsService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard)
@@ -54,12 +58,15 @@ export class QuestionsController {
   @Post('random')
   @UseGuards(SubscriptionGuard)
   @UseGuards(AuthGuard)
-  getRandomQuestion(
+  async getRandomQuestion(
     @Body() body: GetRandomQuestionDto,
-    @Req() request: AuthedRequest
+    @Req() request: AuthedRequest,
   ): Promise<QuestionResponseDto> {
     const userId = request.user.id ?? null;
-    return this.questionsService.getRandomQuestion(body.subjectIds, body.skipAnswered, userId);
+    const threshold = userId
+      ? await this.userService.getCorrectnessThreshold(userId)
+      : undefined;
+    return this.questionsService.getRandomQuestion(body.subjectIds, body.skipAnswered, userId, threshold);
   }
 
   @Get('subject/:subjectId')
