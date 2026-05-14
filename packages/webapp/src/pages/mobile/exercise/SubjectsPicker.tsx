@@ -6,6 +6,7 @@ import { SubjectTreeItem } from '../../../api/types';
 import { IconChevronLeft, IconChevronRight, IconPlayerPlay, IconPlayerPlayFilled } from '@tabler/icons-react';
 import exerciseStoreInstance from './exerciseStore';
 import { SubjectScore } from '../../../components/SubjectScore/SubjectScore';
+import { useCurrentUser } from '../../../api/users';
 
 // Custom hook for animated counter
 export const useCountAnimation = (value: number, duration: number = 500) => {
@@ -178,6 +179,8 @@ const getAllDescendantIdsFromNodeInfo = (
 export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExamId }) => {
   const { data: examData, isLoading, error } = useSubjectsByExamId(govExamId);
   const exerciseStore = exerciseStoreInstance;
+  const { data: currentUser } = useCurrentUser();
+  const effectiveThreshold = currentUser?.correctnessThreshold ?? 3;
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [totalQuestions, setTotalQuestions] = useState(0);
 
@@ -421,7 +424,7 @@ export const SubjectsPicker: React.FC<SubjectsPickerProps> = observer(({ govExam
           />
         </Group>
         <Text size="xs" c="dimmed" mt={4}>
-          כאשר מופעל, המערכת לא תציג שאלות שכבר ענית עליהן נכון לפחות 3 פעמים בעבר.
+          כאשר מופעל, המערכת לא תציג שאלות שכבר ענית עליהן נכון לפחות {effectiveThreshold} פעמים בעבר.
         </Text>
       </Stack>
 
