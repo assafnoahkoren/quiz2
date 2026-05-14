@@ -21,24 +21,28 @@ datasource db {
 enum UserRole {
   USER
   ADMIN
+  GUEST
 }
 
 model User {
   id                String             @id @default(uuid())
   role              UserRole           @default(USER)
-  email             String             @unique
+  email             String?            @unique
   name              String?
-  password          String
+  password          String?
   govExamInstanceId String?
   GovExamInstance   GovExamInstance?   @relation(fields: [govExamInstanceId], references: [id])
   govExamId         String?
   GovExam           GovExam?           @relation(fields: [govExamId], references: [id])
+  correctnessThreshold Int?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   UserExams         UserExam[]
   Subscriptions     Subscription[]
   UserExamQuestion  UserExamQuestion[]
   Reports           Report[]
+  ReportMessages    ReportMessage[]
+  ReportReads       ReportRead[]
 }
 
 model Subscription {
@@ -175,18 +179,40 @@ model UserExamQuestion {
 }
 
 model Report {
-  id           String       @id @default(uuid())
-  type         ReportType
-  reporterId   String
-  Reporter     User         @relation(fields: [reporterId], references: [id])
-  message      String
-  phoneNumber  String
-  questionId   String?
-  Question     Question?    @relation(fields: [questionId], references: [id])
-  govExamId    String
-  GovExam      GovExam      @relation(fields: [govExamId], references: [id])
-  questionData Json
-  status       ReportStatus @default(PENDING)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             String          @id @default(uuid())
+  type           ReportType
+  reporterId     String
+  Reporter       User            @relation(fields: [reporterId], references: [id])
+  message        String
+  phoneNumber    String
+  questionId     String?
+  Question       Question?       @relation(fields: [questionId], references: [id])
+  govExamId      String
+  GovExam        GovExam         @relation(fields: [govExamId], references: [id])
+  questionData   Json
+  status         ReportStatus    @default(PENDING)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  ReportMessages ReportMessage[]
+  ReportReads    ReportRead[]
+}
+
+model ReportMessage {
+  id        String   @id @default(uuid())
+  reportId  String
+  Report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId  String
+  Author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model ReportRead {
+  reportId String
+  Report   Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  userId   String
+  User     User     @relation(fields: [userId], references: [id])
+  readAt   DateTime @default(now())
+
+  @@id([reportId, userId])
 }

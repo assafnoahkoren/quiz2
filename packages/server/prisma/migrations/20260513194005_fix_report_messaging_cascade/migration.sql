@@ -1,0 +1,1 @@
+-- This migration fixes cascade rules for ReportMessage and ReportRead (already applied to database)
