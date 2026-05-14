@@ -93,14 +93,14 @@ describe('QuestionsController - per-user correctness threshold (e2e)', () => {
   });
 
   it('respects per-user threshold: question still shown when user threshold exceeds correct-answer count', async () => {
-    // Set the user's personal threshold to 3 (higher than the global threshold of 1)
-    // This means the user wants to see a question until they've answered it correctly 3 times.
+    // Set the user's personal threshold to 10 (well above any plausible global threshold)
+    // This means the user wants to see a question until they've answered it correctly 10 times.
     await request(app.getHttpServer())
       .patch(`/api/users/${testUser.id}`)
-      .send({ correctnessThreshold: 3 })
+      .send({ correctnessThreshold: 10 })
       .expect(200);
 
-    // Record one correct answer — below the user's threshold of 3 (but meets global threshold of 1)
+    // Record one correct answer — below the user's threshold of 10
     await prisma.userExamQuestion.create({
       data: {
         userId: testUser.id,
@@ -109,17 +109,17 @@ describe('QuestionsController - per-user correctness threshold (e2e)', () => {
       },
     });
 
-    // With per-user threshold=3 and only 1 correct answer, the question should NOT be filtered
-    // (1 correct < user threshold 3), so the endpoint must return the question.
-    // Before the fix: correctnessThreshold is stripped from the PATCH DTO, so the global threshold
-    // of 1 applies — 1 correct >= global threshold 1 → question IS filtered → endpoint returns null
-    // → this assertion fails (body has no id).
+    // With per-user threshold=10 and only 1 correct answer, the question should NOT be filtered
+    // (1 correct < user threshold 10), so the endpoint must return the question.
+    // Before fix: global threshold applies (regardless of value) — if 1 correct answer
+    // meets the global threshold, question is filtered and endpoint returns null.
+    // After fix: user threshold 10 applies → 1 correct < 10 → question NOT filtered → returned.
     const response = await request(app.getHttpServer())
       .post('/api/questions/random')
       .send({ subjectIds: [testSubject.id], skipAnswered: true })
       .expect(201);
 
-    // The question should be returned because 1 correct answer < user threshold of 3
+    // The question should be returned because 1 correct answer < user threshold of 10
     expect(response.body?.id).toBeDefined();
   });
 });
