@@ -22,6 +22,11 @@ export const getCurrentUser = async (): Promise<User> => {
   return response.data;
 };
 
+export const updateCurrentUser = async (updateData: UpdateUserDto): Promise<User> => {
+  const response = await apiClient.patch<User>(ME_ENDPOINT, updateData);
+  return response.data;
+};
+
 export const createUser = async (userData: CreateUserDto): Promise<User> => {
   const response = await apiClient.post<User>(USERS_ENDPOINT, userData);
   return response.data;
@@ -93,7 +98,7 @@ export const useCreateUser = (options?: UseMutationOptions<User, Error, CreateUs
   });
 };
 
-// Hook to update a user
+// Hook to update a user (admin)
 export const useUpdateUser = (options?: UseMutationOptions<User, Error, { id: string } & UpdateUserDto>) => {
   const queryClient = useQueryClient();
   return useMutation<User, Error, { id: string } & UpdateUserDto>({
@@ -102,7 +107,20 @@ export const useUpdateUser = (options?: UseMutationOptions<User, Error, { id: st
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: userKeys.me() }); // Invalidate current user if updated
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      options?.onSuccess?.(data, variables, context);
+    },
+  });
+};
+
+// Hook to update the current authenticated user's own settings
+export const useUpdateCurrentUser = (options?: UseMutationOptions<User, Error, UpdateUserDto>) => {
+  const queryClient = useQueryClient();
+  return useMutation<User, Error, UpdateUserDto>({
+    ...options,
+    mutationFn: updateCurrentUser,
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
       options?.onSuccess?.(data, variables, context);
     },
   });

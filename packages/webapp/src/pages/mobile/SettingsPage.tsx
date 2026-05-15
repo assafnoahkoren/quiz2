@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Stack, Title, Text, Group, Paper, Divider, ActionIcon, Loader } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconMinus } from '@tabler/icons-react';
-import { useCurrentUser, useUpdateUser } from '../../api/users';
+import { useCurrentUser, useUpdateCurrentUser } from '../../api/users';
 
 const DEFAULT_THRESHOLD = 3;
 const MIN = 1;
@@ -10,17 +11,22 @@ const MAX = 20;
 
 export function SettingsPage() {
   const { data: currentUser } = useCurrentUser();
-  const { mutate: updateUser, isPending } = useUpdateUser();
+  const { mutate: updateMe, isPending } = useUpdateCurrentUser();
 
   const serverValue = currentUser?.correctnessThreshold ?? DEFAULT_THRESHOLD;
   const [localValue, setLocalValue] = useState<number | null>(null);
   const displayValue = localValue ?? serverValue;
 
   const saveDebounced = useDebouncedCallback((value: number) => {
-    if (!currentUser) return;
-    updateUser(
-      { id: currentUser.id, correctnessThreshold: value },
-      { onSuccess: () => setLocalValue(null) },
+    updateMe(
+      { correctnessThreshold: value },
+      {
+        onSuccess: () => setLocalValue(null),
+        onError: () => {
+          setLocalValue(null);
+          showNotification({ title: 'שגיאה', message: 'לא ניתן לשמור את ההגדרה, אנא נסה שוב', color: 'red' });
+        },
+      },
     );
   }, 600);
 
